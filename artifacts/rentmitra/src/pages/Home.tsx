@@ -271,6 +271,22 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── Sustainability ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="relative overflow-hidden rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30 px-6 py-7 flex items-start gap-4"
+        >
+          <div className="text-3xl shrink-0 mt-0.5">🌱</div>
+          <div>
+            <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300 leading-relaxed">
+              Every item rented instead of bought helps reduce waste, conserve valuable resources, and extend the life of products already in circulation. By choosing to rent, you're supporting a more sustainable future for India.
+            </p>
+          </div>
+        </motion.section>
+
         {/* ── Recent ── */}
         {recentListings && recentListings.data.length > 0 && (
           <section>

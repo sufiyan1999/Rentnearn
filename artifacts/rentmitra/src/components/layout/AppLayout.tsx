@@ -3,6 +3,8 @@ import { Link, useLocation } from "wouter";
 import { Home, Search, PlusCircle, Heart, User, Building2, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import Footer from "./Footer";
+import CookieConsent from "@/components/CookieConsent";
 
 export function BottomNav() {
   const [location] = useLocation();
@@ -123,7 +125,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <main className="flex-1 w-full pb-20 md:pb-0">
         {children}
       </main>
+      <Footer />
       <BottomNav />
+      <CookieConsent />
     </div>
   );
 }

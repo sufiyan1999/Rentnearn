@@ -17,10 +17,19 @@ import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminListings from "./pages/AdminListings";
 import AdminUsers from "./pages/AdminUsers";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
 import ForgotPassword from "./pages/ForgotPassword";
 import BusinessProfile from "./pages/BusinessProfile";
+// Legal pages
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import CookiePolicy from "./pages/CookiePolicy";
+import Disclaimer from "./pages/Disclaimer";
+// Info pages
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import FAQ from "./pages/FAQ";
+import Safety from "./pages/Safety";
+import HowItWorks from "./pages/HowItWorks";
 
 const queryClient = new QueryClient();
 
@@ -37,24 +46,38 @@ function Router() {
   return (
     <AppLayout>
       <Switch>
+        {/* Core */}
         <Route path="/" component={Home} />
         <Route path="/search" component={Search} />
         <Route path="/categories" component={Categories} />
-        <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
-        <Route path="/forgot-password" component={ForgotPassword} />
-        <Route path="/profile" component={Profile} />
-        <Route path="/favourites" component={Favourites} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/admin" component={AdminDashboard} />
-        <Route path="/admin/listings" component={AdminListings} />
-        <Route path="/admin/users" component={AdminUsers} />
-        <Route path="/business/:userId" component={BusinessProfile} />
-        <Route path="/privacy" component={Privacy} />
-        <Route path="/terms" component={Terms} />
         <Route path="/listings/new" component={CreateListing} />
         <Route path="/listings/:id/edit" component={CreateListing} />
         <Route path="/listings/:id" component={ListingDetails} />
+        {/* Auth */}
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+        <Route path="/forgot-password" component={ForgotPassword} />
+        {/* User */}
+        <Route path="/profile" component={Profile} />
+        <Route path="/favourites" component={Favourites} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/business/:userId" component={BusinessProfile} />
+        {/* Admin */}
+        <Route path="/admin" component={AdminDashboard} />
+        <Route path="/admin/listings" component={AdminListings} />
+        <Route path="/admin/users" component={AdminUsers} />
+        {/* Info pages */}
+        <Route path="/about" component={About} />
+        <Route path="/contact" component={Contact} />
+        <Route path="/faq" component={FAQ} />
+        <Route path="/safety" component={Safety} />
+        <Route path="/how-it-works" component={HowItWorks} />
+        {/* Legal pages */}
+        <Route path="/privacy" component={PrivacyPolicy} />
+        <Route path="/terms" component={TermsOfService} />
+        <Route path="/cookies" component={CookiePolicy} />
+        <Route path="/disclaimer" component={Disclaimer} />
+        {/* 404 */}
         <Route component={NotFound} />
       </Switch>
     </AppLayout>

@@ -1,0 +1,335 @@
+Rental Categories
+Create the following categories and subcategories.
+🛠️ Tools & Hardware
+Drill Machine
+Hammer Drill
+Rotary Hammer
+Impact Driver
+Circular Saw
+Jigsaw
+Angle Grinder
+Tile Cutter
+Chainsaw
+Lawn Mower
+Pressure Washer
+Air Compressor
+Generator
+Welding Machine
+Power Washer
+Concrete Mixer
+Ladder
+Scaffolding
+Vacuum Cleaner
+Industrial Vacuum
+Paint Sprayer
+Heat Gun
+Nail Gun
+Rivet Gun
+Screwdriver Set
+Tool Kit
+Pipe Cutter
+Jack Hammer
+Wheelbarrow
+📷 Photography & Videography
+DSLR Camera
+Mirrorless Camera
+Cinema Camera
+GoPro
+Action Camera
+Drone
+Camera Lens
+Tripod
+Gimbal
+Stabilizer
+Flash
+Studio Lights
+Ring Light
+Softbox
+Green Screen
+Microphone
+Camera Bag
+Teleprompter
+Projector
+Projector Screen
+👶 Baby Products
+Baby Stroller
+Pram
+Baby Car Seat
+Baby Crib
+Baby Cot
+Baby Swing
+Baby Walker
+Feeding Chair
+Baby Carrier
+Playpen
+Breast Pump
+Baby Monitor
+Baby Bathtub
+Toy Package
+🏥 Medical Equipment
+Wheelchair
+Electric Wheelchair
+Walker
+Walking Stick
+Crutches
+Hospital Bed
+Oxygen Concentrator
+Oxygen Cylinder
+CPAP Machine
+BiPAP Machine
+Nebulizer
+Patient Lift
+Suction Machine
+Blood Pressure Monitor
+Glucometer
+Pulse Oximeter
+Medical Mattress
+Commode Chair
+🎉 Party & Event Equipment
+Plastic Chairs
+Banquet Chairs
+Tables
+Folding Tables
+Tent
+Canopy
+Stage
+DJ Equipment
+Speaker
+Amplifier
+Microphone
+LED Screen
+Projector
+Smoke Machine
+Bubble Machine
+Dance Floor
+Decorative Lights
+Wedding Decoration
+Flower Decoration
+Balloon Decoration
+🏕️ Camping & Outdoor
+Camping Tent
+Sleeping Bag
+Air Mattress
+Camping Stove
+Camping Chair
+Camping Table
+Ice Box
+Cooler Box
+BBQ Grill
+Portable Fan
+Portable Generator
+Trekking Pole
+Hiking Backpack
+Binoculars
+Kayak
+Inflatable Boat
+🚴 Sports & Fitness
+Bicycle
+Mountain Bike
+Road Bike
+Electric Bike
+Treadmill
+Exercise Cycle
+Cross Trainer
+Rowing Machine
+Home Gym
+Bench Press
+Dumbbells
+Barbell Set
+Yoga Mat
+Punching Bag
+Cricket Kit
+Football Kit
+Badminton Kit
+Tennis Kit
+Golf Kit
+Skating Gear
+🎮 Gaming
+PlayStation
+Xbox
+Nintendo Switch
+Gaming Laptop
+Gaming PC
+VR Headset
+Racing Simulator
+Gaming Chair
+Gaming Monitor
+💻 Electronics
+Laptop
+Desktop Computer
+Monitor
+Printer
+Scanner
+Tablet
+iPad
+Mobile Phone
+Satellite Phone
+WiFi Router
+Portable WiFi
+Power Bank
+UPS
+External Hard Disk
+NAS Storage
+🎵 Musical Instruments
+Guitar
+Bass Guitar
+Keyboard
+Piano
+Drum Set
+Violin
+Saxophone
+Flute
+Tabla
+Harmonium
+Dhol
+Cajon
+Amplifier
+DJ Controller
+🚗 Automotive
+Car
+SUV
+Luxury Car
+Bike
+Scooter
+Electric Scooter
+Bicycle Rack
+Roof Box
+Car Carrier
+GPS Device
+Dash Camera
+Jump Starter
+Car Vacuum
+🏠 Home Appliances
+Refrigerator
+Washing Machine
+Dryer
+Dishwasher
+Microwave
+Oven
+Air Fryer
+Mixer Grinder
+Coffee Machine
+Water Purifier
+Vacuum Cleaner
+Steam Cleaner
+Air Purifier
+Dehumidifier
+Room Heater
+Air Conditioner
+Air Cooler
+🪑 Furniture
+Sofa
+Recliner
+Dining Table
+Office Chair
+Office Desk
+Study Table
+Folding Table
+Wardrobe
+Bookshelf
+TV Unit
+Bed
+Mattress
+🎭 Costumes & Fashion
+Wedding Dress
+Sherwani
+Tuxedo
+Suit
+Saree
+Lehenga
+Costume
+Jewellery
+Luxury Handbags
+Watches
+📚 Education & Office
+Whiteboard
+Projector
+Laptop
+Tablet
+Printer
+Scanner
+Office Chair
+Office Desk
+Conference Equipment
+🐶 Pet Supplies
+Pet Carrier
+Pet Cage
+Aquarium
+Dog Crate
+Pet Stroller
+Grooming Kit
+🚜 Construction Equipment
+Mini Excavator
+JCB
+Forklift
+Concrete Mixer
+Plate Compactor
+Road Roller
+Generator
+Scaffolding
+Cement Cutter
+Earth Auger
+🌾 Agriculture
+Tractor
+Rotavator
+Water Pump
+Sprayer
+Seeder
+Harvester
+Power Tiller
+Grass Cutter
+🎨 Art & Creative
+Easel
+3D Printer
+Laser Cutter
+Cricut Machine
+Sewing Machine
+Embroidery Machine
+Pottery Wheel
+📦 Miscellaneous
+Storage Box
+Locker
+Safe
+Travel Luggage
+Wheel Trolley
+Shopping Cart
+Utility Cart
+Smart Search
+Implement a search engine that can search by:
+Item Name
+Category
+Brand
+City
+Area
+Pincode
+Price Range
+Daily / Weekly / Monthly Rent
+Distance
+Featured Listings
+Business Listings
+Verified Users
+Recently Added
+Most Viewed
+Most Favourited
+Additional Listing Fields
+Each listing should also include:
+Brand
+Model
+Year of Purchase (optional)
+Item Condition (New / Like New / Good / Fair / Used)
+Security Deposit (optional)
+Delivery Available (Yes/No)
+Self Pickup (Yes/No)
+Rental Period (Hourly, Daily, Weekly, Monthly)
+Minimum Rental Duration
+Maximum Rental Duration
+Quantity Available
+Owner Instructions
+Available From
+Available Until
+One more feature I strongly recommend adding from the beginning is attributes that change based on category. For example:
+Camera → Brand, Megapixels, Lens Included, Battery Count.
+Wheelchair → Manual/Electric, Foldable, Weight Capacity.
+Drill Machine → Brand, Power (W), Corded/Cordless, Battery Included.
+Car → Fuel Type, Transmission, Seating Capacity.
+This gives users better filters and a much better search experience without making the app significantly more complex.

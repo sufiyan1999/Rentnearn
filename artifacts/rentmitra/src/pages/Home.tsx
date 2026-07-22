@@ -6,31 +6,33 @@ import { CATEGORIES } from "@/lib/constants";
 import * as Icons from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/ui-core";
+import { motion } from "framer-motion";
+
+// Show 12 categories on home (3 rows of 4 on mobile, 2 rows of 6 on desktop)
+const HOME_CATS = CATEGORIES.slice(0, 12);
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [coords, setCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        pos => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
         () => console.warn("Geolocation denied or failed")
       );
     }
   }, []);
 
   const { data: featured } = useGetFeaturedListings({ limit: 4 }, {
-    query: { queryKey: getGetFeaturedListingsQueryKey({ limit: 4 }) }
+    query: { queryKey: getGetFeaturedListingsQueryKey({ limit: 4 }) },
   });
-
   const { data: nearby } = useGetNearbyListings(
-    coords ? { lat: coords.lat, lng: coords.lng, limit: 4 } : { lat: 0, lng: 0, limit: 4 }, 
-    { query: { enabled: !!coords, queryKey: getGetNearbyListingsQueryKey({ lat: coords?.lat||0, lng: coords?.lng||0, limit: 4 }) } }
+    coords ? { lat: coords.lat, lng: coords.lng, limit: 4 } : { lat: 0, lng: 0, limit: 4 },
+    { query: { enabled: !!coords, queryKey: getGetNearbyListingsQueryKey({ lat: coords?.lat ?? 0, lng: coords?.lng ?? 0, limit: 4 }) } }
   );
-
   const { data: recentListings } = useGetListings({ limit: 6 }, {
-    query: { queryKey: getGetListingsQueryKey({ limit: 6 }) }
+    query: { queryKey: getGetListingsQueryKey({ limit: 6 }) },
   });
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -41,61 +43,87 @@ export default function Home() {
 
   return (
     <div className="flex flex-col pb-10">
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="bg-primary text-primary-foreground pt-12 pb-24 px-4 rounded-b-[2.5rem] md:rounded-b-[4rem] relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://placehold.co/1000x500/f96d0b/ffffff?text=Pattern')] opacity-10 mix-blend-overlay pointer-events-none"></div>
+        <div className="absolute inset-0 opacity-[0.07] pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle at 20% 80%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
         <div className="container mx-auto max-w-4xl relative z-10 flex flex-col items-center text-center">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl md:text-6xl font-bold tracking-tight mb-4"
+          >
             Rent anything, anywhere.
-          </h1>
-          <p className="text-primary-foreground/80 text-lg md:text-xl mb-8 max-w-2xl">
-            Join thousands of Indians sharing their tools, cameras, and gear. Why buy when you can RentMitra?
-          </p>
-
-          <form onSubmit={handleSearchSubmit} className="w-full max-w-2xl bg-background rounded-full p-2 flex items-center shadow-xl">
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08 }}
+            className="text-primary-foreground/80 text-lg md:text-xl mb-8 max-w-2xl"
+          >
+            India's trusted peer-to-peer rental marketplace. Why buy when you can RentMitra?
+          </motion.p>
+          <motion.form
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            onSubmit={handleSearchSubmit}
+            className="w-full max-w-2xl bg-background rounded-full p-2 flex items-center shadow-2xl"
+          >
             <div className="pl-4 text-muted-foreground">
               <Search className="w-5 h-5" />
             </div>
-            <input 
+            <input
               name="q"
-              type="text" 
-              placeholder="What do you need? (e.g. DSLR, Drill, Tent)" 
-              className="flex-1 bg-transparent border-none focus:outline-none px-4 text-foreground py-3"
+              type="text"
+              placeholder="Search cameras, drills, strollers, sherwani…"
+              className="flex-1 bg-transparent border-none focus:outline-none px-4 text-foreground py-3 text-sm md:text-base"
             />
-            <Button type="submit" className="rounded-full shadow-none px-6">
-              Search
-            </Button>
-          </form>
+            <Button type="submit" className="rounded-full shadow-none px-6">Search</Button>
+          </motion.form>
         </div>
       </section>
 
       <div className="container mx-auto max-w-5xl px-4 -mt-10 relative z-20 flex flex-col gap-10">
-        {/* Categories */}
-        <section className="bg-background rounded-3xl p-6 shadow-sm border border-border">
-          <div className="flex items-center justify-between mb-4">
+        {/* ── Categories ── */}
+        <section className="bg-background rounded-3xl p-5 shadow-sm border border-border">
+          <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-bold">Categories</h2>
             <Link href="/categories" className="text-primary text-sm font-semibold flex items-center hover:underline">
-              See all <ChevronRight className="w-4 h-4 ml-1" />
+              All {CATEGORIES.length} <ChevronRight className="w-4 h-4 ml-0.5" />
             </Link>
           </div>
-          <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
-            {CATEGORIES.slice(0, 8).map(cat => {
+          <div className="grid grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
+            {HOME_CATS.map((cat, i) => {
               const Icon = Icons[cat.icon as keyof typeof Icons] as React.ElementType;
               return (
-                <Link key={cat.id} href={`/search?category=${cat.slug}`} className="flex flex-col items-center gap-2 group">
-                  <div className="w-14 h-14 rounded-full bg-secondary text-foreground group-hover:bg-primary group-hover:text-primary-foreground flex items-center justify-center transition-colors">
-                    {Icon && <Icon className="w-6 h-6" />}
-                  </div>
-                  <span className="text-[10px] md:text-xs font-semibold text-center leading-tight">
-                    {cat.name}
+                <Link key={cat.id} href={`/categories`} className="flex flex-col items-center gap-2 group">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.04 }}
+                    className={`w-13 h-13 w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110 group-hover:shadow-md ${cat.color}`}
+                  >
+                    {Icon && <Icon className="w-5 h-5 md:w-6 md:h-6" />}
+                  </motion.div>
+                  <span className="text-[9px] md:text-[11px] font-semibold text-center leading-tight text-foreground group-hover:text-primary transition-colors max-w-[56px] md:max-w-none">
+                    {cat.name.replace(" & ", "\n& ")}
                   </span>
                 </Link>
               );
             })}
           </div>
+          {/* Subcategory quick-links (top 8 popular subs) */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {["Wedding Dress / Bridal", "DSLR Camera", "Wheelchair", "PlayStation", "Drone", "Treadmill", "Baby Stroller", "Luxury Car"].map(sub => (
+              <Link key={sub} href={`/search?q=${encodeURIComponent(sub)}`} className="text-xs bg-secondary rounded-full px-3 py-1.5 text-muted-foreground hover:bg-primary hover:text-white transition-colors font-medium">
+                {sub}
+              </Link>
+            ))}
+          </div>
         </section>
 
-        {/* Nearby if available */}
+        {/* ── Nearby ── */}
         {coords && nearby && nearby.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-4">
@@ -104,14 +132,12 @@ export default function Home() {
               </h2>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {nearby.map(listing => (
-                <ListingCard key={listing.id} listing={listing} />
-              ))}
+              {nearby.map(listing => <ListingCard key={listing.id} listing={listing} />)}
             </div>
           </section>
         )}
 
-        {/* Featured */}
+        {/* ── Featured ── */}
         {featured && featured.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-4">
@@ -120,14 +146,12 @@ export default function Home() {
               </h2>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {featured.map(listing => (
-                <ListingCard key={listing.id} listing={listing} />
-              ))}
+              {featured.map(listing => <ListingCard key={listing.id} listing={listing} />)}
             </div>
           </section>
         )}
 
-        {/* Recent */}
+        {/* ── Recent ── */}
         {recentListings && recentListings.data.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-4">
@@ -138,10 +162,8 @@ export default function Home() {
                 Explore more
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-6">
-              {recentListings.data.map(listing => (
-                <ListingCard key={listing.id} listing={listing} />
-              ))}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+              {recentListings.data.map(listing => <ListingCard key={listing.id} listing={listing} />)}
             </div>
           </section>
         )}

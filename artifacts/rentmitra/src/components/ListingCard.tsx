@@ -1,11 +1,11 @@
 import { Listing, ListingWithDistance } from "@workspace/api-client-react";
 import { Link } from "wouter";
-import { MapPin, Star, Clock } from "lucide-react";
+import { MapPin, Heart, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAddFavourite, useRemoveFavourite, useGetFavouriteIds, getGetFavouriteIdsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { Heart } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface ListingCardProps {
   listing: Listing | ListingWithDistance;
@@ -19,82 +19,109 @@ export function ListingCard({ listing, className }: ListingCardProps) {
   const removeFav = useRemoveFavourite();
 
   const { data: favIdsResponse } = useGetFavouriteIds({
-    query: {
-      enabled: isAuthenticated,
-      queryKey: getGetFavouriteIdsQueryKey()
-    }
+    query: { enabled: isAuthenticated, queryKey: getGetFavouriteIdsQueryKey() },
   });
-
-  const isFavourited = favIdsResponse?.ids.includes(listing.id) || false;
+  const isFavourited = favIdsResponse?.ids.includes(listing.id) ?? false;
 
   const toggleFavourite = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    if (!isAuthenticated) return; // In real app might trigger login modal
-
+    if (!isAuthenticated) return;
     if (isFavourited) {
       removeFav.mutate({ listingId: listing.id }, {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getGetFavouriteIdsQueryKey() });
-        }
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFavouriteIdsQueryKey() }),
       });
     } else {
       addFav.mutate({ data: { listingId: listing.id } }, {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getGetFavouriteIdsQueryKey() });
-        }
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFavouriteIdsQueryKey() }),
       });
     }
   };
 
-  const imageUrl = listing.thumbnails?.[0] || listing.images?.[0] || "https://placehold.co/400x300/e2e8f0/8492a6?text=No+Image";
+  const imageUrl =
+    listing.thumbnails?.[0] ||
+    listing.images?.[0] ||
+    "https://placehold.co/400x400/f0f0f0/bbb?text=No+Image";
+
+  const distance = "distanceKm" in listing && listing.distanceKm != null
+    ? `${listing.distanceKm.toFixed(1)} km`
+    : null;
 
   return (
-    <Link href={`/listings/${listing.id}`} className={cn("group flex flex-col gap-2 relative", className)}>
-      <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-secondary">
-        <img 
-          src={imageUrl} 
-          alt={listing.title}
-          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-        />
-        
-        {/* Fav button */}
-        {isAuthenticated && (
-          <button 
-            onClick={toggleFavourite}
-            className="absolute top-3 right-3 p-2 rounded-full bg-background/50 backdrop-blur-md hover:bg-background/80 transition-colors"
-          >
-            <Heart className={cn("w-5 h-5", isFavourited ? "fill-destructive text-destructive" : "text-foreground")} />
-          </button>
-        )}
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <Link
+        href={`/listings/${listing.id}`}
+        className={cn("group block", className)}
+      >
+        {/* Image */}
+        <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-muted">
+          <img
+            src={imageUrl}
+            alt={listing.title}
+            loading="lazy"
+            className="object-cover w-full h-full transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]"
+          />
 
-        {/* Featured badge */}
-        {listing.isFeatured && (
-          <div className="absolute top-3 left-3 px-2.5 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full shadow-sm">
-            Featured
+          {/* Bottom gradient + price overlay */}
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none rounded-b-2xl" />
+
+          {/* Price badge in image */}
+          <div className="absolute bottom-2.5 left-3 text-white">
+            <span className="font-bold text-sm drop-shadow-sm">
+              ₹{listing.rentalPrice?.daily || 0}
+            </span>
+            <span className="text-[10px] text-white/75 ml-0.5">/day</span>
           </div>
-        )}
-      </div>
 
-      <div className="flex flex-col gap-1 px-1">
-        <div className="flex justify-between items-start">
-          <h3 className="font-semibold text-foreground line-clamp-1 flex-1">{listing.title}</h3>
-        </div>
-        
-        <div className="flex items-center text-muted-foreground text-xs gap-3">
-          <span className="flex items-center gap-1">
-            <MapPin className="w-3 h-3" />
-            {listing.city}{'distanceKm' in listing && listing.distanceKm != null ? ` (${listing.distanceKm.toFixed(1)} km)` : ''}
-          </span>
-          <span className="capitalize">{listing.category}</span>
+          {/* Featured badge */}
+          {listing.isFeatured && (
+            <div className="absolute top-2.5 left-2.5 flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide text-amber-900 shadow-sm"
+              style={{ background: "linear-gradient(135deg,#fde68a,#fbbf24)" }}>
+              <Star className="w-2.5 h-2.5 fill-amber-700 text-amber-700" />
+              FEATURED
+            </div>
+          )}
+
+          {/* Heart button */}
+          {isAuthenticated && (
+            <motion.button
+              onClick={toggleFavourite}
+              whileTap={{ scale: 0.82 }}
+              className={cn(
+                "absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center",
+                "glass-card shadow-sm transition-all duration-200",
+                "hover:scale-110"
+              )}
+            >
+              <Heart
+                className={cn(
+                  "w-4 h-4 transition-all duration-200",
+                  isFavourited
+                    ? "fill-red-500 text-red-500 scale-110"
+                    : "text-white drop-shadow"
+                )}
+              />
+            </motion.button>
+          )}
         </div>
 
-        <div className="mt-1 flex items-baseline gap-1">
-          <span className="font-bold text-lg text-foreground">₹{listing.rentalPrice?.daily || 0}</span>
-          <span className="text-muted-foreground text-sm">/ day</span>
+        {/* Info */}
+        <div className="pt-2.5 px-0.5 space-y-0.5">
+          <h3 className="font-semibold text-sm text-foreground leading-snug line-clamp-1 group-hover:text-primary transition-colors duration-200">
+            {listing.title}
+          </h3>
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+            <MapPin className="w-3 h-3 shrink-0" />
+            <span className="truncate">{listing.city}{distance ? ` · ${distance}` : ""}</span>
+            <span className="text-border">·</span>
+            <span className="capitalize truncate">{listing.category}</span>
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </motion.div>
   );
 }

@@ -1,27 +1,41 @@
 import { useGetListings, getGetListingsQueryKey, useGetCategories, getGetCategoriesQueryKey, useGetFeaturedListings, getGetFeaturedListingsQueryKey, useGetNearbyListings, getGetNearbyListingsQueryKey } from "@workspace/api-client-react";
 import { ListingCard } from "@/components/ListingCard";
 import { Link, useLocation } from "wouter";
-import { Search, MapPin, ChevronRight, Compass, Star } from "lucide-react";
+import { Search, MapPin, ChevronRight, Compass, Star, ArrowRight, TrendingUp, Shield, Zap } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import * as Icons from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/ui-core";
 import { motion } from "framer-motion";
 
-// Show 12 categories on home (3 rows of 4 on mobile, 2 rows of 6 on desktop)
 const HOME_CATS = CATEGORIES.slice(0, 12);
+
+const STATS = [
+  { value: "10,000+", label: "Active Listings" },
+  { value: "50+", label: "Cities" },
+  { value: "₹0", label: "Commission" },
+  { value: "100%", label: "Peer-to-Peer" },
+];
+
+const POPULAR_SEARCHES = ["DSLR Camera", "Drone", "Wheelchair", "PlayStation 5", "Baby Stroller", "Sherwani", "Treadmill", "Luxury Car"];
+
+const stagger = {
+  visible: { transition: { staggerChildren: 0.05 } },
+};
+const fadeUp = {
+  hidden:  { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } },
+};
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        pos => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => console.warn("Geolocation denied or failed")
-      );
-    }
+    navigator.geolocation?.getCurrentPosition(
+      pos => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => console.warn("Geolocation denied or failed")
+    );
   }, []);
 
   const { data: featured } = useGetFeaturedListings({ limit: 4 }, {
@@ -35,89 +49,177 @@ export default function Home() {
     query: { queryKey: getGetListingsQueryKey({ limit: 6 }) },
   });
 
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const q = new FormData(e.currentTarget).get("q");
     if (q) setLocation(`/search?q=${encodeURIComponent(q.toString())}`);
   };
 
   return (
-    <div className="flex flex-col pb-10">
-      {/* Hero */}
-      <section className="bg-primary text-primary-foreground pt-12 pb-24 px-4 rounded-b-[2.5rem] md:rounded-b-[4rem] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.07] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle at 20% 80%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 20%, #fff 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-        <div className="container mx-auto max-w-4xl relative z-10 flex flex-col items-center text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-bold tracking-tight mb-4"
+    <div className="flex flex-col">
+
+      {/* ══════════ HERO ══════════ */}
+      <section className="relative overflow-hidden bg-primary text-white">
+        {/* Mesh / orb background */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-white/10 blur-3xl animate-float" />
+          <div className="absolute bottom-0 -left-20 w-72 h-72 rounded-full bg-black/15 blur-3xl" style={{ animationDelay: "2s" }} />
+          <div className="absolute inset-0"
+            style={{
+              backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.07) 1px, transparent 0)",
+              backgroundSize: "32px 32px",
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-black/5 to-black/20" />
+        </div>
+
+        <div className="relative z-10 container mx-auto max-w-4xl px-4 pt-16 pb-32 flex flex-col items-center text-center">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold mb-6 backdrop-blur-sm"
           >
-            Rent what you need.<br className="hidden md:block" /> Earn from what you own.
+            <Zap className="w-3 h-3 fill-white" />
+            India's #1 peer-to-peer rental marketplace
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+            className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.08] mb-5 text-balance"
+          >
+            Rent what you need.<br />
+            <span className="opacity-80">Earn from what you own.</span>
           </motion.h1>
+
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 }}
-            className="text-primary-foreground/80 text-lg md:text-xl mb-8 max-w-2xl"
+            transition={{ duration: 0.45, delay: 0.15 }}
+            className="text-white/70 text-lg md:text-xl mb-8 max-w-xl leading-relaxed"
           >
-            India's trusted peer-to-peer rental marketplace. Don't buy it — rent it from someone nearby.
+            Don't buy it — rent it from someone nearby.
           </motion.p>
+
+          {/* Search bar */}
           <motion.form
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            onSubmit={handleSearchSubmit}
-            className="w-full max-w-2xl bg-background rounded-full p-2 flex items-center shadow-2xl"
+            transition={{ duration: 0.45, delay: 0.22 }}
+            onSubmit={handleSearch}
+            className="w-full max-w-2xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-2 flex items-center gap-2 shadow-2xl shadow-black/20"
           >
-            <div className="pl-4 text-muted-foreground">
+            <div className="pl-3 text-white/50 shrink-0">
               <Search className="w-5 h-5" />
             </div>
             <input
               name="q"
               type="text"
-              placeholder="Search cameras, drills, strollers, sherwani…"
-              className="flex-1 bg-transparent border-none focus:outline-none px-4 text-foreground py-3 text-sm md:text-base"
+              placeholder="Search cameras, drills, lehenga, PS5…"
+              className="flex-1 bg-transparent border-none focus:outline-none px-2 text-white placeholder:text-white/40 py-3 text-sm md:text-base font-medium"
             />
-            <Button type="submit" className="rounded-full shadow-none px-6">Search</Button>
+            <button
+              type="submit"
+              className="bg-white text-primary font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-white/90 transition-all duration-200 active:scale-95 shrink-0"
+            >
+              Search
+            </button>
           </motion.form>
+
+          {/* Popular searches */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.35 }}
+            className="mt-4 flex flex-wrap justify-center gap-2"
+          >
+            {POPULAR_SEARCHES.map(s => (
+              <Link
+                key={s}
+                href={`/search?q=${encodeURIComponent(s)}`}
+                className="text-xs text-white/55 hover:text-white bg-white/8 hover:bg-white/15 border border-white/10 rounded-full px-3 py-1.5 transition-all duration-150 font-medium"
+              >
+                {s}
+              </Link>
+            ))}
+          </motion.div>
         </div>
       </section>
 
-      <div className="container mx-auto max-w-5xl px-4 -mt-10 relative z-20 flex flex-col gap-10">
+      {/* ══════════ STATS STRIP ══════════ */}
+      <section className="bg-foreground text-background">
+        <div className="container mx-auto max-w-5xl px-4">
+          <div className="grid grid-cols-4 divide-x divide-background/10">
+            {STATS.map((s, i) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + i * 0.07 }}
+                className="py-4 md:py-5 text-center px-2"
+              >
+                <p className="text-lg md:text-2xl font-extrabold tracking-tight">{s.value}</p>
+                <p className="text-[10px] md:text-xs text-background/50 font-medium mt-0.5">{s.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════ MAIN CONTENT ══════════ */}
+      <div className="container mx-auto max-w-5xl px-4 py-10 flex flex-col gap-12">
+
         {/* ── Categories ── */}
-        <section className="bg-background rounded-3xl p-5 shadow-sm border border-border">
+        <section>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-bold">Categories</h2>
-            <Link href="/categories" className="text-primary text-sm font-semibold flex items-center hover:underline">
-              All {CATEGORIES.length} <ChevronRight className="w-4 h-4 ml-0.5" />
+            <h2 className="text-xl font-extrabold tracking-tight flex items-center gap-2">
+              <span className="w-1.5 h-5 rounded-full gradient-primary inline-block" />
+              Categories
+            </h2>
+            <Link href="/categories" className="text-primary text-sm font-semibold flex items-center gap-0.5 hover:gap-2 transition-all duration-200">
+              All {CATEGORIES.length} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
+
+          <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
             {HOME_CATS.map((cat, i) => {
               const Icon = Icons[cat.icon as keyof typeof Icons] as React.ElementType;
               return (
-                <Link key={cat.id} href={`/categories`} className="flex flex-col items-center gap-2 group">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.04 }}
-                    className={`w-13 h-13 w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110 group-hover:shadow-md ${cat.color}`}
-                  >
-                    {Icon && <Icon className="w-5 h-5 md:w-6 md:h-6" />}
-                  </motion.div>
-                  <span className="text-[9px] md:text-[11px] font-semibold text-center leading-tight text-foreground group-hover:text-primary transition-colors max-w-[56px] md:max-w-none">
-                    {cat.name.replace(" & ", "\n& ")}
-                  </span>
-                </Link>
+                <motion.div
+                  key={cat.id}
+                  initial={{ opacity: 0, scale: 0.88 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.035, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <Link href="/categories" className="flex flex-col items-center gap-2 group cursor-pointer">
+                    <div className={cn(
+                      "w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center",
+                      "transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg",
+                      cat.color
+                    )}>
+                      {Icon && <Icon className="w-5 h-5 md:w-6 md:h-6" />}
+                    </div>
+                    <span className="text-[9px] md:text-[11px] font-semibold text-center leading-tight text-muted-foreground group-hover:text-foreground transition-colors duration-200 max-w-[56px]">
+                      {cat.name}
+                    </span>
+                  </Link>
+                </motion.div>
               );
             })}
           </div>
-          {/* Subcategory quick-links (top 8 popular subs) */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            {["Wedding Dress / Bridal", "DSLR Camera", "Wheelchair", "PlayStation", "Drone", "Treadmill", "Baby Stroller", "Luxury Car"].map(sub => (
-              <Link key={sub} href={`/search?q=${encodeURIComponent(sub)}`} className="text-xs bg-secondary rounded-full px-3 py-1.5 text-muted-foreground hover:bg-primary hover:text-white transition-colors font-medium">
-                {sub}
+
+          {/* Quick-search chips */}
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-4 px-4 md:flex-wrap md:overflow-visible md:mx-0 md:px-0">
+            {["Saree", "DSLR Camera", "Wheelchair", "PlayStation", "Drone", "Treadmill", "Baby Stroller", "Luxury Car", "Tent"].map(s => (
+              <Link
+                key={s}
+                href={`/search?q=${encodeURIComponent(s)}`}
+                className="shrink-0 text-xs bg-secondary hover:bg-primary hover:text-white text-muted-foreground border border-border hover:border-primary rounded-full px-3.5 py-1.5 transition-all duration-200 font-semibold whitespace-nowrap"
+              >
+                {s}
               </Link>
             ))}
           </div>
@@ -126,13 +228,9 @@ export default function Home() {
         {/* ── Nearby ── */}
         {coords && nearby && nearby.length > 0 && (
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-primary" /> Near You
-              </h2>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {nearby.map(listing => <ListingCard key={listing.id} listing={listing} />)}
+            <SectionHeader icon={<MapPin className="w-4 h-4 text-primary" />} title="Near You" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {nearby.map(l => <ListingCard key={l.id} listing={l} />)}
             </div>
           </section>
         )}
@@ -140,34 +238,95 @@ export default function Home() {
         {/* ── Featured ── */}
         {featured && featured.length > 0 && (
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Star className="w-5 h-5 text-primary fill-primary" /> Featured Finds
-              </h2>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {featured.map(listing => <ListingCard key={listing.id} listing={listing} />)}
+            <SectionHeader icon={<Star className="w-4 h-4 text-amber-500 fill-amber-500" />} title="Featured Finds" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {featured.map(l => <ListingCard key={l.id} listing={l} />)}
             </div>
           </section>
         )}
 
+        {/* ── Why RentMitra ── */}
+        <section>
+          <SectionHeader icon={<Shield className="w-4 h-4 text-primary" />} title="Why RentMitra?" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { icon: "🤝", title: "Direct P2P", body: "Connect directly via WhatsApp. No middlemen, no commissions on rentals." },
+              { icon: "💰", title: "Save Money", body: "Pay ₹49 to list. Renters contact you for free. You keep 100% of earnings." },
+              { icon: "🔒", title: "Verified Listings", body: "Every listing is reviewed and approved by our team before going live." },
+            ].map(({ icon, title, body }) => (
+              <motion.div
+                key={title}
+                whileHover={{ y: -3 }}
+                className="bg-card border border-border rounded-2xl p-6 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+              >
+                <div className="text-3xl mb-3">{icon}</div>
+                <h3 className="font-bold mb-1.5">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
         {/* ── Recent ── */}
         {recentListings && recentListings.data.length > 0 && (
           <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Compass className="w-5 h-5 text-primary" /> Freshly Listed
-              </h2>
-              <Link href="/search" className="text-primary text-sm font-semibold hover:underline">
-                Explore more
+            <div className="flex items-center justify-between mb-5">
+              <SectionHeader icon={<Compass className="w-4 h-4 text-primary" />} title="Freshly Listed" noMargin />
+              <Link href="/search" className="text-primary text-sm font-semibold flex items-center gap-0.5 hover:gap-2 transition-all duration-200">
+                Explore <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-              {recentListings.data.map(listing => <ListingCard key={listing.id} listing={listing} />)}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {recentListings.data.map(l => <ListingCard key={l.id} listing={l} />)}
             </div>
           </section>
         )}
+
+        {/* ── CTA ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="relative overflow-hidden rounded-3xl gradient-primary text-white text-center py-14 px-6 shadow-2xl shadow-primary/25"
+        >
+          <div className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.08) 1px, transparent 0)",
+              backgroundSize: "28px 28px",
+            }}
+          />
+          <div className="relative z-10">
+            <TrendingUp className="w-10 h-10 mx-auto mb-4 opacity-90" />
+            <h2 className="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">Have something idle at home?</h2>
+            <p className="text-white/70 mb-6 max-w-sm mx-auto text-sm leading-relaxed">
+              List it in 5 minutes for just ₹49 and start earning from things you already own.
+            </p>
+            <Link
+              href="/listings/new"
+              className="inline-flex items-center gap-2 bg-white text-primary font-bold px-7 py-3 rounded-full text-sm hover:bg-white/90 transition-all duration-200 shadow-lg active:scale-95"
+            >
+              Start Listing Now <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </motion.section>
+
       </div>
     </div>
   );
+}
+
+function SectionHeader({
+  icon, title, noMargin = false
+}: { icon: React.ReactNode; title: string; noMargin?: boolean }) {
+  return (
+    <h2 className={cn("text-xl font-extrabold tracking-tight flex items-center gap-2", noMargin ? "" : "mb-5")}>
+      <span className="w-1.5 h-5 rounded-full gradient-primary inline-block" />
+      {title}
+    </h2>
+  );
+}
+
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
 }

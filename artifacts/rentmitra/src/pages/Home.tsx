@@ -185,30 +185,34 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
-            {HOME_CATS.map((cat, i) => {
-              const Icon = Icons[cat.icon as keyof typeof Icons] as React.ElementType;
-              return (
-                <motion.div
-                  key={cat.id}
-                  initial={{ opacity: 0, scale: 0.88 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.035, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            {HOME_CATS.map((cat, i) => (
+              <motion.div
+                key={cat.id}
+                initial={{ opacity: 0, scale: 0.88 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.035, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <Link
+                  href={`/search?category=${cat.slug}`}
+                  className="flex flex-col items-center gap-2 group cursor-pointer"
                 >
-                  <Link href="/categories" className="flex flex-col items-center gap-2 group cursor-pointer">
-                    <div className={cn(
-                      "w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center",
-                      "transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg",
-                      cat.color
-                    )}>
-                      {Icon && <Icon className="w-5 h-5 md:w-6 md:h-6" />}
-                    </div>
-                    <span className="text-[9px] md:text-[11px] font-semibold text-center leading-tight text-muted-foreground group-hover:text-foreground transition-colors duration-200 max-w-[56px]">
-                      {cat.name}
-                    </span>
-                  </Link>
-                </motion.div>
-              );
-            })}
+                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-white to-zinc-50 dark:from-zinc-800 dark:to-zinc-900 border border-border/50 shadow-sm flex items-center justify-center p-1 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/10 group-hover:border-primary/30">
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      loading="lazy"
+                      decoding="async"
+                      width={56}
+                      height={56}
+                      className="w-full h-full object-contain drop-shadow-sm"
+                    />
+                  </div>
+                  <span className="text-[9px] md:text-[11px] font-semibold text-center leading-tight text-muted-foreground group-hover:text-primary transition-colors duration-200 max-w-[64px]">
+                    {cat.name}
+                  </span>
+                </Link>
+              </motion.div>
+            ))}
           </div>
 
           {/* Quick-search chips */}

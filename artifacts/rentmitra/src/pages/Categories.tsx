@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { CATEGORIES } from "@/lib/constants";
-import * as Icons from "lucide-react";
 import { useGetCategories, getGetCategoriesQueryKey } from "@workspace/api-client-react";
 import { ChevronRight, ChevronLeft, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,7 +27,7 @@ export default function Categories() {
           .filter(item =>
             item.name.toLowerCase().includes(search.toLowerCase())
           )
-          .map(item => ({ ...item, parentName: cat.name, parentSlug: cat.slug, parentIcon: cat.icon, parentColor: cat.color }))
+          .map(item => ({ ...item, parentName: cat.name, parentSlug: cat.slug, parentImage: cat.image, parentColor: cat.color }))
       )
     : [];
 
@@ -62,16 +61,22 @@ export default function Categories() {
               <p className="text-center text-muted-foreground py-12">No categories found.</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {searchResults.map(item => {
-                  const Icon = Icons[(item as any).parentIcon as keyof typeof Icons] as React.ElementType;
-                  return (
+                {searchResults.map(item => (
                     <Link
                       key={item.slug}
                       href={`/search?category=${(item as any).parentSlug}&subcategory=${item.slug}`}
                       className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:border-primary transition-colors group"
                     >
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${(item as any).parentColor ?? "bg-primary/10 text-primary"}`}>
-                        {Icon && <Icon className="w-4 h-4" />}
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white to-zinc-50 dark:from-zinc-800 dark:to-zinc-900 border border-border/50 shadow-sm flex items-center justify-center p-1 shrink-0">
+                        <img
+                          src={(item as any).parentImage ?? `/icons/categories/${(item as any).parentSlug}.png`}
+                          alt={(item as any).parentName}
+                          loading="lazy"
+                          decoding="async"
+                          width={32}
+                          height={32}
+                          className="w-full h-full object-contain"
+                        />
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold leading-tight truncate group-hover:text-primary transition-colors">{item.name}</p>
@@ -80,8 +85,7 @@ export default function Categories() {
                         )}
                       </div>
                     </Link>
-                  );
-                })}
+                ))}
               </div>
             )}
           </div>
@@ -106,14 +110,17 @@ export default function Categories() {
 
               {/* Parent header */}
               <div className="flex items-center gap-4 mb-6">
-                {(() => {
-                  const Icon = Icons[selected.icon as keyof typeof Icons] as React.ElementType;
-                  return (
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${selected.color}`}>
-                      {Icon && <Icon className="w-7 h-7" />}
-                    </div>
-                  );
-                })()}
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white to-zinc-50 dark:from-zinc-800 dark:to-zinc-900 border border-border/50 shadow-md flex items-center justify-center p-2 shrink-0">
+                  <img
+                    src={selected.image}
+                    alt={selected.name}
+                    loading="lazy"
+                    decoding="async"
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-contain drop-shadow-sm"
+                  />
+                </div>
                 <div>
                   <h2 className="text-2xl font-bold">{selected.name}</h2>
                   <p className="text-sm text-muted-foreground">{selected.subcategories.length} subcategories</p>
@@ -147,33 +154,39 @@ export default function Categories() {
           /* ── Parent grid ── */
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {merged.map((cat, i) => {
-                const Icon = Icons[cat.icon as keyof typeof Icons] as React.ElementType;
-                return (
-                  <motion.button
-                    key={cat.id}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.03 }}
-                    onClick={() => setSelected(cat)}
-                    className="bg-card border border-border rounded-3xl p-5 flex flex-col items-center text-center gap-3 hover:border-primary hover:shadow-lg hover:shadow-primary/8 transition-all group cursor-pointer"
-                  >
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110 ${cat.color}`}>
-                      {Icon && <Icon className="w-7 h-7" />}
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-sm leading-tight group-hover:text-primary transition-colors">{cat.name}</h3>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {cat.subcategories.length} types · {cat.listingCount} listings
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-0.5 text-xs text-muted-foreground group-hover:text-primary transition-colors">
-                      <span>Explore</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </div>
-                  </motion.button>
-                );
-              })}
+              {merged.map((cat, i) => (
+                <motion.button
+                  key={cat.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.03, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  onClick={() => setSelected(cat)}
+                  className="bg-card border border-border rounded-3xl p-5 flex flex-col items-center text-center gap-3 hover:border-primary hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 group cursor-pointer"
+                >
+                  {/* 3D Icon */}
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-white to-zinc-50 dark:from-zinc-800 dark:to-zinc-900 border border-border/40 shadow-md flex items-center justify-center p-2.5 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/15">
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      loading="lazy"
+                      decoding="async"
+                      width={80}
+                      height={80}
+                      className="w-full h-full object-contain drop-shadow-md"
+                    />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm leading-tight group-hover:text-primary transition-colors">{cat.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {cat.subcategories.length} types · {cat.listingCount} listings
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-0.5 text-xs text-muted-foreground group-hover:text-primary transition-colors font-medium">
+                    <span>Explore</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </div>
+                </motion.button>
+              ))}
             </div>
           </motion.div>
         )}

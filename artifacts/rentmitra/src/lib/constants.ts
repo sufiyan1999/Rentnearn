@@ -8,13 +8,14 @@ export interface CategoryDef {
   name: string;
   slug: string;
   icon: string;
-  color: string;       // Tailwind bg class for the icon circle
+  image: string;       // Path to 3D icon PNG in /public/icons/categories/
+  color: string;       // Tailwind bg class for the icon circle (fallback)
   subcategories: SubCategory[];
 }
 
 export const CATEGORIES: CategoryDef[] = [
   {
-    id: 1, name: "Tools & Hardware", slug: "tools", icon: "Wrench", color: "bg-orange-100 text-orange-600",
+    id: 1, name: "Tools & Hardware", slug: "tools", icon: "Wrench", image: "/icons/categories/tools.png", color: "bg-orange-100 text-orange-600",
     subcategories: [
       { name: "Drill Machine", slug: "drill-machine" }, { name: "Angle Grinder", slug: "angle-grinder" },
       { name: "Circular Saw", slug: "circular-saw" }, { name: "Pressure Washer", slug: "pressure-washer" },
@@ -28,7 +29,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 2, name: "Photography & Video", slug: "photography", icon: "Camera", color: "bg-violet-100 text-violet-600",
+    id: 2, name: "Photography & Video", slug: "photography", icon: "Camera", image: "/icons/categories/photography.png", color: "bg-violet-100 text-violet-600",
     subcategories: [
       { name: "DSLR Camera", slug: "dslr-camera" }, { name: "Mirrorless Camera", slug: "mirrorless-camera" },
       { name: "Cinema Camera", slug: "cinema-camera" }, { name: "GoPro / Action Camera", slug: "action-camera" },
@@ -41,7 +42,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 3, name: "Baby Products", slug: "baby", icon: "Baby", color: "bg-pink-100 text-pink-600",
+    id: 3, name: "Baby Products", slug: "baby", icon: "Baby", image: "/icons/categories/baby.png", color: "bg-pink-100 text-pink-600",
     subcategories: [
       { name: "Baby Stroller", slug: "baby-stroller" }, { name: "Baby Car Seat", slug: "baby-car-seat" },
       { name: "Baby Crib / Cot", slug: "baby-crib" }, { name: "Baby Swing", slug: "baby-swing" },
@@ -52,7 +53,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 4, name: "Medical Equipment", slug: "medical", icon: "HeartPulse", color: "bg-red-100 text-red-600",
+    id: 4, name: "Medical Equipment", slug: "medical", icon: "HeartPulse", image: "/icons/categories/medical.png", color: "bg-red-100 text-red-600",
     subcategories: [
       { name: "Wheelchair", slug: "wheelchair" }, { name: "Electric Wheelchair", slug: "electric-wheelchair" },
       { name: "Walker", slug: "walker" }, { name: "Hospital Bed", slug: "hospital-bed" },
@@ -64,7 +65,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 5, name: "Party & Events", slug: "party", icon: "PartyPopper", color: "bg-yellow-100 text-yellow-600",
+    id: 5, name: "Party & Events", slug: "party", icon: "PartyPopper", image: "/icons/categories/party.png", color: "bg-yellow-100 text-yellow-600",
     subcategories: [
       { name: "Chairs", slug: "chairs" }, { name: "Tables", slug: "tables" },
       { name: "Tent / Canopy", slug: "tent-canopy" }, { name: "Stage", slug: "stage" },
@@ -76,7 +77,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 6, name: "Camping & Outdoor", slug: "camping", icon: "Tent", color: "bg-emerald-100 text-emerald-600",
+    id: 6, name: "Camping & Outdoor", slug: "camping", icon: "Tent", image: "/icons/categories/camping.png", color: "bg-emerald-100 text-emerald-600",
     subcategories: [
       { name: "Camping Tent", slug: "camping-tent" }, { name: "Sleeping Bag", slug: "sleeping-bag" },
       { name: "Air Mattress", slug: "air-mattress" }, { name: "Camping Stove", slug: "camping-stove" },
@@ -88,7 +89,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 7, name: "Sports & Fitness", slug: "fitness", icon: "Dumbbell", color: "bg-blue-100 text-blue-600",
+    id: 7, name: "Sports & Fitness", slug: "fitness", icon: "Dumbbell", image: "/icons/categories/fitness.png", color: "bg-blue-100 text-blue-600",
     subcategories: [
       { name: "Bicycle", slug: "bicycle" }, { name: "Mountain Bike", slug: "mountain-bike" },
       { name: "Electric Bike", slug: "electric-bike" }, { name: "Treadmill", slug: "treadmill" },
@@ -102,7 +103,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 8, name: "Gaming", slug: "gaming", icon: "Gamepad2", color: "bg-indigo-100 text-indigo-600",
+    id: 8, name: "Gaming", slug: "gaming", icon: "Gamepad2", image: "/icons/categories/gaming.png", color: "bg-indigo-100 text-indigo-600",
     subcategories: [
       { name: "PlayStation", slug: "playstation" }, { name: "Xbox", slug: "xbox" },
       { name: "Nintendo Switch", slug: "nintendo-switch" }, { name: "Gaming Laptop", slug: "gaming-laptop" },
@@ -112,7 +113,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 9, name: "Electronics", slug: "electronics", icon: "Laptop", color: "bg-sky-100 text-sky-600",
+    id: 9, name: "Electronics", slug: "electronics", icon: "Laptop", image: "/icons/categories/electronics.png", color: "bg-sky-100 text-sky-600",
     subcategories: [
       { name: "Laptop", slug: "laptop" }, { name: "Desktop Computer", slug: "desktop" },
       { name: "Monitor", slug: "monitor" }, { name: "Printer / Scanner", slug: "printer" },
@@ -123,7 +124,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 10, name: "Musical Instruments", slug: "music", icon: "Music", color: "bg-purple-100 text-purple-600",
+    id: 10, name: "Musical Instruments", slug: "music", icon: "Music", image: "/icons/categories/music.png", color: "bg-purple-100 text-purple-600",
     subcategories: [
       { name: "Guitar", slug: "guitar" }, { name: "Bass Guitar", slug: "bass-guitar" },
       { name: "Keyboard / Piano", slug: "keyboard" }, { name: "Drum Set", slug: "drum-set" },
@@ -134,7 +135,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 11, name: "Automotive", slug: "automotive", icon: "Car", color: "bg-slate-100 text-slate-600",
+    id: 11, name: "Automotive", slug: "automotive", icon: "Car", image: "/icons/categories/automotive.png", color: "bg-slate-100 text-slate-600",
     subcategories: [
       { name: "Car", slug: "car" }, { name: "SUV", slug: "suv" },
       { name: "Luxury Car", slug: "luxury-car" }, { name: "Bike / Motorcycle", slug: "bike" },
@@ -145,7 +146,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 12, name: "Home Appliances", slug: "home-appliances", icon: "Home", color: "bg-teal-100 text-teal-600",
+    id: 12, name: "Home Appliances", slug: "home-appliances", icon: "Home", image: "/icons/categories/home-appliances.png", color: "bg-teal-100 text-teal-600",
     subcategories: [
       { name: "Refrigerator", slug: "refrigerator" }, { name: "Washing Machine", slug: "washing-machine" },
       { name: "Air Conditioner", slug: "air-conditioner" }, { name: "Air Cooler", slug: "air-cooler" },
@@ -156,7 +157,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 13, name: "Furniture", slug: "furniture", icon: "Armchair", color: "bg-amber-100 text-amber-600",
+    id: 13, name: "Furniture", slug: "furniture", icon: "Armchair", image: "/icons/categories/furniture.png", color: "bg-amber-100 text-amber-600",
     subcategories: [
       { name: "Sofa / Recliner", slug: "sofa" }, { name: "Dining Table", slug: "dining-table" },
       { name: "Office Chair", slug: "office-chair" }, { name: "Office Desk", slug: "office-desk" },
@@ -167,7 +168,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 14, name: "Apparel & Fashion", slug: "apparel", icon: "Shirt", color: "bg-rose-100 text-rose-600",
+    id: 14, name: "Apparel & Fashion", slug: "apparel", icon: "Shirt", image: "/icons/categories/apparel.png", color: "bg-rose-100 text-rose-600",
     subcategories: [
       { name: "Wedding Dress / Bridal", slug: "wedding-dress" }, { name: "Sherwani", slug: "sherwani" },
       { name: "Tuxedo / Suit", slug: "tuxedo" }, { name: "Saree", slug: "saree" },
@@ -178,7 +179,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 15, name: "Education & Office", slug: "education", icon: "BookOpen", color: "bg-cyan-100 text-cyan-600",
+    id: 15, name: "Education & Office", slug: "education", icon: "BookOpen", image: "/icons/categories/education.png", color: "bg-cyan-100 text-cyan-600",
     subcategories: [
       { name: "Whiteboard", slug: "whiteboard" }, { name: "Projector", slug: "edu-projector" },
       { name: "Laptop", slug: "edu-laptop" }, { name: "Tablet", slug: "edu-tablet" },
@@ -187,7 +188,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 16, name: "Pet Supplies", slug: "pets", icon: "PawPrint", color: "bg-lime-100 text-lime-600",
+    id: 16, name: "Pet Supplies", slug: "pets", icon: "PawPrint", image: "/icons/categories/pets.png", color: "bg-lime-100 text-lime-600",
     subcategories: [
       { name: "Pet Carrier", slug: "pet-carrier" }, { name: "Pet Cage", slug: "pet-cage" },
       { name: "Aquarium", slug: "aquarium" }, { name: "Dog Crate", slug: "dog-crate" },
@@ -195,7 +196,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 17, name: "Construction", slug: "construction", icon: "HardHat", color: "bg-orange-100 text-orange-700",
+    id: 17, name: "Construction", slug: "construction", icon: "HardHat", image: "/icons/categories/construction.png", color: "bg-orange-100 text-orange-700",
     subcategories: [
       { name: "Mini Excavator", slug: "mini-excavator" }, { name: "Forklift", slug: "forklift" },
       { name: "Plate Compactor", slug: "plate-compactor" }, { name: "Road Roller", slug: "road-roller" },
@@ -204,7 +205,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 18, name: "Agriculture", slug: "agriculture", icon: "Wheat", color: "bg-green-100 text-green-700",
+    id: 18, name: "Agriculture", slug: "agriculture", icon: "Wheat", image: "/icons/categories/agriculture.png", color: "bg-green-100 text-green-700",
     subcategories: [
       { name: "Tractor", slug: "tractor" }, { name: "Rotavator", slug: "rotavator" },
       { name: "Water Pump", slug: "water-pump" }, { name: "Sprayer", slug: "sprayer" },
@@ -213,7 +214,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 19, name: "Art & Creative", slug: "art", icon: "Palette", color: "bg-fuchsia-100 text-fuchsia-600",
+    id: 19, name: "Art & Creative", slug: "art", icon: "Palette", image: "/icons/categories/art.png", color: "bg-fuchsia-100 text-fuchsia-600",
     subcategories: [
       { name: "Easel", slug: "easel" }, { name: "3D Printer", slug: "3d-printer" },
       { name: "Laser Cutter", slug: "laser-cutter" }, { name: "Cricut Machine", slug: "cricut" },
@@ -222,7 +223,7 @@ export const CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 20, name: "Miscellaneous", slug: "others", icon: "Package", color: "bg-gray-100 text-gray-600",
+    id: 20, name: "Miscellaneous", slug: "others", icon: "Package", image: "/icons/categories/others.png", color: "bg-gray-100 text-gray-600",
     subcategories: [
       { name: "Travel Luggage", slug: "travel-luggage" }, { name: "Storage Box", slug: "storage-box" },
       { name: "Safe / Locker", slug: "safe" }, { name: "Utility Cart", slug: "utility-cart" },

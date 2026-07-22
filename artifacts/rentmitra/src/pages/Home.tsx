@@ -53,7 +53,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-6xl font-bold tracking-tight mb-4"
           >
-            Rent anything, anywhere.
+            Rent what you need.<br className="hidden md:block" /> Earn from what you own.
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 12 }}
@@ -61,7 +61,7 @@ export default function Home() {
             transition={{ delay: 0.08 }}
             className="text-primary-foreground/80 text-lg md:text-xl mb-8 max-w-2xl"
           >
-            India's trusted peer-to-peer rental marketplace. Why buy when you can RentMitra?
+            India's trusted peer-to-peer rental marketplace. Don't buy it — rent it from someone nearby.
           </motion.p>
           <motion.form
             initial={{ opacity: 0, y: 10 }}

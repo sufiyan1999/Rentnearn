@@ -24,6 +24,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
 import Disclaimer from "./pages/Disclaimer";
+import Pricing from "./pages/Pricing";
 // Info pages
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -66,6 +67,8 @@ function Router() {
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/admin/listings" component={AdminListings} />
         <Route path="/admin/users" component={AdminUsers} />
+        {/* Pricing */}
+        <Route path="/pricing" component={Pricing} />
         {/* Info pages */}
         <Route path="/about" component={About} />
         <Route path="/contact" component={Contact} />

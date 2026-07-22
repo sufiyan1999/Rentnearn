@@ -20,6 +20,7 @@ const COLUMNS = [
   {
     title: "Resources",
     links: [
+      { label: "Pricing", href: "/pricing" },
       { label: "Categories", href: "/categories" },
       { label: "Business Accounts", href: "/register" },
       { label: "Safety Guidelines", href: "/safety" },

@@ -1,22 +1,39 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: RentMitra API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: users
+    description: User profile operations
+  - name: listings
+    description: Listing operations
+  - name: categories
+    description: Category operations
+  - name: favourites
+    description: Favourite listings
+  - name: recently-viewed
+    description: Recently viewed listings
+  - name: business
+    description: Business profile operations
+  - name: admin
+    description: Admin operations
+  - name: dashboard
+    description: Dashboard & stats
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +41,1390 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── AUTH ──────────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout current user
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/google:
+    post:
+      operationId: googleAuth
+      tags: [auth]
+      summary: Authenticate with Google OAuth token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleAuthInput"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/forgot-password:
+    post:
+      operationId: forgotPassword
+      tags: [auth]
+      summary: Send password reset email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordInput"
+      responses:
+        "200":
+          description: Email sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/reset-password:
+    post:
+      operationId: resetPassword
+      tags: [auth]
+      summary: Reset password with token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordInput"
+      responses:
+        "200":
+          description: Password reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/verify-email:
+    post:
+      operationId: verifyEmail
+      tags: [auth]
+      summary: Verify email with token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyEmailInput"
+      responses:
+        "200":
+          description: Email verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── USERS ─────────────────────────────────────────────────────────────────
+  /users/me:
+    patch:
+      operationId: updateProfile
+      tags: [users]
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{userId}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get public user profile
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicUser"
+
+  # ── LISTINGS ──────────────────────────────────────────────────────────────
+  /listings:
+    get:
+      operationId: getListings
+      tags: [listings]
+      summary: Search and filter listings
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+        - name: condition
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [newest, price_asc, price_desc, distance]
+      responses:
+        "200":
+          description: Paginated listings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingPage"
+
+    post:
+      operationId: createListing
+      tags: [listings]
+      summary: Create a new listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingInput"
+      responses:
+        "201":
+          description: Listing created (pending approval)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /listings/featured:
+    get:
+      operationId: getFeaturedListings
+      tags: [listings]
+      summary: Get featured listings
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Featured listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+
+  /listings/nearby:
+    get:
+      operationId: getNearbyListings
+      tags: [listings]
+      summary: Get listings near a location
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: radiusKm
+          in: query
+          schema:
+            type: number
+            default: 25
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Nearby listings with distances
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ListingWithDistance"
+
+  /listings/me:
+    get:
+      operationId: getMyListings
+      tags: [listings]
+      summary: Get current user's listings
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected, expired, all]
+      responses:
+        "200":
+          description: My listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+
+  /listings/{id}:
+    get:
+      operationId: getListing
+      tags: [listings]
+      summary: Get a single listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    patch:
+      operationId: updateListing
+      tags: [listings]
+      summary: Update a listing (owner only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingUpdate"
+      responses:
+        "200":
+          description: Updated listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+    delete:
+      operationId: deleteListing
+      tags: [listings]
+      summary: Delete a listing (owner only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /listings/{id}/renew:
+    post:
+      operationId: renewListing
+      tags: [listings]
+      summary: Renew listing for another 30 days
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Renewed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /listings/{id}/qr:
+    get:
+      operationId: getListingQr
+      tags: [listings]
+      summary: Get QR code data URL for a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: QR code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QrResponse"
+
+  # ── CATEGORIES ────────────────────────────────────────────────────────────
+  /categories:
+    get:
+      operationId: getCategories
+      tags: [categories]
+      summary: Get all categories with listing counts
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  # ── FAVOURITES ────────────────────────────────────────────────────────────
+  /favourites:
+    get:
+      operationId: getFavourites
+      tags: [favourites]
+      summary: Get current user's favourite listings
+      responses:
+        "200":
+          description: Favourite listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+
+    post:
+      operationId: addFavourite
+      tags: [favourites]
+      summary: Add a listing to favourites
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavouriteInput"
+      responses:
+        "201":
+          description: Added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /favourites/{listingId}:
+    delete:
+      operationId: removeFavourite
+      tags: [favourites]
+      summary: Remove a listing from favourites
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /favourites/ids:
+    get:
+      operationId: getFavouriteIds
+      tags: [favourites]
+      summary: Get IDs of all favourited listings for current user
+      responses:
+        "200":
+          description: Favourite listing IDs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FavouriteIdsResponse"
+
+  # ── RECENTLY VIEWED ───────────────────────────────────────────────────────
+  /recently-viewed:
+    get:
+      operationId: getRecentlyViewed
+      tags: [recently-viewed]
+      summary: Get current user's recently viewed listings
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Recently viewed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+
+    post:
+      operationId: trackView
+      tags: [recently-viewed]
+      summary: Track a listing view
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrackViewInput"
+      responses:
+        "200":
+          description: Tracked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # ── BUSINESS ──────────────────────────────────────────────────────────────
+  /business-profiles:
+    post:
+      operationId: createBusinessProfile
+      tags: [business]
+      summary: Create or update business profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessProfileInput"
+      responses:
+        "200":
+          description: Business profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessProfile"
+
+  /business-profiles/{userId}:
+    get:
+      operationId: getBusinessProfile
+      tags: [business]
+      summary: Get a business profile by user ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Business profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessProfile"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── ADMIN ─────────────────────────────────────────────────────────────────
+  /admin/listings:
+    get:
+      operationId: adminGetListings
+      tags: [admin]
+      summary: Get all listings (admin)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected, expired, all]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Paginated listings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListingPage"
+
+  /admin/listings/{id}/approve:
+    patch:
+      operationId: approveListing
+      tags: [admin]
+      summary: Approve a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /admin/listings/{id}/reject:
+    patch:
+      operationId: rejectListing
+      tags: [admin]
+      summary: Reject a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectListingInput"
+      responses:
+        "200":
+          description: Rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /admin/listings/{id}/feature:
+    patch:
+      operationId: featureListing
+      tags: [admin]
+      summary: Toggle featured status of a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeatureListingInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /admin/users:
+    get:
+      operationId: adminGetUsers
+      tags: [admin]
+      summary: Get all users (admin)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPage"
+
+  /admin/users/{userId}/verify:
+    patch:
+      operationId: verifyUser
+      tags: [admin]
+      summary: Verify a user account (admin)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /admin/stats:
+    get:
+      operationId: adminGetStats
+      tags: [admin]
+      summary: Get platform statistics (admin)
+      responses:
+        "200":
+          description: Platform stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  # ── DASHBOARD ─────────────────────────────────────────────────────────────
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get current user's dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Get recent activity for current user
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
 components:
   schemas:
+    # ── PRIMITIVES / SHARED ────────────────────────────────────────────────
     HealthStatus:
       type: object
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    # ── AUTH ───────────────────────────────────────────────────────────────
+    RegisterInput:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          minLength: 2
+        email:
+          type: string
+        password:
+          type: string
+          minLength: 8
+        phone:
+          type: ["string", "null"]
+        userType:
+          type: string
+          enum: [individual, business]
+          default: individual
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    GoogleAuthInput:
+      type: object
+      required: [idToken]
+      properties:
+        idToken:
+          type: string
+
+    ForgotPasswordInput:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+
+    ResetPasswordInput:
+      type: object
+      required: [token, password]
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+          minLength: 8
+
+    VerifyEmailInput:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    # ── USERS ──────────────────────────────────────────────────────────────
+    User:
+      type: object
+      required: [id, name, email, userType, isVerified, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        profilePhoto:
+          type: ["string", "null"]
+        userType:
+          type: string
+          enum: [individual, business, admin]
+        isVerified:
+          type: boolean
+        emailVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    PublicUser:
+      type: object
+      required: [id, name, userType, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        profilePhoto:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        userType:
+          type: string
+        isVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        listingCount:
+          type: integer
+        businessProfile:
+          oneOf:
+            - $ref: "#/components/schemas/BusinessProfile"
+            - type: "null"
+
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+        phone:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+
+    PhotoUploadResponse:
+      type: object
+      required: [photoUrl]
+      properties:
+        photoUrl:
+          type: string
+
+    UserPage:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    # ── LISTINGS ───────────────────────────────────────────────────────────
+    RentalPrice:
+      type: object
+      properties:
+        daily:
+          type: ["number", "null"]
+        weekly:
+          type: ["number", "null"]
+        monthly:
+          type: ["number", "null"]
+
+    Listing:
+      type: object
+      required: [id, ownerId, title, category, status, createdAt]
+      properties:
+        id:
+          type: integer
+        ownerId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        category:
+          type: string
+        brand:
+          type: ["string", "null"]
+        condition:
+          type: string
+          enum: [new, like_new, good, fair, poor]
+        rentalPrice:
+          $ref: "#/components/schemas/RentalPrice"
+        city:
+          type: string
+        state:
+          type: string
+        pincode:
+          type: ["string", "null"]
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
+        images:
+          type: array
+          items:
+            type: string
+        thumbnails:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected, expired]
+        isFeatured:
+          type: boolean
+        rejectionReason:
+          type: ["string", "null"]
+        expiresAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        owner:
+          oneOf:
+            - $ref: "#/components/schemas/PublicUser"
+            - type: "null"
+
+    ListingDetail:
+      allOf:
+        - $ref: "#/components/schemas/Listing"
+        - type: object
+          properties:
+            qrCode:
+              type: ["string", "null"]
+            isFavourited:
+              type: boolean
+            whatsappUrl:
+              type: ["string", "null"]
+
+    ListingWithDistance:
+      allOf:
+        - $ref: "#/components/schemas/Listing"
+        - type: object
+          required: [distanceKm]
+          properties:
+            distanceKm:
+              type: number
+
+    ListingPage:
+      type: object
+      required: [data, total, page, limit]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Listing"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+    ListingInput:
+      type: object
+      required: [title, category, condition, city, state]
+      properties:
+        title:
+          type: string
+          minLength: 5
+        description:
+          type: string
+        category:
+          type: string
+        customCategory:
+          type: ["string", "null"]
+        brand:
+          type: ["string", "null"]
+        condition:
+          type: string
+          enum: [new, like_new, good, fair, poor]
+        dailyPrice:
+          type: ["number", "null"]
+        weeklyPrice:
+          type: ["number", "null"]
+        monthlyPrice:
+          type: ["number", "null"]
+        city:
+          type: string
+        state:
+          type: string
+        pincode:
+          type: ["string", "null"]
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
+
+    ListingUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 5
+        description:
+          type: string
+        category:
+          type: string
+        brand:
+          type: ["string", "null"]
+        condition:
+          type: string
+          enum: [new, like_new, good, fair, poor]
+        dailyPrice:
+          type: ["number", "null"]
+        weeklyPrice:
+          type: ["number", "null"]
+        monthlyPrice:
+          type: ["number", "null"]
+        city:
+          type: string
+        state:
+          type: string
+        pincode:
+          type: ["string", "null"]
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
+
+    ImagesUploadResponse:
+      type: object
+      required: [images, thumbnails]
+      properties:
+        images:
+          type: array
+          items:
+            type: string
+        thumbnails:
+          type: array
+          items:
+            type: string
+
+    QrResponse:
+      type: object
+      required: [qrDataUrl, listingUrl]
+      properties:
+        qrDataUrl:
+          type: string
+        listingUrl:
+          type: string
+
+    # ── CATEGORIES ─────────────────────────────────────────────────────────
+    Category:
+      type: object
+      required: [id, name, slug, icon]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        icon:
+          type: string
+        description:
+          type: ["string", "null"]
+        listingCount:
+          type: integer
+
+    # ── FAVOURITES ─────────────────────────────────────────────────────────
+    FavouriteInput:
+      type: object
+      required: [listingId]
+      properties:
+        listingId:
+          type: integer
+
+    FavouriteIdsResponse:
+      type: object
+      required: [ids]
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+
+    # ── RECENTLY VIEWED ────────────────────────────────────────────────────
+    TrackViewInput:
+      type: object
+      required: [listingId]
+      properties:
+        listingId:
+          type: integer
+
+    # ── BUSINESS ───────────────────────────────────────────────────────────
+    BusinessProfile:
+      type: object
+      required: [id, userId, businessName]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        businessName:
+          type: string
+        logo:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        contactEmail:
+          type: ["string", "null"]
+        contactPhone:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        state:
+          type: ["string", "null"]
+        gstNumber:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    BusinessProfileInput:
+      type: object
+      required: [businessName]
+      properties:
+        businessName:
+          type: string
+          minLength: 2
+        description:
+          type: string
+        contactEmail:
+          type: ["string", "null"]
+        contactPhone:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        state:
+          type: ["string", "null"]
+        gstNumber:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+
+    # ── ADMIN ──────────────────────────────────────────────────────────────
+    RejectListingInput:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+
+    FeatureListingInput:
+      type: object
+      required: [featured]
+      properties:
+        featured:
+          type: boolean
+
+    AdminStats:
+      type: object
+      required: [totalUsers, totalListings, pendingApprovals, activeListings, totalFavourites]
+      properties:
+        totalUsers:
+          type: integer
+        totalListings:
+          type: integer
+        pendingApprovals:
+          type: integer
+        activeListings:
+          type: integer
+        expiredListings:
+          type: integer
+        featuredListings:
+          type: integer
+        totalFavourites:
+          type: integer
+        newUsersThisMonth:
+          type: integer
+        newListingsThisMonth:
+          type: integer
+        topCategories:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryCount"
+
+    CategoryCount:
+      type: object
+      required: [category, count]
+      properties:
+        category:
+          type: string
+        count:
+          type: integer
+
+    # ── DASHBOARD ──────────────────────────────────────────────────────────
+    DashboardStats:
+      type: object
+      required: [totalListings, activeListings, pendingListings, totalFavourites]
+      properties:
+        totalListings:
+          type: integer
+        activeListings:
+          type: integer
+        pendingListings:
+          type: integer
+        rejectedListings:
+          type: integer
+        expiredListings:
+          type: integer
+        totalFavourites:
+          type: integer
+        profileViews:
+          type: integer
+
+    ActivityItem:
+      type: object
+      required: [id, type, description, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [listing_approved, listing_rejected, listing_expired, listing_viewed, favourite_added]
+        description:
+          type: string
+        listingId:
+          type: ["integer", "null"]
+        listingTitle:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time

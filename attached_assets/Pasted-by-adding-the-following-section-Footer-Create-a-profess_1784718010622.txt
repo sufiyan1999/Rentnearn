@@ -1,0 +1,92 @@
+by adding the following section.
+Footer
+Create a professional responsive footer.
+Company
+About Us
+Contact Us
+FAQs
+Support
+Legal
+Privacy Policy
+Terms of Service
+Cookie Policy
+Disclaimer
+Resources
+Categories
+Business Accounts
+Safety Tips
+How It Works
+Follow Us
+Facebook
+Instagram
+LinkedIn
+X (Twitter)
+Contact
+Email
+WhatsApp
+City (India)
+Copyright
+Display:
+© 2026 RentMitra India. All Rights Reserved.
+Legal Pages
+Create responsive pages for:
+Privacy Policy
+Include sections covering:
+Information collected
+Account information
+Listing information
+Cookies
+Analytics
+Third-party services
+Data security
+User rights
+Contact information
+Terms of Service
+Include:
+User responsibilities
+Listing rules
+Prohibited items
+Account suspension
+Disclaimer
+Intellectual property
+Limitation of liability
+Governing law (India)
+Cookie Policy
+Include:
+What cookies are
+Essential cookies
+Functional cookies
+Analytics cookies
+Managing cookies
+Cookie consent
+Disclaimer
+Clearly state:
+RentMitra is only a marketplace connecting owners and renters.
+RentMitra is not responsible for payments, deposits, damages, disputes, or the condition of listed items.
+Users are responsible for inspecting items before renting.
+Users enter rental agreements at their own risk.
+Cookie Consent
+On first visit, display a GDPR-style cookie banner at the bottom of the page.
+Buttons:
+Accept All
+Reject Non-Essential
+Cookie Settings
+Remember the user's choice using local storage.
+Footer Design
+Use a modern, premium footer with:
+Dark background
+Four-column responsive layout
+Social media icons
+Company logo
+Quick links
+Legal links
+Contact information
+Copyright notice
+The footer should collapse into an accordion layout on mobile devices for a better user experience.
+One more recommendation
+Since your target is India, I would also include these pages from the beginning because they are often expected by users and app stores:
+About Us
+Contact Us
+Frequently Asked Questions (FAQ)
+Safety Guidelines (Tips for safe renting, meeting in public places, verifying items, etc.)
+These pages are inexpensive to build, improve credibility, and help with App Store approval and SEO.

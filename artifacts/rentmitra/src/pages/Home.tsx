@@ -140,7 +140,7 @@ export default function Home() {
               <Link
                 key={s}
                 href={`/search?q=${encodeURIComponent(s)}`}
-                className="text-xs text-white/55 hover:text-white bg-white/8 hover:bg-white/15 border border-white/10 rounded-full px-3 py-1.5 transition-all duration-150 font-medium"
+                className="text-xs text-white font-semibold bg-white/20 hover:bg-white/35 border border-white/35 rounded-full px-3 py-1.5 transition-all duration-150"
               >
                 {s}
               </Link>

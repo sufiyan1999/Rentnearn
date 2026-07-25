@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { SeoHead } from "@/components/SeoHead";
 import { CATEGORIES } from "@/lib/constants";
 import { useGetCategories, getGetCategoriesQueryKey } from "@workspace/api-client-react";
 import { ChevronRight, ChevronLeft, Search } from "lucide-react";
@@ -33,6 +34,11 @@ export default function Categories() {
 
   return (
     <div className="pb-24 md:pb-0">
+      <SeoHead
+        title="Browse All Rental Categories"
+        description={`Explore ${CATEGORIES.length} categories on RentNEarn — cameras, drones, furniture, wedding outfits, medical equipment, tools & more. Find what you need to rent near you.`}
+        canonical="/categories"
+      />
       {/* Header */}
       <div className="bg-gradient-to-br from-primary to-orange-600 text-white py-10 px-4">
         <div className="container mx-auto max-w-5xl">

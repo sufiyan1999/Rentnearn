@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { SeoHead } from "@/components/SeoHead";
 import { Mail, MessageCircle, MapPin, Clock, Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const CONTACT_OPTIONS = [
-  { icon: Mail, title: "Email Support", detail: "support@rentmitra.in", desc: "Typically replies within 24 hours", href: "mailto:support@rentmitra.in", color: "text-primary" },
+  { icon: Mail, title: "Email Support", detail: "support@rentnearn.com", desc: "Typically replies within 24 hours", href: "mailto:support@rentnearn.com", color: "text-primary" },
   { icon: MessageCircle, title: "WhatsApp", detail: "+91 9999 000 001", desc: "Mon–Sat, 9 AM – 6 PM IST", href: "https://wa.me/919999000001", color: "text-green-500" },
   { icon: MapPin, title: "Registered Office", detail: "India", desc: "Available in 50+ cities", href: null, color: "text-primary" },
   { icon: Clock, title: "Support Hours", detail: "Mon–Sat", desc: "9:00 AM – 6:00 PM IST", href: null, color: "text-amber-500" },
@@ -23,6 +24,11 @@ export default function Contact() {
 
   return (
     <div className="pb-24 md:pb-0">
+      <SeoHead
+        title="Contact Us"
+        description="Get in touch with the RentNEarn team. We're here to help with listing questions, account issues, or partnership inquiries."
+        canonical="/contact"
+      />
       <div className="bg-gradient-to-br from-primary to-orange-600 text-white py-14 md:py-20">
         <div className="container mx-auto px-4 max-w-3xl text-center">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>

@@ -17,19 +17,19 @@ const NOT_HANDLED = [
 const SECTIONS = [
   {
     title: "1. Platform Role",
-    body: `RentMitra ("we", "the platform") operates solely as a technology intermediary. We provide a listing service that connects people who wish to rent out items with people who wish to rent them. RentMitra is not an owner, operator, seller, lessor, or agent for any listed item. We do not take part in, supervise, or guarantee any transaction between users.`,
+    body: `RentNEarn ("we", "the platform") operates solely as a technology intermediary. We provide a listing service that connects people who wish to rent out items with people who wish to rent them. RentNEarn is not an owner, operator, seller, lessor, or agent for any listed item. We do not take part in, supervise, or guarantee any transaction between users.`,
   },
   {
     title: "2. No Warranty on Listed Items",
-    body: `RentMitra makes no representations or warranties about the accuracy, quality, safety, legality, or availability of any item listed on the platform. Listings are created by independent users. We approve listings for policy compliance only — not quality or accuracy. Renters are strongly advised to inspect items in person before completing a rental.`,
+    body: `RentNEarn makes no representations or warranties about the accuracy, quality, safety, legality, or availability of any item listed on the platform. Listings are created by independent users. We approve listings for policy compliance only — not quality or accuracy. Renters are strongly advised to inspect items in person before completing a rental.`,
   },
   {
     title: "3. Payments, Deposits & Disputes",
-    body: `RentMitra does not process, hold, or facilitate rental payments. All financial arrangements — including rental fees, security deposits, damage compensation, and refunds — are made directly between the owner and renter. RentMitra is not liable for any payment disputes, failed transfers, non-refunded deposits, or financial losses arising from a rental. Note: RentMitra does accept listing fees and featured listing payments for platform services only (see Revenue Model below).`,
+    body: `RentNEarn does not process, hold, or facilitate rental payments. All financial arrangements — including rental fees, security deposits, damage compensation, and refunds — are made directly between the owner and renter. RentNEarn is not liable for any payment disputes, failed transfers, non-refunded deposits, or financial losses arising from a rental. Note: RentNEarn does accept listing fees and featured listing payments for platform services only (see Revenue Model below).`,
   },
   {
     title: "4. Damage & Liability",
-    body: `RentMitra is not liable for any damage to or loss of rented items, personal injury, property damage, or any other loss arising from a rental transaction. Owners and renters are responsible for agreeing on and enforcing their own terms regarding item condition, care, and liability for damage.`,
+    body: `RentNEarn is not liable for any damage to or loss of rented items, personal injury, property damage, or any other loss arising from a rental transaction. Owners and renters are responsible for agreeing on and enforcing their own terms regarding item condition, care, and liability for damage.`,
   },
   {
     title: "5. User Responsibility",
@@ -37,15 +37,15 @@ const SECTIONS = [
   },
   {
     title: "6. Revenue Model",
-    body: `RentMitra earns revenue solely from listing fees and featured listing promotions. We do not earn commissions from rentals, take a percentage of transactions, or receive payments from renters on behalf of owners. The current fee schedule is: ₹49 for 1 listing (30 days); ₹199 for 5 listings (30 days); ₹499/month for unlimited listings (businesses); and ₹99 to feature any approved listing for 7 days. These fees may change from time to time with notice.`,
+    body: `RentNEarn earns revenue solely from listing fees and featured listing promotions. We do not earn commissions from rentals, take a percentage of transactions, or receive payments from renters on behalf of owners. The current fee schedule is: ₹49 for 1 listing (30 days); ₹199 for 5 listings (30 days); ₹499/month for unlimited listings (businesses); and ₹99 to feature any approved listing for 7 days. These fees may change from time to time with notice.`,
   },
   {
     title: "7. Limitation of Liability",
-    body: `To the fullest extent permitted by applicable Indian law, RentMitra India, its directors, employees, and agents shall not be liable for any indirect, incidental, special, consequential, punitive, or exemplary damages, including loss of profits, goodwill, data, or other intangible losses, even if advised of the possibility of such damages.`,
+    body: `To the fullest extent permitted by applicable Indian law, RentNEarn India, its directors, employees, and agents shall not be liable for any indirect, incidental, special, consequential, punitive, or exemplary damages, including loss of profits, goodwill, data, or other intangible losses, even if advised of the possibility of such damages.`,
   },
   {
     title: "8. Third-Party Links",
-    body: `RentMitra may contain links to third-party websites or services (e.g. WhatsApp, Google Maps, Razorpay). These links are provided for convenience only. RentMitra has no control over and assumes no responsibility for the content, privacy policies, or practices of any third-party sites or payment processors.`,
+    body: `RentNEarn may contain links to third-party websites or services (e.g. WhatsApp, Google Maps, Razorpay). These links are provided for convenience only. RentNEarn has no control over and assumes no responsibility for the content, privacy policies, or practices of any third-party sites or payment processors.`,
   },
   {
     title: "9. Governing Law",
@@ -53,7 +53,7 @@ const SECTIONS = [
   },
   {
     title: "10. Contact",
-    body: `For questions about this Disclaimer: legal@rentmitra.in`,
+    body: `For questions about this Disclaimer: legal@rentnearn.com`,
   },
 ];
 
@@ -79,7 +79,7 @@ export default function Disclaimer() {
             <div>
               <h2 className="font-bold text-amber-900 dark:text-amber-200 mb-2">Important Notice</h2>
               <p className="text-sm text-amber-900/80 dark:text-amber-200/80 leading-relaxed">
-                RentMitra is a classifieds marketplace that connects owners and renters. We are <strong>not</strong> responsible
+                RentNEarn is a classifieds marketplace that connects owners and renters. We are <strong>not</strong> responsible
                 for payments, deposits, damages, disputes, fraud, or the condition of listed items. All rental transactions are
                 between private individuals. Use this platform at your own risk.
               </p>
@@ -103,7 +103,7 @@ export default function Disclaimer() {
             ))}
           </ul>
           <p className="text-xs text-red-700/70 dark:text-red-300/60 mt-4 leading-relaxed">
-            All of the above must be arranged directly between the owner and renter. RentMitra bears no responsibility for any failure, loss, or dispute arising from these activities.
+            All of the above must be arranged directly between the owner and renter. RentNEarn bears no responsibility for any failure, loss, or dispute arising from these activities.
           </p>
         </motion.div>
 
@@ -112,10 +112,10 @@ export default function Disclaimer() {
           className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-2xl p-6">
           <div className="flex items-start gap-3 mb-4">
             <IndianRupee className="w-6 h-6 text-green-600 shrink-0 mt-0.5" />
-            <h2 className="font-bold text-green-900 dark:text-green-200">How RentMitra Earns Money</h2>
+            <h2 className="font-bold text-green-900 dark:text-green-200">How RentNEarn Earns Money</h2>
           </div>
           <p className="text-sm text-green-900/80 dark:text-green-200/80 mb-4 leading-relaxed">
-            RentMitra earns money <strong>only</strong> from listing fees and featured listing promotions paid by owners.
+            RentNEarn earns money <strong>only</strong> from listing fees and featured listing promotions paid by owners.
             We do <strong>not</strong> take any commission from rental transactions.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

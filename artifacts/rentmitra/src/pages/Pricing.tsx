@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { SeoHead } from "@/components/SeoHead";
 import { motion } from "framer-motion";
 import {
   Check, X, Star, Zap, Building2, Gift, Crown, ChevronDown, ChevronUp,
@@ -125,11 +126,11 @@ const FEATURED_PLANS = [
 
 const FAQS = [
   { q: "What happens when my free trial ends?", a: "After 90 days, your account automatically switches to a limited free state. Your existing listings will be paused until you subscribe to a paid plan. Your data is preserved — nothing is deleted." },
-  { q: "Can I upgrade mid-cycle?", a: "Yes. When you upgrade, your new plan activates immediately and your previous plan is cancelled. Contact us at support@rentmitra.in for any billing adjustments." },
+  { q: "Can I upgrade mid-cycle?", a: "Yes. When you upgrade, your new plan activates immediately and your previous plan is cancelled. Contact us at support@rentnearn.com for any billing adjustments." },
   { q: "What does 'Priority Search Ranking' mean?", a: "Plus and Business listings appear higher in search results compared to Basic and Free Trial listings, giving you more visibility to potential renters." },
   { q: "Can I purchase Featured Listings on any plan?", a: "Yes — Featured Listing boosts are available as add-ons for any plan including Free Trial. Featured listings appear above standard listings with a gold badge." },
   { q: "How is the Business plan billed?", a: "Business is billed at ₹1,999 per year (roughly ₹167/month), which saves you 58% compared to a hypothetical monthly billing." },
-  { q: "Is there a refund policy?", a: "We offer a 7-day refund for new subscriptions if no listings were created during that period. Contact support@rentmitra.in within 7 days of purchase." },
+  { q: "Is there a refund policy?", a: "We offer a 7-day refund for new subscriptions if no listings were created during that period. Contact support@rentnearn.com within 7 days of purchase." },
 ];
 
 // ─── Comparison table ────────────────────────────────────────────────────────
@@ -164,6 +165,11 @@ export default function Pricing() {
 
   return (
     <div className="pb-24 md:pb-0">
+      <SeoHead
+        title="Rental Plans & Pricing"
+        description="RentNEarn plans start free — list up to 3 items with a 3-month free trial. Upgrade to Basic (₹49/mo), Plus (₹199/mo), or Business (₹1,999/yr) for more listings and features."
+        canonical="/pricing"
+      />
       {/* Hero */}
       <div className="bg-gradient-to-br from-primary to-orange-600 text-white py-14 px-4 text-center relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none"

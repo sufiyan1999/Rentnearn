@@ -91,7 +91,7 @@ export default function Login() {
           </div>
 
           <p className="text-center text-sm text-muted-foreground">
-            New to RentMitra?{" "}
+            New to RentNEarn?{" "}
             <Link href="/register" className="text-primary font-bold hover:underline">Create account</Link>
           </p>
         </div>

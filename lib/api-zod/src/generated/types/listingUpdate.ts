@@ -24,6 +24,8 @@ export interface ListingUpdate {
   city?: string;
   state?: string;
   /** @nullable */
+  area?: string | null;
+  /** @nullable */
   pincode?: string | null;
   /** @nullable */
   latitude?: number | null;

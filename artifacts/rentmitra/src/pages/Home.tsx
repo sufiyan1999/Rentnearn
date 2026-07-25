@@ -1,5 +1,7 @@
 import { useGetListings, getGetListingsQueryKey, useGetCategories, getGetCategoriesQueryKey, useGetFeaturedListings, getGetFeaturedListingsQueryKey, useGetNearbyListings, getGetNearbyListingsQueryKey } from "@workspace/api-client-react";
 import { ListingCard } from "@/components/ListingCard";
+import { SeoHead } from "@/components/SeoHead";
+import { Helmet } from "react-helmet-async";
 import { Link, useLocation } from "wouter";
 import { Search, MapPin, Compass, Star, ArrowRight, TrendingUp, Shield, Zap, X, Gift, Building2, Check, Rocket } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
@@ -17,7 +19,7 @@ const STATS = [
   { value: "100%", label: "Peer-to-Peer" },
 ];
 
-const POPULAR_SEARCHES = ["DSLR Camera", "Drone", "Wheelchair", "PlayStation 5", "Baby Stroller", "Sherwani", "Treadmill", "Luxury Car"];
+const POPULAR_SEARCHES = ["Sony Camera", "Bosch Drill", "Baby Stroller", "Wheelchair", "Camping Tent", "DJ Speakers", "Projector", "Mountain Bike"];
 
 const stagger = {
   visible: { transition: { staggerChildren: 0.05 } },
@@ -55,8 +57,30 @@ export default function Home() {
     if (q) setLocation(`/search?q=${encodeURIComponent(q.toString())}`);
   };
 
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "RentNEarn",
+    url: typeof window !== "undefined" ? window.location.origin : "https://rentnearn.com",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${typeof window !== "undefined" ? window.location.origin : "https://rentnearn.com"}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <div className="flex flex-col">
+      <SeoHead
+        description="Don't buy it — rent it from someone nearby. Find cameras, drones, furniture, outfits & 1,000s of items near you on India's largest peer-to-peer rental marketplace. Zero commission."
+        canonical="/"
+      />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(websiteSchema)}</script>
+      </Helmet>
 
       {/* ══════════ HERO ══════════ */}
       <section className="relative overflow-hidden bg-primary text-white">
@@ -91,17 +115,17 @@ export default function Home() {
             transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
             className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.08] mb-5 text-balance"
           >
-            Rent what you need.<br />
-            <span className="opacity-80">Earn from what you own.</span>
+            Rent What You Need.<br />
+            <span className="opacity-80">Earn From What You Own.</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.15 }}
-            className="text-white/70 text-lg md:text-xl mb-8 max-w-xl leading-relaxed"
+            className="text-white/70 text-lg md:text-xl mb-8 max-w-2xl leading-relaxed"
           >
-            Don't buy it — rent it from someone nearby.
+            Discover thousands of rental products near you. From cameras and power tools to wheelchairs, baby strollers, camping gear and vehicles—RentNEarn helps you save money while turning unused items into extra income.
           </motion.p>
 
           {/* Search bar */}
@@ -118,7 +142,7 @@ export default function Home() {
             <input
               name="q"
               type="text"
-              placeholder="Search cameras, drills, lehenga, PS5…"
+              placeholder="Sony Camera, Bosch Drill, Baby Stroller, Wheelchair…"
               className="flex-1 bg-transparent border-none focus:outline-none px-2 text-white placeholder:text-white/40 py-3 text-sm md:text-base font-medium"
             />
             <button
@@ -129,11 +153,32 @@ export default function Home() {
             </button>
           </motion.form>
 
+          {/* Hero CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-5 flex items-center gap-3"
+          >
+            <Link
+              href="/search"
+              className="bg-white text-primary font-bold text-sm px-6 py-2.5 rounded-full hover:bg-white/90 transition-all duration-200 active:scale-95 shadow-lg"
+            >
+              Start Renting
+            </Link>
+            <Link
+              href="/listings/new"
+              className="bg-white/15 border border-white/30 text-white font-semibold text-sm px-6 py-2.5 rounded-full hover:bg-white/25 transition-all duration-200 active:scale-95 backdrop-blur-sm"
+            >
+              List Your Item
+            </Link>
+          </motion.div>
+
           {/* Popular searches */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.35 }}
+            transition={{ delay: 0.42 }}
             className="mt-4 flex flex-wrap justify-center gap-2"
           >
             {POPULAR_SEARCHES.map(s => (
@@ -252,9 +297,9 @@ export default function Home() {
           </section>
         )}
 
-        {/* ── Why RentMitra ── */}
+        {/* ── Why RentNEarn ── */}
         <section>
-          <SectionHeader icon={<Shield className="w-4 h-4 text-primary" />} title="Why RentMitra?" />
+          <SectionHeader icon={<Shield className="w-4 h-4 text-primary" />} title="Why RentNEarn?" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               { icon: "🤝", title: "Direct P2P", body: "Connect directly via WhatsApp. No middlemen, no commissions on rentals." },
@@ -345,11 +390,11 @@ export default function Home() {
 // ─── Launch banner ──────────────────────────────────────────────────────────
 function LaunchBanner() {
   const [dismissed, setDismissed] = useState(() =>
-    typeof window !== "undefined" && localStorage.getItem("rentmitra_launch_banner_dismissed") === "1"
+    typeof window !== "undefined" && localStorage.getItem("rentnearn_launch_banner_dismissed") === "1"
   );
 
   const dismiss = () => {
-    localStorage.setItem("rentmitra_launch_banner_dismissed", "1");
+    localStorage.setItem("rentnearn_launch_banner_dismissed", "1");
     setDismissed(true);
   };
 

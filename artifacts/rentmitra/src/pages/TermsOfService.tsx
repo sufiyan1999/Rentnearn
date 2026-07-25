@@ -18,7 +18,7 @@ export default function TermsOfService() {
         {[
           {
             title: "1. Acceptance of Terms",
-            body: `By accessing or using RentMitra, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, you must not use the platform.`,
+            body: `By accessing or using RentNEarn, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, you must not use the platform.`,
           },
           {
             title: "2. User Responsibilities",
@@ -30,7 +30,7 @@ export default function TermsOfService() {
           },
           {
             title: "4. Prohibited Items",
-            body: `The following items may not be listed on RentMitra: firearms, weapons, or ammunition; controlled substances or illegal drugs; stolen or counterfeit goods; items that violate any intellectual property rights; adult-only content or products; animals; items that require a government licence to operate (unless you hold that licence); any item whose rental is prohibited under Indian law.`,
+            body: `The following items may not be listed on RentNEarn: firearms, weapons, or ammunition; controlled substances or illegal drugs; stolen or counterfeit goods; items that violate any intellectual property rights; adult-only content or products; animals; items that require a government licence to operate (unless you hold that licence); any item whose rental is prohibited under Indian law.`,
           },
           {
             title: "5. Account Suspension & Termination",
@@ -38,15 +38,15 @@ export default function TermsOfService() {
           },
           {
             title: "6. Disclaimer of Liability",
-            body: `RentMitra is a marketplace platform that connects owners and renters. We are not a party to any rental agreement between users. We are not responsible for the condition, quality, safety, or legality of listed items. We are not responsible for any payment disputes, deposits, damages, loss, or injury arising from a rental transaction. Users enter rental agreements entirely at their own risk.`,
+            body: `RentNEarn is a marketplace platform that connects owners and renters. We are not a party to any rental agreement between users. We are not responsible for the condition, quality, safety, or legality of listed items. We are not responsible for any payment disputes, deposits, damages, loss, or injury arising from a rental transaction. Users enter rental agreements entirely at their own risk.`,
           },
           {
             title: "7. Intellectual Property",
-            body: `All content, trademarks, logos, and design elements on RentMitra are owned by or licensed to RentMitra India and may not be reproduced without written consent. By uploading photos or content, you grant RentMitra a non-exclusive, royalty-free licence to display that content on the platform.`,
+            body: `All content, trademarks, logos, and design elements on RentNEarn are owned by or licensed to RentNEarn India and may not be reproduced without written consent. By uploading photos or content, you grant RentNEarn a non-exclusive, royalty-free licence to display that content on the platform.`,
           },
           {
             title: "8. Limitation of Liability",
-            body: `To the maximum extent permitted by Indian law, RentMitra shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the platform, even if advised of the possibility of such damages. Our total liability to you for any claim shall not exceed ₹1,000 (One Thousand Indian Rupees).`,
+            body: `To the maximum extent permitted by Indian law, RentNEarn shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the platform, even if advised of the possibility of such damages. Our total liability to you for any claim shall not exceed ₹1,000 (One Thousand Indian Rupees).`,
           },
           {
             title: "9. Governing Law",
@@ -54,11 +54,11 @@ export default function TermsOfService() {
           },
           {
             title: "10. Changes to Terms",
-            body: `We may update these Terms at any time. Continued use of RentMitra after changes are posted constitutes acceptance of the new Terms. We will provide notice of material changes by email or prominent in-app notification.`,
+            body: `We may update these Terms at any time. Continued use of RentNEarn after changes are posted constitutes acceptance of the new Terms. We will provide notice of material changes by email or prominent in-app notification.`,
           },
           {
             title: "11. Contact",
-            body: `For legal enquiries: legal@rentmitra.in — RentMitra India`,
+            body: `For legal enquiries: legal@rentnearn.com — RentNEarn India`,
           },
         ].map(({ title, body }) => (
           <motion.section key={title} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>

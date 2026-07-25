@@ -18,7 +18,7 @@ export default function PrivacyPolicy() {
         {[
           {
             title: "1. Introduction",
-            body: `RentMitra ("we", "our", "us") respects your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and mobile application. By using RentMitra, you consent to the practices described in this policy.`,
+            body: `RentNEarn ("we", "our", "us") respects your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and mobile application. By using RentNEarn, you consent to the practices described in this policy.`,
           },
           {
             title: "2. Information We Collect",
@@ -63,19 +63,19 @@ export default function PrivacyPolicy() {
           },
           {
             title: "7. Your Rights",
-            body: `You have the right to: access the personal data we hold about you; correct inaccurate data; request deletion of your account and data; withdraw consent for non-essential cookies at any time. To exercise these rights, email privacy@rentmitra.in.`,
+            body: `You have the right to: access the personal data we hold about you; correct inaccurate data; request deletion of your account and data; withdraw consent for non-essential cookies at any time. To exercise these rights, email privacy@rentnearn.com.`,
           },
           {
             title: "8. Children's Privacy",
-            body: `RentMitra is not intended for users under 18. We do not knowingly collect personal information from minors. If you believe a minor has provided us with personal information, please contact us immediately.`,
+            body: `RentNEarn is not intended for users under 18. We do not knowingly collect personal information from minors. If you believe a minor has provided us with personal information, please contact us immediately.`,
           },
           {
             title: "9. Changes to This Policy",
-            body: `We may update this policy from time to time. We will notify you of significant changes by email or by displaying a prominent notice on the platform. Continued use of RentMitra after changes constitutes acceptance.`,
+            body: `We may update this policy from time to time. We will notify you of significant changes by email or by displaying a prominent notice on the platform. Continued use of RentNEarn after changes constitutes acceptance.`,
           },
           {
             title: "10. Contact Us",
-            body: `For privacy-related queries: privacy@rentmitra.in — RentMitra India, support@rentmitra.in`,
+            body: `For privacy-related queries: privacy@rentnearn.com — RentNEarn India, support@rentnearn.com`,
           },
         ].map(({ title, body, subsections }) => (
           <motion.section key={title} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>

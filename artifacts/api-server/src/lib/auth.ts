@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-const JWT_SECRET = process.env.JWT_SECRET ?? "rentmitra-dev-secret-change-in-production";
+const JWT_SECRET = process.env.JWT_SECRET ?? "rentnearn-dev-secret-change-in-production";
 const JWT_EXPIRES_IN = "30d";
 
 export function hashPassword(password: string): Promise<string> {

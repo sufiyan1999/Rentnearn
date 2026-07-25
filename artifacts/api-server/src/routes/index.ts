@@ -11,9 +11,12 @@ import adminRouter from "./admin";
 import dashboardRouter from "./dashboard";
 import paymentsRouter from "./payments";
 import membershipsRouter from "./memberships";
+import seoRouter from "./seo";
 
 const router: IRouter = Router();
 
+// Public routes first — must come before adminRouter which has a global requireAuth middleware
+router.use(seoRouter);
 router.use(healthRouter);
 router.use(authRouter);
 router.use(usersRouter);
@@ -22,9 +25,10 @@ router.use(categoriesRouter);
 router.use(favouritesRouter);
 router.use(recentlyViewedRouter);
 router.use(businessRouter);
-router.use(adminRouter);
 router.use(dashboardRouter);
 router.use(paymentsRouter);
 router.use(membershipsRouter);
+// Admin router must come after public routes — it applies requireAuth to all requests
+router.use(adminRouter);
 
 export default router;

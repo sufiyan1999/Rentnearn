@@ -20,6 +20,7 @@ export const listingsTable = pgTable("listings", {
   monthlyPrice: numeric("monthly_price", { precision: 10, scale: 2 }),
   city: text("city").notNull(),
   state: text("state").notNull(),
+  area: text("area"),
   pincode: text("pincode"),
   latitude: numeric("latitude", { precision: 10, scale: 7 }),
   longitude: numeric("longitude", { precision: 10, scale: 7 }),

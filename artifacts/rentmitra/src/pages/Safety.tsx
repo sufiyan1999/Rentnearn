@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { SeoHead } from "@/components/SeoHead";
 import { ShieldCheck, Eye, MapPin, CreditCard, Phone, AlertTriangle, CheckCircle, Camera } from "lucide-react";
 
 const TIPS = [
@@ -39,7 +40,7 @@ const TIPS = [
     tips: [
       "Never send full payment before inspecting the item in person.",
       "Use UPI with proper transaction history. Avoid cash for large deposits.",
-      "Be wary of owners who ask for payment on platforms outside RentMitra conversations.",
+      "Be wary of owners who ask for payment on platforms outside RentNEarn conversations.",
     ],
   },
   {
@@ -47,7 +48,7 @@ const TIPS = [
     color: "bg-violet-500/10 text-violet-600",
     title: "Verify the Person",
     tips: [
-      "Check if the user has a verified badge on RentMitra.",
+      "Check if the user has a verified badge on RentNEarn.",
       "Search for the phone number online if something feels off.",
       "Trust your instincts — if the deal seems too good to be true, it likely is.",
     ],
@@ -59,7 +60,7 @@ const TIPS = [
     tips: [
       "Report listings that look fake, have stock photos, or list prices far below market value.",
       "Never pay an 'advance booking fee' to hold an item — this is a common scam.",
-      "Report suspicious users to support@rentmitra.in immediately.",
+      "Report suspicious users to support@rentnearn.com immediately.",
     ],
   },
 ];
@@ -76,6 +77,11 @@ const QUICK_TIPS = [
 export default function Safety() {
   return (
     <div className="pb-24 md:pb-0">
+      <SeoHead
+        title="Safety Tips for Renting"
+        description="Stay safe while renting on RentNEarn. Tips on meeting safely, verifying items, making payments, and protecting yourself as a renter or owner."
+        canonical="/safety"
+      />
       <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white py-14 md:py-20">
         <div className="container mx-auto px-4 max-w-3xl text-center">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
@@ -84,7 +90,7 @@ export default function Safety() {
             </div>
             <h1 className="text-4xl font-bold mb-3">Safety Tips</h1>
             <p className="text-white/80 text-base max-w-xl mx-auto">
-              RentMitra connects you with people nearby. Follow these guidelines to rent safely and confidently.
+              RentNEarn connects you with people nearby. Follow these guidelines to rent safely and confidently.
             </p>
           </motion.div>
         </div>
@@ -137,7 +143,7 @@ export default function Safety() {
             <div>
               <h3 className="font-semibold mb-2 text-amber-800 dark:text-amber-200">Important Reminder</h3>
               <p className="text-sm text-amber-900/80 dark:text-amber-200/70 leading-relaxed">
-                RentMitra is a listing platform that connects owners and renters. We are not a party to any rental agreement and
+                RentNEarn is a listing platform that connects owners and renters. We are not a party to any rental agreement and
                 are not responsible for the condition of items, payment disputes, damages, or any issues arising from a rental
                 transaction. Users enter into rental agreements at their own risk.
               </p>

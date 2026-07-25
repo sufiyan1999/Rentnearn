@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation, useRoute } from "wouter";
 import { useCreateListing, useGetListing, getGetListingQueryKey, useUpdateListing, ListingInput, ListingInputCondition } from "@workspace/api-client-react";
 import { Button, Input, Label, Textarea } from "@/components/ui/ui-core";
-import { CATEGORIES, STATES } from "@/lib/constants";
+import { CATEGORIES, STATES, CITIES_BY_STATE } from "@/lib/constants";
 import { toast } from "sonner";
 import { ImagePlus, X, MapPin } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,6 +41,7 @@ export default function CreateListing() {
     monthlyPrice: null,
     city: "",
     state: "",
+    area: null,
     pincode: "",
   });
 
@@ -59,6 +60,7 @@ export default function CreateListing() {
         monthlyPrice: existingListing.rentalPrice?.monthly || null,
         city: existingListing.city || "",
         state: existingListing.state || "",
+        area: (existingListing as any).area || null,
         pincode: existingListing.pincode || "",
       });
       if (existingListing.images) {
@@ -304,7 +306,7 @@ export default function CreateListing() {
               <select 
                 className="w-full p-3 border-2 border-input rounded-xl bg-background text-sm font-medium"
                 value={formData.state}
-                onChange={e => setFormData(p => ({ ...p, state: e.target.value }))}
+                onChange={e => setFormData(p => ({ ...p, state: e.target.value, city: "" }))}
                 required
               >
                 <option value="">Select State</option>
@@ -314,12 +316,38 @@ export default function CreateListing() {
 
             <div className="space-y-2">
               <Label>City</Label>
-              <Input 
-                required 
-                value={formData.city}
-                onChange={e => setFormData(p => ({ ...p, city: e.target.value }))}
-                placeholder="e.g. Mumbai"
+              {formData.state && CITIES_BY_STATE[formData.state] ? (
+                <select
+                  className="w-full p-3 border-2 border-input rounded-xl bg-background text-sm font-medium"
+                  value={formData.city}
+                  onChange={e => setFormData(p => ({ ...p, city: e.target.value }))}
+                  required
+                >
+                  <option value="">Select City</option>
+                  {CITIES_BY_STATE[formData.state].map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              ) : (
+                <Input 
+                  required 
+                  value={formData.city}
+                  onChange={e => setFormData(p => ({ ...p, city: e.target.value }))}
+                  placeholder="e.g. Mumbai"
+                />
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Area / Locality <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label>
+              <Input
+                value={formData.area ?? ""}
+                onChange={e => setFormData(p => ({ ...p, area: e.target.value || null }))}
+                placeholder="e.g. Bandra West, Koramangala, Connaught Place"
               />
+              <p className="text-xs text-muted-foreground">
+                Helps renters find listings near their neighbourhood.
+              </p>
             </div>
 
             <div className="space-y-2">

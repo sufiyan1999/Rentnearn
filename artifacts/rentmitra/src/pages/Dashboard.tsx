@@ -208,7 +208,7 @@ function ProfileTab({ updateUser }: { updateUser: (u: any) => void }) {
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const token = localStorage.getItem("rentmitra_token");
+    const token = localStorage.getItem("rentnearn_token");
     const fd = new FormData();
     fd.append("photo", file);
     setPhotoLoading(true);
@@ -234,7 +234,7 @@ function ProfileTab({ updateUser }: { updateUser: (u: any) => void }) {
   const handleChangePassword = async () => {
     if (pwForm.next !== pwForm.confirm) { toast.error("Passwords don't match"); return; }
     if (pwForm.next.length < 8) { toast.error("Password must be at least 8 characters"); return; }
-    const token = localStorage.getItem("rentmitra_token");
+    const token = localStorage.getItem("rentnearn_token");
     setPwLoading(true);
     try {
       const res = await fetch(`${BASE}/api/auth/change-password`, {

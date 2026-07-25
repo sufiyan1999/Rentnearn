@@ -20,13 +20,13 @@ const COOKIE_TYPES = [
     type: "Analytics Cookies",
     canDisable: true,
     examples: "Page views, session duration, feature usage patterns",
-    desc: "These cookies help us understand how visitors interact with RentMitra by collecting and reporting anonymised information. No personally identifiable information is included.",
+    desc: "These cookies help us understand how visitors interact with RentNEarn by collecting and reporting anonymised information. No personally identifiable information is included.",
   },
 ];
 
 export default function CookiePolicy() {
   function resetConsent() {
-    localStorage.removeItem("rentmitra_cookie_consent");
+    localStorage.removeItem("rentnearn_cookie_consent");
     window.location.reload();
   }
 
@@ -73,7 +73,7 @@ export default function CookiePolicy() {
           <h2 className="text-xl font-bold mb-3">Managing Cookies</h2>
           <p className="text-muted-foreground text-sm leading-relaxed mb-4">
             You can control non-essential cookies at any time using our Cookie Settings panel, which appears when you first
-            visit RentMitra. Your preferences are stored in your browser's local storage. You can also manage cookies through
+            visit RentNEarn. Your preferences are stored in your browser's local storage. You can also manage cookies through
             your browser settings — most browsers allow you to refuse all cookies or accept only certain types.
           </p>
           <p className="text-muted-foreground text-sm leading-relaxed mb-5">
@@ -98,7 +98,7 @@ export default function CookiePolicy() {
           <h2 className="text-xl font-bold mb-3">Contact</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
             If you have questions about our use of cookies, contact us at{" "}
-            <a href="mailto:privacy@rentmitra.in" className="text-primary underline underline-offset-2">privacy@rentmitra.in</a>.
+            <a href="mailto:privacy@rentnearn.com" className="text-primary underline underline-offset-2">privacy@rentnearn.com</a>.
           </p>
         </motion.section>
       </div>

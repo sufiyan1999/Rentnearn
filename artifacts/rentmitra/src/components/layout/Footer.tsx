@@ -40,10 +40,10 @@ const COLUMNS = [
 ];
 
 const SOCIAL = [
-  { icon: Facebook,  label: "Facebook",  href: "https://facebook.com/rentmitra" },
-  { icon: Instagram, label: "Instagram", href: "https://instagram.com/rentmitra" },
-  { icon: Linkedin,  label: "LinkedIn",  href: "https://linkedin.com/company/rentmitra" },
-  { icon: Twitter,   label: "X (Twitter)", href: "https://x.com/rentmitra" },
+  { icon: Facebook,  label: "Facebook",  href: "https://facebook.com/rentnearn" },
+  { icon: Instagram, label: "Instagram", href: "https://instagram.com/rentnearn" },
+  { icon: Linkedin,  label: "LinkedIn",  href: "https://linkedin.com/company/rentnearn" },
+  { icon: Twitter,   label: "X (Twitter)", href: "https://x.com/rentnearn" },
 ];
 
 function AccordionColumn({ title, links }: { title: string; links: { label: string; href: string }[] }) {
@@ -80,11 +80,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           {/* Brand column */}
           <div className="md:col-span-2 space-y-5">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary/30">
-                R
+            <Link href="/" className="flex items-center gap-0">
+              <span className="font-extrabold text-2xl tracking-tight text-white">Rent</span>
+              <div className="mx-[6px] w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-md shadow-primary/40">
+                <span className="text-white font-black text-sm leading-none">N</span>
               </div>
-              <span className="font-bold text-2xl tracking-tight">RentMitra</span>
+              <span className="font-extrabold text-2xl tracking-tight text-primary">Earn</span>
             </Link>
             <p className="text-sm text-white/50 leading-relaxed max-w-xs">
               India's trusted peer-to-peer rental marketplace. Rent what you need, earn from what you own.
@@ -106,9 +107,9 @@ export default function Footer() {
             </div>
             {/* Contact block */}
             <div className="space-y-2 pt-2">
-              <a href="mailto:support@rentmitra.in" className="flex items-center gap-2 text-sm text-white/55 hover:text-white transition-colors">
+              <a href="mailto:support@rentnearn.com" className="flex items-center gap-2 text-sm text-white/55 hover:text-white transition-colors">
                 <Mail className="w-4 h-4 text-primary" />
-                support@rentmitra.in
+                support@rentnearn.com
               </a>
               <a href="https://wa.me/919999000001" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-white/55 hover:text-white transition-colors">
                 <MessageCircle className="w-4 h-4 text-green-400" />
@@ -132,7 +133,7 @@ export default function Footer() {
       <div className="border-t border-white/8">
         <div className="container mx-auto px-4 py-5 max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-white/35 text-center sm:text-left">
-            &copy; 2026 RentMitra India. All Rights Reserved.
+            &copy; 2026 RentNEarn. All Rights Reserved.
           </p>
           <div className="flex items-center gap-4 flex-wrap justify-center">
             {[

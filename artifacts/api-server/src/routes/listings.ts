@@ -90,7 +90,7 @@ router.get("/listings", optionalAuth, async (req, res): Promise<void> => {
 
 // POST /listings
 router.post("/listings", requireAuth, async (req, res): Promise<void> => {
-  const { title, description, category, customCategory, brand, condition, dailyPrice, weeklyPrice, monthlyPrice, city, state, pincode, latitude, longitude } = req.body;
+  const { title, description, category, customCategory, brand, condition, dailyPrice, weeklyPrice, monthlyPrice, city, state, area, pincode, latitude, longitude } = req.body;
 
   if (!title || !category || !city || !state) {
     res.status(400).json({ error: "title, category, city, state are required" });
@@ -132,7 +132,7 @@ router.post("/listings", requireAuth, async (req, res): Promise<void> => {
     dailyPrice: dailyPrice ? String(dailyPrice) : null,
     weeklyPrice: weeklyPrice ? String(weeklyPrice) : null,
     monthlyPrice: monthlyPrice ? String(monthlyPrice) : null,
-    city, state, pincode: pincode ?? null,
+    city, state, area: area ?? null, pincode: pincode ?? null,
     latitude: latitude ? String(latitude) : null,
     longitude: longitude ? String(longitude) : null,
     expiresAt,
@@ -257,7 +257,7 @@ router.get("/listings/:id", optionalAuth, async (req, res): Promise<void> => {
     isFavourited = !!fav;
   }
 
-  const whatsappUrl = owner?.phone ? `https://wa.me/91${owner.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I saw your listing for "${row.title}" on RentMitra. Is it available for rent?`)}` : null;
+  const whatsappUrl = owner?.phone ? `https://wa.me/91${owner.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hi, I saw your listing for "${row.title}" on RentNEarn. Is it available for rent?`)}` : null;
 
   res.json({ ...formatListing(row, owner), qrCode: qrDataUrl, isFavourited, whatsappUrl, listingUrl });
 });
@@ -272,7 +272,7 @@ router.patch("/listings/:id", requireAuth, async (req, res): Promise<void> => {
   if (!existing) { res.status(404).json({ error: "Listing not found" }); return; }
   if (existing.ownerId !== req.user!.id) { res.status(403).json({ error: "Not authorized" }); return; }
 
-  const { title, description, category, brand, condition, dailyPrice, weeklyPrice, monthlyPrice, city, state, pincode, latitude, longitude } = req.body;
+  const { title, description, category, brand, condition, dailyPrice, weeklyPrice, monthlyPrice, city, state, area, pincode, latitude, longitude } = req.body;
   const updates: Partial<typeof listingsTable.$inferInsert> = {};
   if (title) updates.title = title;
   if (description !== undefined) updates.description = description;
@@ -284,6 +284,7 @@ router.patch("/listings/:id", requireAuth, async (req, res): Promise<void> => {
   if (monthlyPrice !== undefined) updates.monthlyPrice = monthlyPrice ? String(monthlyPrice) : null;
   if (city) updates.city = city;
   if (state) updates.state = state;
+  if (area !== undefined) updates.area = area ?? null;
   if (pincode !== undefined) updates.pincode = pincode;
   if (latitude !== undefined) updates.latitude = latitude ? String(latitude) : null;
   if (longitude !== undefined) updates.longitude = longitude ? String(longitude) : null;
@@ -379,6 +380,7 @@ function formatListing(listing: typeof listingsTable.$inferSelect, owner?: { id:
     },
     city: listing.city,
     state: listing.state,
+    area: listing.area,
     pincode: listing.pincode,
     latitude: listing.latitude ? Number(listing.latitude) : null,
     longitude: listing.longitude ? Number(listing.longitude) : null,

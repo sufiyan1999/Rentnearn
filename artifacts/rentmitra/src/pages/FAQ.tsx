@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { SeoHead } from "@/components/SeoHead";
 import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -7,10 +8,10 @@ const FAQS = [
   {
     category: "General",
     items: [
-      { q: "What is RentMitra?", a: "RentMitra is India's peer-to-peer rental marketplace where you can rent items from people near you or list your own items for rent. We connect owners and renters directly — no middleman fees." },
-      { q: "How does RentMitra work?", a: "Owners list items they're happy to rent out. Renters browse listings, find what they need, and contact the owner directly via WhatsApp or phone. The two parties agree on terms, price, and pickup arrangements privately." },
-      { q: "Is RentMitra available across India?", a: "Yes! RentMitra is available in 50+ cities across India. If your city isn't covered yet, you can still list items — we're growing fast." },
-      { q: "Is RentMitra free to use?", a: "Yes, RentMitra is completely free for both owners and renters. We don't charge listing fees, transaction fees, or commissions." },
+      { q: "What is RentNEarn?", a: "RentNEarn is India's peer-to-peer rental marketplace where you can rent items from people near you or list your own items for rent. We connect owners and renters directly — no middleman fees." },
+      { q: "How does RentNEarn work?", a: "Owners list items they're happy to rent out. Renters browse listings, find what they need, and contact the owner directly via WhatsApp or phone. The two parties agree on terms, price, and pickup arrangements privately." },
+      { q: "Is RentNEarn available across India?", a: "Yes! RentNEarn is available in 50+ cities across India. If your city isn't covered yet, you can still list items — we're growing fast." },
+      { q: "Is RentNEarn free to use?", a: "Yes, RentNEarn is completely free for both owners and renters. We don't charge listing fees, transaction fees, or commissions." },
     ],
   },
   {
@@ -19,14 +20,14 @@ const FAQS = [
       { q: "How do I find items to rent?", a: "Search by keyword, browse by category, or use the Nearby feature to find items close to you. You can filter by price, condition, and location." },
       { q: "How do I contact an owner?", a: "Each listing has a WhatsApp button that opens a pre-filled message to the owner. You can also call or message them directly." },
       { q: "What should I check before renting an item?", a: "Always inspect the item in person before taking it. Check for damage, verify it works as described, and agree on a deposit arrangement with the owner directly. See our Safety Tips for a full checklist." },
-      { q: "What if the item is damaged or not as described?", a: "RentMitra is a marketplace platform — we connect you with owners but don't manage individual transactions. Disputes should be resolved directly between you and the owner. We recommend inspecting everything carefully before agreeing to rent." },
+      { q: "What if the item is damaged or not as described?", a: "RentNEarn is a marketplace platform — we connect you with owners but don't manage individual transactions. Disputes should be resolved directly between you and the owner. We recommend inspecting everything carefully before agreeing to rent." },
     ],
   },
   {
     category: "For Owners",
     items: [
       { q: "How do I list an item?", a: "Create a free account, tap the '+' button, fill in your item details (name, category, photos, price, location), and submit. Our team reviews and approves listings within 24 hours." },
-      { q: "How do I set my rental price?", a: "You set your own daily, weekly, and monthly prices. RentMitra doesn't take a cut. Check similar listings in your area for a fair market rate." },
+      { q: "How do I set my rental price?", a: "You set your own daily, weekly, and monthly prices. RentNEarn doesn't take a cut. Check similar listings in your area for a fair market rate." },
       { q: "Can I pause or remove my listing?", a: "Yes. Go to your dashboard, find your listing, and you can edit, pause, or delete it at any time. Listings automatically expire after 30 days and can be renewed." },
       { q: "What items can I list?", a: "You can list almost anything legal — tools, cameras, bikes, baby gear, electronics, party equipment, medical devices, and more. See our Terms of Service for prohibited items." },
     ],
@@ -36,8 +37,8 @@ const FAQS = [
     items: [
       { q: "How do I create an account?", a: "Click Sign Up, enter your name, email, and password, or continue with Google. Verify your email and you're ready to go." },
       { q: "Is my personal information safe?", a: "Yes. We follow industry-standard security practices. Your email and phone number are not shared publicly — only when a renter contacts you directly." },
-      { q: "How does verification work?", a: "RentMitra admins may manually verify users or businesses after reviewing their profile. Verified badges give other users extra confidence." },
-      { q: "What should I do if I suspect fraud?", a: "Never transfer money via UPI or wire before inspecting an item. Meet in a public place for the first transaction. Report suspicious listings or users to support@rentmitra.in immediately." },
+      { q: "How does verification work?", a: "RentNEarn admins may manually verify users or businesses after reviewing their profile. Verified badges give other users extra confidence." },
+      { q: "What should I do if I suspect fraud?", a: "Never transfer money via UPI or wire before inspecting an item. Meet in a public place for the first transaction. Report suspicious listings or users to support@rentnearn.com immediately." },
     ],
   },
 ];
@@ -81,6 +82,11 @@ export default function FAQ() {
 
   return (
     <div className="pb-24 md:pb-0">
+      <SeoHead
+        title="Frequently Asked Questions"
+        description="Answers to common questions about renting on RentNEarn — how it works, payments, safety, listing your items, and more."
+        canonical="/faq"
+      />
       <div className="bg-gradient-to-br from-primary to-orange-600 text-white py-14 md:py-20">
         <div className="container mx-auto px-4 max-w-3xl text-center">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>

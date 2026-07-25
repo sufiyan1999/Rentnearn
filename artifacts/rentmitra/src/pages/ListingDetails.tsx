@@ -1,5 +1,7 @@
 import { useRoute, useLocation } from "wouter";
 import { useGetListing, getGetListingQueryKey, useGetListingQr, getGetListingQrQueryKey } from "@workspace/api-client-react";
+import { SeoHead } from "@/components/SeoHead";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/ui-core";
 import { ArrowLeft, MapPin, Share2, MessageCircle, AlertTriangle, ShieldCheck, QrCode, Star, Calendar, Tag } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -59,7 +61,7 @@ export default function ListingDetails() {
 
   const handleShare = async () => {
     if (navigator.share) {
-      try { await navigator.share({ title: listing.title, text: `Check out ${listing.title} on RentMitra`, url: window.location.href }); }
+      try { await navigator.share({ title: listing.title, text: `Check out ${listing.title} on RentNEarn`, url: window.location.href }); }
       catch (e) { /* user cancelled */ }
     } else {
       navigator.clipboard.writeText(window.location.href);
@@ -69,12 +71,74 @@ export default function ListingDetails() {
 
   const handleWhatsApp = () => {
     if (!listing.owner?.phone) { toast.error("Owner phone number not available"); return; }
-    const msg = encodeURIComponent(`Hi, I saw your listing for "${listing.title}" on RentMitra. Is it available?`);
+    const msg = encodeURIComponent(`Hi, I saw your listing for "${listing.title}" on RentNEarn. Is it available?`);
     window.open(`https://wa.me/91${listing.owner.phone}?text=${msg}`, "_blank");
+  };
+
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://rentnearn.com";
+  const seoTitle = `${listing.title} for Rent in ${listing.city}`;
+  const seoDescription =
+    listing.description
+      ? `${listing.description.slice(0, 140)} · Starting ₹${listing.rentalPrice?.daily ?? "—"}/day on RentNEarn.`
+      : `Rent ${listing.title} in ${listing.city}, ${listing.state}. Starting from ₹${listing.rentalPrice?.daily ?? "—"}/day — contact owner directly via WhatsApp on RentNEarn.`;
+  const seoImage = listing.images?.[0];
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: listing.title,
+    description: listing.description ?? seoDescription,
+    ...(seoImage && { image: [seoImage] }),
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "INR",
+      ...(listing.rentalPrice?.daily && { price: listing.rentalPrice.daily }),
+      priceSpecification: listing.rentalPrice?.daily
+        ? {
+            "@type": "UnitPriceSpecification",
+            price: listing.rentalPrice.daily,
+            priceCurrency: "INR",
+            unitText: "DAY",
+          }
+        : undefined,
+      availability: "https://schema.org/InStock",
+      seller: listing.owner
+        ? {
+            "@type": listing.owner.userType === "business" ? "Organization" : "Person",
+            name: listing.owner.name,
+          }
+        : undefined,
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${origin}/` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: listing.category,
+        item: `${origin}/search?category=${encodeURIComponent(listing.category)}`,
+      },
+      { "@type": "ListItem", position: 3, name: listing.title },
+    ],
   };
 
   return (
     <div className="pb-32 md:pb-8">
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        image={seoImage}
+        canonical={`/listings/${listing.id}`}
+        type="product"
+      />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(productSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
+      </Helmet>
       {/* Mobile floating header */}
       <div className="md:hidden fixed top-0 inset-x-0 z-50 flex items-center justify-between p-4 pointer-events-none">
         <motion.button
@@ -266,7 +330,7 @@ export default function ListingDetails() {
 
               <div className="flex flex-col gap-2 pt-1">
                 {[
-                  { icon: ShieldCheck, text: "Verified by RentMitra" },
+                  { icon: ShieldCheck, text: "Verified by RentNEarn" },
                   { icon: Calendar, text: "Contact to check availability" },
                   { icon: Tag, text: "No hidden charges" },
                 ].map(({ icon: Icon, text }) => (

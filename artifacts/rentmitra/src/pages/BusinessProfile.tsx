@@ -98,7 +98,7 @@ export default function BusinessProfile() {
               <p className="text-sm font-semibold text-muted-foreground">Listings Available</p>
               <p className="text-2xl font-bold">{user?.listingCount || 0}</p>
             </div>
-            <Button onClick={() => window.open(`https://wa.me/91${business.contactPhone || user?.phone}?text=Hi, I found your business on RentMitra.`, '_blank')}>
+            <Button onClick={() => window.open(`https://wa.me/91${business.contactPhone || user?.phone}?text=Hi, I found your business on RentNEarn.`, '_blank')}>
               Contact Business
             </Button>
           </div>

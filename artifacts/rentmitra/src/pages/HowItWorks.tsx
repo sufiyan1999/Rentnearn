@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { SeoHead } from "@/components/SeoHead";
 import { UserPlus, Search, MessageCircle, Package, Star, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -20,10 +21,15 @@ const OWNER_STEPS = [
 export default function HowItWorks() {
   return (
     <div className="pb-24 md:pb-0">
+      <SeoHead
+        title="How RentNEarn Works"
+        description="Renting is simple on RentNEarn — search for items near you, contact the owner on WhatsApp, and pick up. Listing takes 5 minutes. No commission, zero middlemen."
+        canonical="/how-it-works"
+      />
       <div className="bg-gradient-to-br from-primary to-orange-600 text-white py-14 md:py-20">
         <div className="container mx-auto px-4 max-w-3xl text-center">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="text-4xl font-bold mb-3">How RentMitra Works</h1>
+            <h1 className="text-4xl font-bold mb-3">How RentNEarn Works</h1>
             <p className="text-white/80">Renting or listing — it takes just a few simple steps.</p>
           </motion.div>
         </div>
@@ -98,10 +104,10 @@ export default function HowItWorks() {
           </motion.div>
         </section>
 
-        {/* Why RentMitra */}
+        {/* Why RentNEarn */}
         <section>
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-primary text-white rounded-3xl p-8 text-center">
-            <h2 className="text-2xl font-bold mb-3">Why RentMitra?</h2>
+            <h2 className="text-2xl font-bold mb-3">Why RentNEarn?</h2>
             <div className="grid grid-cols-3 gap-6 mt-6">
               {[
                 { value: "Free", label: "No fees or commissions" },

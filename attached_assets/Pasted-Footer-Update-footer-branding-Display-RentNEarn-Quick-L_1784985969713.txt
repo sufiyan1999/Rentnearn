@@ -1,0 +1,93 @@
+Footer
+Update footer branding.
+Display:
+RentNEarn
+Quick Links
+Categories
+Pricing
+Business
+About Us
+Support
+Legal
+Privacy Policy
+Cookie Policy
+Terms of Service
+Disclaimer
+Contact
+Social Media
+Copyright:
+© 2026 RentNEarn. All Rights Reserved.
+Emails
+Update every email template.
+Sender Name:
+RentNEarn
+Footer:
+Thank you for choosing RentNEarn.
+Rent Smart. Earn More. Waste Less.
+Website:
+https://www.rentnearn.com
+Mobile App
+Update:
+App Name:
+RentNEarn
+Bundle Display Name:
+RentNEarn
+Splash Screen
+App Icon
+PWA Manifest
+Browser Title
+SEO
+Update:
+Title:
+RentNEarn – India's Rental Marketplace
+Description:
+Rent tools, cameras, vehicles, baby products, medical equipment, furniture, electronics and more from trusted people near you. Save money, earn from unused items and support a sustainable future.
+Keywords:
+Rent in India
+Rental Marketplace
+Rent Tools
+Camera Rental
+Wheelchair Rental
+Baby Stroller Rental
+Equipment Rental
+Peer-to-Peer Rentals
+RentNEarn
+Circular Economy
+Sharing Economy
+Placeholder Text
+Replace examples with realistic content.
+Examples:
+Sony Camera
+Bosch Drill
+Baby Stroller
+Wheelchair
+Camping Tent
+DJ Speakers
+Projector
+Luxury Car
+Mountain Bike
+Generator
+Loading Screen
+Replace existing loading screen.
+Display:
+RentNEarn
+Loading...
+Rent Smart. Earn More.
+Empty States
+Instead of generic messages use:
+No Listings Yet
+Be the first to list an item in your area and start earning today.
+Button:
+List Your First Item
+Final Requirement
+Search the entire codebase and replace all visible references to RentMitra with RentNEarn.
+Ensure there are no broken links, old branding, or outdated references.
+Keep the existing UI, functionality, routing, and database intact while applying the new branding consistently across the website, Progressive Web App, and future iOS and Android builds.
+One branding suggestion
+Instead of writing it as RentNEarn everywhere, use a consistent visual identity:
+RentNEarn
+This improves readability while keeping the domain rentnearn.com simple and memorable. You can also style it in the logo with:
+Rent (dark charcoal)
+N (orange, inside a circular icon)
+Earn (orange)
+This creates a distinctive, modern brand that is easy to recognize.

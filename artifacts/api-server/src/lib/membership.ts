@@ -222,18 +222,18 @@ export async function sendTrialExpiryWarnings() {
     try {
       await sendEmail({
         to: user.email,
-        subject: "Your RentMitra Free Trial expires soon",
+        subject: "Your RentNEarn Free Trial expires soon",
         html: `
           <p>Hi ${user.name},</p>
-          <p>Your <strong>3-month free trial</strong> on RentMitra expires in <strong>${days} days</strong>.</p>
+          <p>Your <strong>3-month free trial</strong> on RentNEarn expires in <strong>${days} days</strong>.</p>
           <p>To keep your listings active, please upgrade to a paid plan:</p>
           <ul>
             <li>Basic — ₹49/month (up to 5 listings)</li>
             <li>Plus — ₹199/month (up to 25 listings)</li>
             <li>Business — ₹1,999/year (up to 500 listings)</li>
           </ul>
-          <p><a href="https://rentmitra.in/pricing">View Plans →</a></p>
-          <p>— The RentMitra Team</p>
+          <p><a href="https://rentnearn.com/pricing">View Plans →</a></p>
+          <p>— The RentNEarn Team</p>
         `,
       });
     } catch {

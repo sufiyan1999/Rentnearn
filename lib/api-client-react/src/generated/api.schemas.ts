@@ -200,6 +200,8 @@ export interface Listing {
   city?: string;
   state?: string;
   /** @nullable */
+  area?: string | null;
+  /** @nullable */
   pincode?: string | null;
   /** @nullable */
   latitude?: number | null;
@@ -267,6 +269,8 @@ export interface ListingInput {
   city: string;
   state: string;
   /** @nullable */
+  area?: string | null;
+  /** @nullable */
   pincode?: string | null;
   /** @nullable */
   latitude?: number | null;
@@ -301,6 +305,8 @@ export interface ListingUpdate {
   monthlyPrice?: number | null;
   city?: string;
   state?: string;
+  /** @nullable */
+  area?: string | null;
   /** @nullable */
   pincode?: string | null;
   /** @nullable */

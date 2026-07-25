@@ -24,9 +24,9 @@ export default function FairUsagePolicy() {
           className="bg-card border border-border rounded-2xl p-6"
         >
           <p className="text-muted-foreground leading-relaxed">
-            RentMitra is committed to maintaining a healthy, trustworthy marketplace for all users. This Fair
+            RentNEarn is committed to maintaining a healthy, trustworthy marketplace for all users. This Fair
             Usage Policy outlines the acceptable use of our platform, particularly for Business plan holders
-            who receive high listing limits, and the actions RentMitra may take when usage falls outside these
+            who receive high listing limits, and the actions RentNEarn may take when usage falls outside these
             guidelines.
           </p>
         </motion.section>
@@ -49,8 +49,8 @@ export default function FairUsagePolicy() {
             </p>
             <p>
               If you require more than 500 concurrent active listings, please contact our team at{" "}
-              <a href="mailto:support@rentmitra.in" className="text-primary hover:underline">
-                support@rentmitra.in
+              <a href="mailto:support@rentnearn.com" className="text-primary hover:underline">
+                support@rentnearn.com
               </a>{" "}
               to discuss an enterprise arrangement.
             </p>
@@ -103,7 +103,7 @@ export default function FairUsagePolicy() {
           </h2>
           <div className="bg-card border border-border rounded-2xl p-6 space-y-4 text-sm text-muted-foreground leading-relaxed">
             <p>
-              RentMitra reserves the right to investigate any account that shows signs of spam, duplicate
+              RentNEarn reserves the right to investigate any account that shows signs of spam, duplicate
               listings, automated uploads, or activity that negatively impacts platform performance or other
               users' experience.
             </p>
@@ -203,7 +203,7 @@ export default function FairUsagePolicy() {
             policy, please reach out.
           </p>
           <a
-            href="mailto:support@rentmitra.in"
+            href="mailto:support@rentnearn.com"
             className="inline-flex items-center gap-2 bg-primary text-white font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-primary/90 transition-colors"
           >
             Contact Support

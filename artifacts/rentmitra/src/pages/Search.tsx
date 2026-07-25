@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
+import { SeoHead } from "@/components/SeoHead";
 import {
   Search as SearchIcon, SlidersHorizontal, X, ChevronDown,
   Star, Building2, MapPin, Zap, Clock, Filter
@@ -10,7 +11,7 @@ import {
   GetListingsParams, GetNearbyListingsParams,
 } from "@workspace/api-client-react";
 import { ListingCard } from "@/components/ListingCard";
-import { CATEGORIES, STATES } from "@/lib/constants";
+import { CATEGORIES, STATES, CITIES_BY_STATE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -219,8 +220,39 @@ export default function Search() {
     />
   );
 
+  // Dynamic SEO title from active filters
+  const seoTitle = (() => {
+    const catLabel = filters.category
+      ? CATEGORIES.find(c => c.slug === filters.category)?.name
+      : null;
+    const parts: string[] = [];
+    if (catLabel) parts.push(`${catLabel} for Rent`);
+    else if (filters.q) parts.push(`"${filters.q}"`);
+    if (filters.city) parts.push(`in ${filters.city}`);
+    else if (filters.state) parts.push(`in ${filters.state}`);
+    return parts.length ? parts.join(" ") : "Search Rentals";
+  })();
+
+  const seoDescription = (() => {
+    const catLabel = filters.category
+      ? CATEGORIES.find(c => c.slug === filters.category)?.name?.toLowerCase()
+      : null;
+    if (catLabel && filters.city)
+      return `Find ${catLabel} for rent in ${filters.city} on RentNEarn. Browse ${total.toLocaleString("en-IN")} listings, compare prices, and contact owners directly on WhatsApp.`;
+    if (catLabel)
+      return `Rent ${catLabel} near you on RentNEarn. Browse ${total.toLocaleString("en-IN")} listings across India — cameras, drones, furniture, outfits & more.`;
+    if (filters.q)
+      return `Search results for "${filters.q}" on RentNEarn. Find items for rent near you — compare prices and contact owners directly.`;
+    return "Search thousands of rental listings across India. Find cameras, drones, furniture, outfits & more — peer-to-peer, zero commission.";
+  })();
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl pb-24 md:pb-6">
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        canonical={`/search${window.location.search}`}
+      />
       {/* ── Top bar ── */}
       <div className="flex gap-2 mb-5">
         {/* Keyword */}
@@ -564,12 +596,28 @@ function FilterPanel({
       {/* ── City ── */}
       <section>
         <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5">City</h3>
-        <input
-          value={filters.city}
-          onChange={e => set("city", e.target.value)}
-          placeholder="e.g. Mumbai"
-          className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm font-medium placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-        />
+        {filters.state && CITIES_BY_STATE[filters.state] ? (
+          <div className="relative">
+            <select
+              value={filters.city}
+              onChange={e => set("city", e.target.value)}
+              className="w-full h-10 pl-3 pr-8 rounded-xl border border-border bg-background text-sm font-medium appearance-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+            >
+              <option value="">All Cities</option>
+              {CITIES_BY_STATE[filters.state].map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+          </div>
+        ) : (
+          <input
+            value={filters.city}
+            onChange={e => set("city", e.target.value)}
+            placeholder="e.g. Mumbai"
+            className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm font-medium placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+          />
+        )}
       </section>
 
       {/* ── Condition ── */}

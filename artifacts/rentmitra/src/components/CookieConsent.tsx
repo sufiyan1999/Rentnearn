@@ -4,7 +4,7 @@ import { Cookie, X, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
-const STORAGE_KEY = "rentmitra_cookie_consent";
+const STORAGE_KEY = "rentnearn_cookie_consent";
 
 type ConsentValue = "accepted" | "rejected" | null;
 

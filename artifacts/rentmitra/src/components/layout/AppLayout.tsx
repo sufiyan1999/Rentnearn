@@ -79,13 +79,12 @@ export function TopNav() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center text-white font-black text-base shadow-md shadow-primary/30 shine-on-hover">
-              R
+          <Link href="/" className="flex items-center gap-0 shrink-0">
+            <span className="font-extrabold text-[1.15rem] tracking-tight text-foreground">Rent</span>
+            <div className="mx-[5px] w-[22px] h-[22px] rounded-full bg-primary flex items-center justify-center shadow-sm shadow-primary/40 shine-on-hover">
+              <span className="text-white font-black text-[11px] leading-none">N</span>
             </div>
-            <span className="font-extrabold text-[1.15rem] tracking-tight hidden sm:block">
-              Rent<span className="gradient-text">Mitra</span>
-            </span>
+            <span className="font-extrabold text-[1.15rem] tracking-tight text-primary">Earn</span>
           </Link>
 
           {/* Desktop nav */}

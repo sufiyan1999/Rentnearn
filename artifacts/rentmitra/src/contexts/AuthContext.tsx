@@ -14,29 +14,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem("rentmitra_user");
+    const saved = localStorage.getItem("rentnearn_user");
     return saved ? JSON.parse(saved) : null;
   });
   const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem("rentmitra_token") || null;
+    return localStorage.getItem("rentnearn_token") || null;
   });
 
   const login = (newToken: string, newUser: User) => {
-    localStorage.setItem("rentmitra_token", newToken);
-    localStorage.setItem("rentmitra_user", JSON.stringify(newUser));
+    localStorage.setItem("rentnearn_token", newToken);
+    localStorage.setItem("rentnearn_user", JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
   };
 
   const logout = () => {
-    localStorage.removeItem("rentmitra_token");
-    localStorage.removeItem("rentmitra_user");
+    localStorage.removeItem("rentnearn_token");
+    localStorage.removeItem("rentnearn_user");
     setToken(null);
     setUser(null);
   };
 
   const updateUser = (updatedUser: User) => {
-    localStorage.setItem("rentmitra_user", JSON.stringify(updatedUser));
+    localStorage.setItem("rentnearn_user", JSON.stringify(updatedUser));
     setUser(updatedUser);
   };
 

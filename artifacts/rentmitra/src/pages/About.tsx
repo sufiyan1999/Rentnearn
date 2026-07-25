@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { SeoHead } from "@/components/SeoHead";
 import { ShieldCheck, Users, MapPin, Leaf, Star, Wrench } from "lucide-react";
 
 const VALUES = [
@@ -20,6 +21,11 @@ const TEAM = [
 export default function About() {
   return (
     <div className="pb-24 md:pb-0">
+      <SeoHead
+        title="About RentNEarn"
+        description="RentNEarn is India's #1 peer-to-peer rental marketplace — connecting renters and owners directly, with zero commission. Learn our story, mission, and values."
+        canonical="/about"
+      />
       {/* Hero */}
       <div className="bg-gradient-to-br from-primary to-orange-600 text-white py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-4xl text-center">
@@ -27,7 +33,7 @@ export default function About() {
             <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-white font-bold text-2xl mx-auto mb-6 shadow-lg">
               R
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-5 tracking-tight">About RentMitra</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-5 tracking-tight">About RentNEarn</h1>
             <p className="text-lg text-white/85 leading-relaxed max-w-2xl mx-auto">
               India's trusted peer-to-peer rental marketplace, connecting people who have things
               with people who need them — safely, locally, and affordably.
@@ -41,13 +47,16 @@ export default function About() {
         <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-14">
           <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
           <p className="text-muted-foreground leading-relaxed text-base">
-            RentMitra was founded on a simple idea: most things we own sit idle 90% of the time. A power drill used once,
-            a camera collecting dust, a baby stroller long outgrown. We built RentMitra to turn idle assets into income for
-            owners and affordable access for renters — creating a circular sharing economy across India's cities and towns.
+            At RentNEarn, we believe that not everything needs to be owned. Our mission is to connect people who have
+            underused items with those who need them, making renting simple, affordable, and accessible across India.
           </p>
           <p className="text-muted-foreground leading-relaxed text-base mt-4">
-            We are not a middleman in transactions. We connect people, and they transact directly. No platform fees, no
-            hidden charges — just a trusted classifieds board for rentals, powered by community trust.
+            By extending the life of everyday products, reducing unnecessary purchases, and encouraging responsible sharing,
+            we help people save money, earn extra income, and contribute to a cleaner, greener, and more sustainable future.
+          </p>
+          <p className="text-muted-foreground leading-relaxed text-base mt-4">
+            Every rental supports a smarter circular economy where communities benefit while reducing waste and making
+            better use of existing resources.
           </p>
         </motion.section>
 

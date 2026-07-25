@@ -30,8 +30,13 @@ export default function About() {
       <div className="bg-gradient-to-br from-primary to-orange-600 text-white py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-4xl text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-white font-bold text-2xl mx-auto mb-6 shadow-lg">
-              R
+            <div className="mx-auto mb-6 inline-block">
+              <img
+                src="/rentnearn-logo.jpg"
+                alt="RentNEarn"
+                className="h-14 w-auto object-contain rounded-xl bg-white px-3 py-2 shadow-lg"
+                draggable={false}
+              />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-5 tracking-tight">About RentNEarn</h1>
             <p className="text-lg text-white/85 leading-relaxed max-w-2xl mx-auto">

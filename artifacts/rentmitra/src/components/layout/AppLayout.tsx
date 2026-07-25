@@ -79,12 +79,13 @@ export function TopNav() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-0 shrink-0">
-            <span className="font-extrabold text-[1.15rem] tracking-tight text-foreground">Rent</span>
-            <div className="mx-[5px] w-[22px] h-[22px] rounded-full bg-primary flex items-center justify-center shadow-sm shadow-primary/40 shine-on-hover">
-              <span className="text-white font-black text-[11px] leading-none">N</span>
-            </div>
-            <span className="font-extrabold text-[1.15rem] tracking-tight text-primary">Earn</span>
+          <Link href="/" className="shrink-0">
+            <img
+              src="/rentnearn-logo.jpg"
+              alt="RentNEarn"
+              className="h-9 w-auto object-contain"
+              draggable={false}
+            />
           </Link>
 
           {/* Desktop nav */}

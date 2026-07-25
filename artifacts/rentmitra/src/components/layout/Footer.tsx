@@ -80,12 +80,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           {/* Brand column */}
           <div className="md:col-span-2 space-y-5">
-            <Link href="/" className="flex items-center gap-0">
-              <span className="font-extrabold text-2xl tracking-tight text-white">Rent</span>
-              <div className="mx-[6px] w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-md shadow-primary/40">
-                <span className="text-white font-black text-sm leading-none">N</span>
-              </div>
-              <span className="font-extrabold text-2xl tracking-tight text-primary">Earn</span>
+            <Link href="/" className="inline-block">
+              <img
+                src="/rentnearn-logo.jpg"
+                alt="RentNEarn"
+                className="h-10 w-auto object-contain rounded-lg bg-white px-2 py-1"
+                draggable={false}
+              />
             </Link>
             <p className="text-sm text-white/50 leading-relaxed max-w-xs">
               India's trusted peer-to-peer rental marketplace. Rent what you need, earn from what you own.

@@ -84,7 +84,7 @@ export default function Footer() {
               <img
                 src="/rentnearn-logo.jpg"
                 alt="RentNEarn"
-                className="h-10 w-auto object-contain rounded-lg bg-white px-2 py-1"
+                className="h-16 w-auto object-contain mix-blend-screen"
                 draggable={false}
               />
             </Link>

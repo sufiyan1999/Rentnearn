@@ -34,7 +34,7 @@ export default function About() {
               <img
                 src="/rentnearn-logo.jpg"
                 alt="RentNEarn"
-                className="h-14 w-auto object-contain rounded-xl bg-white px-3 py-2 shadow-lg"
+                className="h-20 w-auto object-contain mix-blend-screen"
                 draggable={false}
               />
             </div>

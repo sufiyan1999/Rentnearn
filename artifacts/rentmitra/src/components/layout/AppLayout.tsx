@@ -78,13 +78,18 @@ export function TopNav() {
       <div className="glass border-b shadow-sm shadow-black/5 dark:shadow-black/20">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
 
-          {/* Logo */}
-          <Link href="/" className="shrink-0">
+          {/* Logo — cropped to the wordmark area */}
+          <Link href="/" className="shrink-0 overflow-hidden" style={{ height: 40, width: 160 }}>
             <img
               src="/rentnearn-logo.jpg"
               alt="RentNEarn"
-              className="h-9 w-auto object-contain"
               draggable={false}
+              style={{
+                height: 130,
+                width: "auto",
+                marginTop: -30,
+                mixBlendMode: "multiply",
+              }}
             />
           </Link>
 

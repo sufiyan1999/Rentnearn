@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -9,6 +9,7 @@ export const categoriesTable = pgTable("categories", {
   icon: text("icon").notNull(),
   description: text("description"),
   parentId: integer("parent_id"), // null = top-level category, non-null = subcategory
+  isActive: boolean("is_active").notNull().default(true),
 });
 
 export const insertCategorySchema = createInsertSchema(categoriesTable).omit({ id: true });

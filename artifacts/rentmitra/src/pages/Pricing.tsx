@@ -1,372 +1,424 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { Check, Zap, Package, Building2, Star, ShieldCheck, HelpCircle, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/ui-core";
+import {
+  Check, X, Star, Zap, Building2, Gift, Crown, ChevronDown, ChevronUp,
+  Rocket, Shield, TrendingUp
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import { useMyMembership } from "@/lib/useMembership";
+import { cn } from "@/lib/utils";
 
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
-
+// ─── Plan definitions ────────────────────────────────────────────────────────
 const PLANS = [
   {
-    id: "single",
-    name: "Starter",
+    slug: "free_trial",
+    name: "Free Trial",
+    badge: null,
+    price: 0,
+    priceLabel: "Free",
+    period: "3 months",
+    billingNote: "No credit card required",
+    icon: Gift,
+    gradient: "from-emerald-500 to-teal-500",
+    border: "border-emerald-200 dark:border-emerald-800",
+    bg: "bg-emerald-50 dark:bg-emerald-950/30",
+    ctaLabel: "Start Free Trial",
+    ctaHref: "/register",
+    highlight: false,
+    features: [
+      "3 months free access",
+      "Up to 3 active listings",
+      "5 images per listing",
+      "WhatsApp & phone contact",
+      "QR code per listing",
+      "Favourite listings",
+      "Recently viewed",
+      "Listing renewal during trial",
+    ],
+  },
+  {
+    slug: "basic",
+    name: "Basic",
+    badge: null,
     price: 49,
-    label: "₹49",
-    period: "per listing / 30 days",
-    icon: Package,
-    color: "bg-blue-50 text-blue-600",
-    border: "border-blue-200",
-    description: "Perfect for individuals renting out one item.",
-    features: [
-      "1 active listing for 30 days",
-      "Up to 5 photos per listing",
-      "WhatsApp contact button",
-      "Basic search visibility",
-      "Listing renewal available",
-    ],
-    cta: "Get Started",
-    popular: false,
-  },
-  {
-    id: "bundle",
-    name: "Bundle",
-    price: 199,
-    label: "₹199",
-    period: "5 listings / 30 days",
+    priceLabel: "₹49",
+    period: "/month",
+    billingNote: "Billed monthly",
     icon: Zap,
-    color: "bg-primary/10 text-primary",
-    border: "border-primary",
-    description: "Great for people with multiple items to rent out.",
+    gradient: "from-blue-500 to-indigo-500",
+    border: "border-blue-200 dark:border-blue-800",
+    bg: "bg-blue-50 dark:bg-blue-950/30",
+    ctaLabel: "Get Basic",
+    ctaHref: "/contact",
+    highlight: false,
     features: [
-      "5 active listings for 30 days",
-      "Up to 5 photos per listing",
-      "WhatsApp contact button",
-      "Higher search ranking",
-      "Save ₹46 vs. individual listings",
-      "Listing renewal available",
+      "Up to 5 active listings",
+      "8 images per listing",
+      "WhatsApp & phone contact",
+      "QR code per listing",
+      "Listing renewal",
+      "Email notifications",
     ],
-    cta: "Choose Bundle",
-    popular: true,
   },
   {
-    id: "unlimited",
-    name: "Business",
-    price: 499,
-    label: "₹499",
-    period: "per month · unlimited",
-    icon: Building2,
-    color: "bg-purple-50 text-purple-600",
-    border: "border-purple-200",
-    description: "Ideal for rental businesses and dealers.",
+    slug: "plus",
+    name: "Plus",
+    badge: "Most Popular",
+    price: 199,
+    priceLabel: "₹199",
+    period: "/month",
+    billingNote: "Billed monthly",
+    icon: TrendingUp,
+    gradient: "from-primary to-orange-500",
+    border: "border-primary",
+    bg: "bg-primary/5",
+    ctaLabel: "Get Plus",
+    ctaHref: "/contact",
+    highlight: true,
     features: [
-      "Unlimited listings for 30 days",
-      "Up to 5 photos per listing",
-      "Business profile badge",
-      "Priority search placement",
-      "WhatsApp contact button",
-      "Dedicated support",
+      "Up to 25 active listings",
+      "8 images per listing",
+      "Priority search ranking",
+      "Featured listing discount",
+      "WhatsApp & phone contact",
+      "QR code per listing",
+      "Email notifications",
+      "Basic business analytics",
     ],
-    cta: "Go Business",
-    popular: false,
+  },
+  {
+    slug: "business",
+    name: "Business",
+    badge: "Best Value",
+    price: 1999,
+    priceLabel: "₹1,999",
+    period: "/year",
+    billingNote: "Billed annually · Save 58%",
+    icon: Building2,
+    gradient: "from-zinc-800 to-zinc-950",
+    border: "border-zinc-300 dark:border-zinc-700",
+    bg: "bg-zinc-950 text-white",
+    ctaLabel: "Get Business",
+    ctaHref: "/contact",
+    highlight: false,
+    dark: true,
+    features: [
+      "Up to 500 active listings",
+      "8 images per listing",
+      "Business profile page",
+      "Business logo upload",
+      "Verified Business badge ✓",
+      "Priority search ranking",
+      "Business dashboard",
+      "Analytics",
+      "Email support",
+      "Bulk upload ready (coming soon)",
+    ],
   },
 ];
 
-const FEATURED = {
-  id: "featured",
-  price: 99,
-  label: "₹99",
-  period: "per listing · 7 days",
-  description: "Boost any existing listing to the top of search results and the Featured section on the homepage.",
-  features: [
-    "Homepage Featured section placement",
-    "Top of category search results",
-    "\"Featured\" badge on listing card",
-    "7 days of boosted visibility",
-  ],
-};
+const FEATURED_PLANS = [
+  { duration: "7 Days Featured", price: "₹29", desc: "Boost any listing for a week" },
+  { duration: "30 Days Featured", price: "₹99", desc: "Maximum visibility for a month" },
+];
 
 const FAQS = [
-  {
-    q: "Is my listing live immediately after payment?",
-    a: "Your listing goes into review first (usually within a few hours). Once approved by our team, it goes live automatically. Payment confirms your slot — not instant visibility.",
-  },
-  {
-    q: "Can I get a refund if my listing is rejected?",
-    a: "If your listing is rejected due to a policy violation we cannot refund the listing fee. We recommend reading our listing guidelines before publishing to ensure approval.",
-  },
-  {
-    q: "What payment methods does RentMitra accept?",
-    a: "All payments are processed via Razorpay. You can pay using UPI (GPay, PhonePe, Paytm), debit/credit cards, net banking, and EMI options.",
-  },
-  {
-    q: "Does RentMitra take a commission on rentals?",
-    a: "No. RentMitra charges only listing and featured fees. All rental payments happen directly between the owner and renter — we are not involved in any transaction.",
-  },
-  {
-    q: "What happens when my 30-day listing expires?",
-    a: "Your listing is automatically marked expired. You can renew it for another 30 days at the same price from your dashboard.",
-  },
-  {
-    q: "Can I feature a listing I've already paid to list?",
-    a: "Yes. Featured is a separate add-on (₹99) that you can apply to any approved listing at any time from your dashboard.",
-  },
+  { q: "What happens when my free trial ends?", a: "After 90 days, your account automatically switches to a limited free state. Your existing listings will be paused until you subscribe to a paid plan. Your data is preserved — nothing is deleted." },
+  { q: "Can I upgrade mid-cycle?", a: "Yes. When you upgrade, your new plan activates immediately and your previous plan is cancelled. Contact us at support@rentmitra.in for any billing adjustments." },
+  { q: "What does 'Priority Search Ranking' mean?", a: "Plus and Business listings appear higher in search results compared to Basic and Free Trial listings, giving you more visibility to potential renters." },
+  { q: "Can I purchase Featured Listings on any plan?", a: "Yes — Featured Listing boosts are available as add-ons for any plan including Free Trial. Featured listings appear above standard listings with a gold badge." },
+  { q: "How is the Business plan billed?", a: "Business is billed at ₹1,999 per year (roughly ₹167/month), which saves you 58% compared to a hypothetical monthly billing." },
+  { q: "Is there a refund policy?", a: "We offer a 7-day refund for new subscriptions if no listings were created during that period. Contact support@rentmitra.in within 7 days of purchase." },
 ];
 
+// ─── Comparison table ────────────────────────────────────────────────────────
+const FEATURES_TABLE = [
+  { feature: "Active Listings",     trial: "3",     basic: "5",    plus: "25",      biz: "500" },
+  { feature: "Images per Listing",  trial: "5",     basic: "8",    plus: "8",       biz: "8" },
+  { feature: "WhatsApp Contact",    trial: true,    basic: true,   plus: true,      biz: true },
+  { feature: "Phone Contact",       trial: true,    basic: true,   plus: true,      biz: true },
+  { feature: "QR Code",             trial: true,    basic: true,   plus: true,      biz: true },
+  { feature: "Listing Renewal",     trial: true,    basic: true,   plus: true,      biz: true },
+  { feature: "Email Notifications", trial: false,   basic: true,   plus: true,      biz: true },
+  { feature: "Priority Search",     trial: false,   basic: false,  plus: true,      biz: true },
+  { feature: "Business Profile",    trial: false,   basic: false,  plus: false,     biz: true },
+  { feature: "Verified Badge",      trial: false,   basic: false,  plus: false,     biz: true },
+  { feature: "Analytics",           trial: false,   basic: false,  plus: "Basic",   biz: "Advanced" },
+  { feature: "Email Support",       trial: false,   basic: false,  plus: false,     biz: true },
+];
+
+function Cell({ value }: { value: boolean | string }) {
+  if (value === true)  return <Check className="w-4 h-4 text-emerald-500 mx-auto" />;
+  if (value === false) return <X className="w-4 h-4 text-muted-foreground/40 mx-auto" />;
+  return <span className="text-xs font-semibold text-primary">{value}</span>;
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
 export default function Pricing() {
-  const { isAuthenticated, token } = useAuth();
-  const [, setLocation] = useLocation();
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
+  const { data: membershipInfo } = useMyMembership();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  async function loadRazorpay(): Promise<boolean> {
-    if (window.Razorpay) return true;
-    return new Promise(resolve => {
-      const s = document.createElement("script");
-      s.src = "https://checkout.razorpay.com/v1/checkout.js";
-      s.onload = () => resolve(true);
-      s.onerror = () => resolve(false);
-      document.body.appendChild(s);
-    });
-  }
-
-  async function handleCheckout(planId: string, amount: number, planName: string) {
-    if (!isAuthenticated) {
-      setLocation("/login?redirect=/pricing");
-      return;
-    }
-
-    setLoadingPlan(planId);
-
-    try {
-      const ok = await loadRazorpay();
-      if (!ok) {
-        toast.error("Failed to load payment gateway. Please try again.");
-        return;
-      }
-
-      // Create Razorpay order
-      const res = await fetch("/api/payments/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ plan: planId, amountPaise: amount * 100 }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        toast.error(err.message || "Could not create payment order.");
-        return;
-      }
-
-      const { orderId, keyId, amount: orderAmount, currency } = await res.json();
-
-      const options = {
-        key: keyId,
-        amount: orderAmount,
-        currency,
-        name: "RentMitra",
-        description: `${planName} Plan`,
-        order_id: orderId,
-        prefill: {},
-        theme: { color: "#f96d0b" },
-        handler: async (response: any) => {
-          // Verify payment
-          const verifyRes = await fetch("/api/payments/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify({
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            }),
-          });
-          if (verifyRes.ok) {
-            toast.success("Payment successful! Your plan is now active.");
-            setLocation("/listings/new");
-          } else {
-            toast.error("Payment verification failed. Contact support@rentmitra.in");
-          }
-        },
-        modal: { ondismiss: () => setLoadingPlan(null) },
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", () => toast.error("Payment failed. Please try again."));
-      rzp.open();
-    } catch (e) {
-      toast.error("Something went wrong. Please try again.");
-    } finally {
-      setLoadingPlan(null);
-    }
-  }
+  const activePlanSlug = membershipInfo?.plan?.slug;
 
   return (
     <div className="pb-24 md:pb-0">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-[#111] to-[#1a1a2e] text-white py-16 px-4">
-        <div className="container mx-auto max-w-4xl text-center">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-            <span className="inline-block bg-primary/20 text-primary border border-primary/30 rounded-full px-4 py-1 text-xs font-bold mb-5 tracking-wider uppercase">
-              Simple, Transparent Pricing
-            </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              List once. Earn repeatedly.
-            </h1>
-            <p className="text-white/60 text-lg max-w-xl mx-auto">
-              No commissions. No hidden fees. Pay only to list — all rental payments happen directly between you and the renter.
-            </p>
-          </motion.div>
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-primary to-orange-600 text-white py-14 px-4 text-center relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.07) 1px, transparent 0)", backgroundSize: "28px 28px" }} />
+        <div className="relative z-10 container mx-auto max-w-2xl">
+          <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-4 py-1.5 text-xs font-semibold mb-4 backdrop-blur-sm">
+            <Gift className="w-3.5 h-3.5" /> 3 Months FREE for every new member
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3">Simple, transparent pricing</h1>
+          <p className="text-white/75 text-lg">Start free. Upgrade when you're ready. No hidden fees.</p>
         </div>
       </div>
 
-      <div className="container mx-auto max-w-5xl px-4 py-12 space-y-16">
+      <div className="container mx-auto max-w-6xl px-4 py-12 space-y-16">
 
-        {/* Plans */}
+        {/* ── Current plan banner ── */}
+        {isAuthenticated && membershipInfo?.plan && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-primary/5 border border-primary/20 rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+          >
+            <div>
+              <p className="text-sm font-semibold text-primary">
+                Current plan: <span className="font-bold">{membershipInfo.plan.name}</span>
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {membershipInfo.listingsUsed}/{membershipInfo.listingLimit} listings used
+                {membershipInfo.daysRemaining > 0 && ` · ${membershipInfo.daysRemaining} days remaining`}
+              </p>
+            </div>
+            <Link href="/dashboard" className="text-xs font-semibold text-primary hover:underline shrink-0">
+              View dashboard →
+            </Link>
+          </motion.div>
+        )}
+
+        {/* ── Plan cards ── */}
         <section>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {PLANS.map((plan, i) => {
               const Icon = plan.icon;
+              const isCurrent = activePlanSlug === plan.slug;
               return (
                 <motion.div
-                  key={plan.id}
+                  key={plan.slug}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08 }}
-                  className={`relative bg-card border-2 rounded-3xl p-7 flex flex-col ${plan.popular ? `${plan.border} shadow-xl shadow-primary/10` : "border-border"}`}
+                  transition={{ delay: i * 0.07, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className={cn(
+                    "relative rounded-3xl border-2 flex flex-col overflow-hidden",
+                    plan.highlight ? "border-primary shadow-xl shadow-primary/15 scale-[1.02]" : plan.border,
+                    plan.dark ? "bg-zinc-950 text-white" : "bg-card"
+                  )}
                 >
-                  {plan.popular && (
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                      <span className="bg-primary text-white text-xs font-bold px-4 py-1.5 rounded-full shadow">
-                        Most Popular
-                      </span>
+                  {/* Badge */}
+                  {plan.badge && (
+                    <div className={cn(
+                      "absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full",
+                      plan.highlight ? "bg-primary text-white" : "bg-amber-400 text-zinc-900"
+                    )}>
+                      {plan.badge}
                     </div>
                   )}
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 ${plan.color}`}>
-                    <Icon className="w-6 h-6" />
+                  {isCurrent && (
+                    <div className="absolute top-3 left-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500 text-white">
+                      Current
+                    </div>
+                  )}
+
+                  <div className="p-5 flex flex-col flex-1">
+                    {/* Icon + name */}
+                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-4", `bg-gradient-to-br ${plan.gradient}`)}>
+                      <Icon className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className={cn("font-bold text-xl mb-1", plan.dark ? "text-white" : "")}>{plan.name}</h3>
+
+                    {/* Price */}
+                    <div className="mb-1">
+                      <span className={cn("text-4xl font-extrabold tracking-tight", plan.dark ? "text-white" : "")}>{plan.priceLabel}</span>
+                      <span className={cn("text-sm ml-1", plan.dark ? "text-white/60" : "text-muted-foreground")}>{plan.period}</span>
+                    </div>
+                    <p className={cn("text-xs mb-5", plan.dark ? "text-white/50" : "text-muted-foreground")}>{plan.billingNote}</p>
+
+                    {/* Features */}
+                    <ul className="space-y-2.5 flex-1 mb-6">
+                      {plan.features.map(f => (
+                        <li key={f} className={cn("flex items-start gap-2 text-sm", plan.dark ? "text-white/80" : "text-foreground/80")}>
+                          <Check className={cn("w-4 h-4 shrink-0 mt-0.5", plan.highlight ? "text-primary" : plan.dark ? "text-emerald-400" : "text-emerald-500")} />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* CTA */}
+                    {isCurrent ? (
+                      <div className="text-center py-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600 text-sm font-semibold border border-emerald-200 dark:border-emerald-800">
+                        ✓ Active Plan
+                      </div>
+                    ) : (
+                      <Link
+                        href={isAuthenticated ? plan.ctaHref : "/register"}
+                        className={cn(
+                          "block text-center py-2.5 rounded-2xl text-sm font-bold transition-all duration-200",
+                          plan.highlight
+                            ? "bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25"
+                            : plan.dark
+                            ? "bg-white text-zinc-950 hover:bg-white/90"
+                            : "bg-secondary hover:bg-primary hover:text-white border border-border"
+                        )}
+                      >
+                        {plan.ctaLabel}
+                      </Link>
+                    )}
                   </div>
-                  <h3 className="text-xl font-bold mb-1">{plan.name}</h3>
-                  <p className="text-muted-foreground text-sm mb-4 leading-snug">{plan.description}</p>
-                  <div className="mb-6">
-                    <span className="text-4xl font-black">{plan.label}</span>
-                    <span className="text-muted-foreground text-sm ml-2">{plan.period}</span>
-                  </div>
-                  <ul className="space-y-2.5 mb-8 flex-1">
-                    {plan.features.map(f => (
-                      <li key={f} className="flex items-start gap-2 text-sm">
-                        <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    onClick={() => handleCheckout(plan.id, plan.price, plan.name)}
-                    isLoading={loadingPlan === plan.id}
-                    variant={plan.popular ? "default" : "outline"}
-                    className={`w-full rounded-2xl py-3 font-bold ${plan.popular ? "" : ""}`}
-                  >
-                    {plan.cta}
-                  </Button>
                 </motion.div>
               );
             })}
           </div>
         </section>
 
-        {/* Featured add-on */}
+        {/* ── Featured boosts ── */}
         <section>
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200 dark:border-amber-800 rounded-3xl p-8"
-          >
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
-                    <Star className="w-5 h-5 fill-amber-500 text-amber-500" />
+          <div className="flex items-center gap-2 mb-6">
+            <span className="w-1.5 h-5 rounded-full bg-amber-400 inline-block" />
+            <h2 className="text-xl font-extrabold tracking-tight">Featured Listing Boosts</h2>
+            <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full font-medium">Available on any plan</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+            {FEATURED_PLANS.map((fp, i) => (
+              <motion.div
+                key={fp.duration}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + i * 0.08 }}
+                className="relative overflow-hidden rounded-2xl border-2 border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/20 p-5"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                    <Star className="w-4 h-4 text-white fill-white" />
                   </div>
-                  <h3 className="text-xl font-bold">Featured Listing Boost</h3>
-                  <span className="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">Add-on</span>
+                  <span className="text-2xl font-extrabold text-amber-700 dark:text-amber-300">{fp.price}</span>
                 </div>
-                <p className="text-muted-foreground text-sm mb-5 max-w-lg">{FEATURED.description}</p>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {FEATURED.features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <Check className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                      <span>{f}</span>
+                <h3 className="font-bold text-amber-900 dark:text-amber-100 mb-1">{fp.duration}</h3>
+                <p className="text-sm text-amber-700/70 dark:text-amber-400/70 mb-4">{fp.desc}</p>
+                <ul className="space-y-1.5 text-xs text-amber-800 dark:text-amber-300">
+                  {["Appears above standard listings", "Gold ⭐ Featured badge", "Higher search priority"].map(f => (
+                    <li key={f} className="flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5 text-amber-600" /> {f}
                     </li>
                   ))}
                 </ul>
-              </div>
-              <div className="flex flex-col items-center md:items-end gap-4 shrink-0">
-                <div className="text-center md:text-right">
-                  <span className="text-4xl font-black text-amber-600">{FEATURED.label}</span>
-                  <p className="text-muted-foreground text-xs mt-1">{FEATURED.period}</p>
-                </div>
-                <Button
-                  onClick={() => handleCheckout("featured", FEATURED.price, "Featured Listing")}
-                  isLoading={loadingPlan === "featured"}
-                  className="bg-amber-500 hover:bg-amber-600 text-white rounded-2xl px-8 font-bold"
-                >
-                  Boost a Listing
-                </Button>
-              </div>
-            </div>
-          </motion.div>
+              </motion.div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+            <Shield className="w-3.5 h-3.5" />
+            Featured listings are reviewed before activation. Purchase from your listing detail page after approval.
+          </p>
         </section>
 
-        {/* Trust strip */}
+        {/* ── Comparison table ── */}
         <section>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { icon: ShieldCheck, title: "Secure Payments", body: "All payments are processed by Razorpay — India's most trusted payment gateway. UPI, cards, net banking supported." },
-              { icon: Package, title: "No Commission", body: "RentMitra charges only listing fees. We don't take any cut from your rental earnings. Every rupee is yours." },
-              { icon: Zap, title: "Instant Activation", body: "After payment, your listing goes for review. Most listings are approved within a few hours." },
-            ].map(({ icon: Icon, title, body }) => (
-              <div key={title} className="bg-secondary rounded-2xl p-6">
-                <Icon className="w-6 h-6 text-primary mb-3" />
-                <h4 className="font-bold mb-1">{title}</h4>
-                <p className="text-sm text-muted-foreground leading-relaxed">{body}</p>
-              </div>
-            ))}
+          <div className="flex items-center gap-2 mb-6">
+            <span className="w-1.5 h-5 rounded-full gradient-primary inline-block" />
+            <h2 className="text-xl font-extrabold tracking-tight">Plan Comparison</h2>
+          </div>
+          <div className="overflow-x-auto rounded-3xl border border-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-secondary border-b border-border">
+                  <th className="text-left px-5 py-3.5 font-semibold min-w-[160px]">Feature</th>
+                  {["Free Trial", "Basic", "Plus", "Business"].map((h, i) => (
+                    <th key={h} className={cn("px-4 py-3.5 text-center font-semibold", i === 2 ? "text-primary" : i === 3 ? "text-zinc-900 dark:text-white" : "")}>
+                      {h}
+                      {i === 2 && <div className="text-[10px] font-normal text-primary/70">★ Popular</div>}
+                      {i === 3 && <div className="text-[10px] font-normal text-amber-600">Best Value</div>}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {FEATURES_TABLE.map(row => (
+                  <tr key={row.feature} className="hover:bg-secondary/40 transition-colors">
+                    <td className="px-5 py-3 font-medium text-muted-foreground">{row.feature}</td>
+                    <td className="px-4 py-3 text-center"><Cell value={row.trial} /></td>
+                    <td className="px-4 py-3 text-center"><Cell value={row.basic} /></td>
+                    <td className="px-4 py-3 text-center bg-primary/3"><Cell value={row.plus} /></td>
+                    <td className="px-4 py-3 text-center"><Cell value={row.biz} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
 
-        {/* FAQs */}
+        {/* ── FAQ ── */}
         <section>
-          <h2 className="text-2xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
-          <div className="space-y-3 max-w-2xl mx-auto">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="w-1.5 h-5 rounded-full bg-indigo-400 inline-block" />
+            <h2 className="text-xl font-extrabold tracking-tight">Frequently Asked Questions</h2>
+          </div>
+          <div className="space-y-3 max-w-3xl">
             {FAQS.map((faq, i) => (
-              <div key={i} className="bg-card border border-border rounded-2xl overflow-hidden">
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + i * 0.04 }}
+                className="bg-card border border-border rounded-2xl overflow-hidden"
+              >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left font-semibold text-sm hover:bg-secondary transition-colors"
+                  className="w-full flex items-center justify-between px-5 py-4 text-left font-semibold text-sm hover:bg-secondary/50 transition-colors"
                 >
-                  <span>{faq.q}</span>
-                  <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${openFaq === i ? "rotate-180" : ""}`} />
+                  {faq.q}
+                  {openFaq === i ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0 ml-3" /> : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 ml-3" />}
                 </button>
                 {openFaq === i && (
-                  <div className="px-6 pb-5 text-sm text-muted-foreground leading-relaxed border-t border-border pt-4">
+                  <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed border-t border-border pt-3">
                     {faq.a}
                   </div>
                 )}
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>
 
-        {/* Bottom CTA */}
-        <section className="text-center py-4">
-          <p className="text-muted-foreground text-sm mb-2">Still have questions?</p>
-          <Link href="/contact" className="text-primary font-semibold text-sm hover:underline">
-            Contact our support team →
-          </Link>
-        </section>
+        {/* ── Bottom CTA ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="gradient-primary text-white rounded-3xl p-10 text-center relative overflow-hidden"
+        >
+          <div className="absolute inset-0 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.08) 1px, transparent 0)", backgroundSize: "24px 24px" }} />
+          <div className="relative z-10">
+            <Rocket className="w-10 h-10 mx-auto mb-4 opacity-90" />
+            <h2 className="text-2xl md:text-3xl font-extrabold mb-2">Ready to start renting?</h2>
+            <p className="text-white/70 mb-6 max-w-sm mx-auto text-sm">
+              Join free today. No credit card required. Start listing in minutes.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link href="/register" className="bg-white text-primary font-bold px-7 py-3 rounded-full text-sm hover:bg-white/90 transition-all">
+                Start Free Trial
+              </Link>
+              <Link href="/contact" className="bg-white/15 text-white font-semibold px-7 py-3 rounded-full text-sm border border-white/25 hover:bg-white/25 transition-all">
+                Contact Sales
+              </Link>
+            </div>
+          </div>
+        </motion.section>
+
       </div>
     </div>
   );

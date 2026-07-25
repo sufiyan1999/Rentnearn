@@ -14,6 +14,11 @@ const transporter = nodemailer.createTransport({
 const FROM = process.env.ZOHO_EMAIL ?? "noreply@rentmitra.in";
 const APP_URL = process.env.APP_URL ?? "http://localhost:80";
 
+/** Generic send — exported for use by the membership service. */
+export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }): Promise<void> {
+  await sendMail(to, subject, html);
+}
+
 async function sendMail(to: string, subject: string, html: string): Promise<void> {
   if (!process.env.ZOHO_EMAIL || !process.env.ZOHO_PASSWORD) {
     logger.warn({ to, subject }, "Email not configured, skipping send");

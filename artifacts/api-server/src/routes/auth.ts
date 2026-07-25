@@ -4,6 +4,7 @@ import { db, usersTable, tokensTable } from "@workspace/db";
 import { hashPassword, comparePassword, signToken, generateSecureToken } from "../lib/auth";
 import { sendWelcomeEmail, sendVerificationEmail, sendPasswordResetEmail } from "../lib/email";
 import { logger } from "../lib/logger";
+import { assignFreeTrial } from "../lib/membership";
 
 const router = Router();
 
@@ -37,6 +38,9 @@ router.post("/auth/register", async (req, res): Promise<void> => {
 
   await sendWelcomeEmail(email, name);
   await sendVerificationEmail(email, name, verifyToken);
+
+  // Assign 90-day free trial membership (fire-and-forget — don't block the response)
+  assignFreeTrial(user.id).catch(err => logger.warn({ err, userId: user.id }, "assignFreeTrial failed"));
 
   const token = signToken({ userId: user.id, email: user.email, userType: user.userType });
   req.log.info({ userId: user.id }, "User registered");
@@ -97,6 +101,7 @@ router.post("/auth/google", async (req, res): Promise<void> => {
         name: name ?? email, email, googleId, profilePhoto: picture ?? null, emailVerified: true,
       }).returning();
       await sendWelcomeEmail(email, name ?? email);
+      assignFreeTrial(user.id).catch(err => logger.warn({ err, userId: user.id }, "assignFreeTrial failed"));
     } else if (!user.googleId) {
       await db.update(usersTable).set({ googleId, emailVerified: true }).where(eq(usersTable.id, user.id));
     }

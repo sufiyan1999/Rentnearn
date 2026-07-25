@@ -6,6 +6,7 @@ import { sendListingSubmittedEmail } from "../lib/email";
 import multer from "multer";
 import { processAndSaveImage, validateImageBuffer } from "../lib/images";
 import QRCode from "qrcode";
+import { getListingLimit, countActiveListings } from "../lib/membership";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -57,6 +58,30 @@ router.post("/listings", requireAuth, async (req, res): Promise<void> => {
 
   if (!title || !category || !city || !state) {
     res.status(400).json({ error: "title, category, city, state are required" });
+    return;
+  }
+
+  // Membership listing limit check
+  const [limit, used] = await Promise.all([
+    getListingLimit(req.user!.id),
+    countActiveListings(req.user!.id),
+  ]);
+  if (limit === 0) {
+    res.status(403).json({
+      error: "No active membership",
+      message: "Your free trial has expired or no membership is active. Please subscribe to a plan to create listings.",
+      code: "MEMBERSHIP_REQUIRED",
+    });
+    return;
+  }
+  if (used >= limit) {
+    res.status(403).json({
+      error: "Listing limit reached",
+      message: `Your current plan allows up to ${limit} active listing${limit === 1 ? "" : "s"}. You have ${used}. Upgrade your plan to add more.`,
+      code: "LISTING_LIMIT_REACHED",
+      limit,
+      used,
+    });
     return;
   }
 

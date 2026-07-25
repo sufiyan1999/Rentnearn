@@ -1,12 +1,12 @@
 import { useGetListings, getGetListingsQueryKey, useGetCategories, getGetCategoriesQueryKey, useGetFeaturedListings, getGetFeaturedListingsQueryKey, useGetNearbyListings, getGetNearbyListingsQueryKey } from "@workspace/api-client-react";
 import { ListingCard } from "@/components/ListingCard";
 import { Link, useLocation } from "wouter";
-import { Search, MapPin, ChevronRight, Compass, Star, ArrowRight, TrendingUp, Shield, Zap } from "lucide-react";
+import { Search, MapPin, Compass, Star, ArrowRight, TrendingUp, Shield, Zap, X, Gift, Building2, Check, Rocket } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import * as Icons from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/ui-core";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const HOME_CATS = CATEGORIES.slice(0, 12);
 
@@ -169,6 +169,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ══════════ LAUNCH BANNER ══════════ */}
+      <LaunchBanner />
+
       {/* ══════════ MAIN CONTENT ══════════ */}
       <div className="container mx-auto max-w-5xl px-4 py-10 flex flex-col gap-12">
 
@@ -271,6 +274,9 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── Plans mini-section ── */}
+        <PlansMiniSection />
+
         {/* ── Sustainability ── */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
@@ -333,6 +339,131 @@ export default function Home() {
 
       </div>
     </div>
+  );
+}
+
+// ─── Launch banner ──────────────────────────────────────────────────────────
+function LaunchBanner() {
+  const [dismissed, setDismissed] = useState(() =>
+    typeof window !== "undefined" && localStorage.getItem("rentmitra_launch_banner_dismissed") === "1"
+  );
+
+  const dismiss = () => {
+    localStorage.setItem("rentmitra_launch_banner_dismissed", "1");
+    setDismissed(true);
+  };
+
+  return (
+    <AnimatePresence>
+      {!dismissed && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3 }}
+          className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white overflow-hidden"
+        >
+          <div className="container mx-auto max-w-5xl px-4 py-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Gift className="w-4 h-4 shrink-0" />
+              <p className="text-sm font-semibold truncate">
+                🎉 Launch Offer — <strong>3 Months FREE</strong> · No credit card required · List up to 3 items free
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                href="/register"
+                className="bg-white text-emerald-700 font-bold text-xs px-3.5 py-1.5 rounded-full hover:bg-white/90 transition-colors"
+              >
+                Start Free
+              </Link>
+              <button
+                onClick={dismiss}
+                aria-label="Dismiss"
+                className="p-1 rounded-full hover:bg-white/20 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ─── Plans mini-section ──────────────────────────────────────────────────────
+const MINI_PLANS = [
+  { slug: "free_trial", name: "Free Trial", price: "Free", icon: Gift, color: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800", iconColor: "bg-gradient-to-br from-emerald-500 to-teal-500", features: ["3 months free", "Up to 3 listings", "5 images/listing"] },
+  { slug: "basic",      name: "Basic",      price: "₹49/mo", icon: Zap,       color: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800",         iconColor: "bg-gradient-to-br from-blue-500 to-indigo-500", features: ["Up to 5 listings", "8 images/listing", "Email notifications"] },
+  { slug: "plus",       name: "Plus",       price: "₹199/mo", icon: TrendingUp, color: "bg-primary/5 border-primary",                                                iconColor: "bg-gradient-to-br from-primary to-orange-500", features: ["Up to 25 listings", "Priority search", "Featured discount"], popular: true },
+  { slug: "business",   name: "Business",   price: "₹1,999/yr", icon: Building2, color: "bg-zinc-950 border-zinc-700 text-white",                                   iconColor: "bg-gradient-to-br from-zinc-700 to-zinc-950",  features: ["Up to 500 listings", "Business profile", "Verified badge"], dark: true },
+];
+
+function PlansMiniSection() {
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-xl font-extrabold tracking-tight flex items-center gap-2">
+          <span className="w-1.5 h-5 rounded-full bg-amber-400 inline-block" />
+          Choose a Plan
+        </h2>
+        <Link href="/pricing" className="text-primary text-sm font-semibold flex items-center gap-0.5 hover:gap-2 transition-all duration-200">
+          See full pricing <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {MINI_PLANS.map((plan, i) => {
+          const Icon = plan.icon;
+          return (
+            <motion.div
+              key={plan.slug}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.07, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className={cn(
+                "relative rounded-2xl border p-4 flex flex-col",
+                plan.color,
+                (plan as any).dark ? "text-white" : ""
+              )}
+            >
+              {(plan as any).popular && (
+                <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-bold px-2 py-0.5 rounded-full bg-primary text-white whitespace-nowrap">
+                  Most Popular
+                </div>
+              )}
+              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center mb-3", plan.iconColor)}>
+                <Icon className="w-4 h-4 text-white" />
+              </div>
+              <p className={cn("font-bold text-sm mb-0.5", (plan as any).dark ? "text-white" : "")}>{plan.name}</p>
+              <p className={cn("text-lg font-extrabold mb-3", (plan as any).dark ? "text-white" : "")}>{plan.price}</p>
+              <ul className="space-y-1.5 flex-1 mb-4">
+                {plan.features.map(f => (
+                  <li key={f} className={cn("flex items-center gap-1.5 text-[11px]", (plan as any).dark ? "text-white/70" : "text-muted-foreground")}>
+                    <Check className={cn("w-3 h-3 shrink-0", (plan as any).dark ? "text-emerald-400" : "text-emerald-500")} /> {f}
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/pricing"
+                className={cn(
+                  "block text-center py-2 rounded-xl text-xs font-bold transition-colors",
+                  (plan as any).dark
+                    ? "bg-white text-zinc-950 hover:bg-white/90"
+                    : (plan as any).popular
+                    ? "bg-primary text-white hover:bg-primary/90"
+                    : "bg-secondary hover:bg-border border border-border"
+                )}
+              >
+                Get started
+              </Link>
+            </motion.div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 

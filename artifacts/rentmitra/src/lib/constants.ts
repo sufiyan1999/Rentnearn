@@ -230,6 +230,21 @@ export const CATEGORIES: CategoryDef[] = [
       { name: "Shopping Cart", slug: "shopping-cart" },
     ],
   },
+  {
+    id: 21, name: "Accommodation Rentals", slug: "accommodation", icon: "Building2", image: "/icons/categories/accommodation.png", color: "bg-sky-100 text-sky-600",
+    subcategories: [
+      { name: "1BHK Flat", slug: "1bhk-flat" },
+      { name: "2BHK Flat", slug: "2bhk-flat" },
+      { name: "3BHK Flat", slug: "3bhk-flat" },
+      { name: "Studio Apartment", slug: "studio-apartment" },
+      { name: "Independent House", slug: "independent-house" },
+      { name: "Villa / Bungalow", slug: "villa-bungalow" },
+      { name: "Farmhouse", slug: "farmhouse" },
+      { name: "Furnished Room", slug: "furnished-room" },
+      { name: "PG / Hostel Room", slug: "pg-hostel" },
+      { name: "Serviced Apartment", slug: "serviced-apartment" },
+    ],
+  },
 ];
 
 export const STATES = [

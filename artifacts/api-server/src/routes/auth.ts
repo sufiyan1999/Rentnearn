@@ -1,18 +1,56 @@
 import { Router } from "express";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db, usersTable, tokensTable } from "@workspace/db";
 import { hashPassword, comparePassword, signToken, generateSecureToken } from "../lib/auth";
-import { sendWelcomeEmail, sendVerificationEmail, sendPasswordResetEmail } from "../lib/email";
+import { sendWelcomeEmail, sendVerificationEmail, sendPasswordResetEmail, sendOtpEmail } from "../lib/email";
 import { logger } from "../lib/logger";
 import { assignFreeTrial } from "../lib/membership";
 
 const router = Router();
 
+// POST /auth/send-otp  — check uniqueness and email a 6-digit OTP before registration
+router.post("/auth/send-otp", async (req, res): Promise<void> => {
+  const { email, phone } = req.body;
+  if (!email || !phone) {
+    res.status(400).json({ error: "email and phone are required" });
+    return;
+  }
+
+  const [existingEmail] = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+  if (existingEmail) {
+    res.status(400).json({ error: "This email is already registered. Please log in." });
+    return;
+  }
+
+  const [existingPhone] = await db.select().from(usersTable).where(eq(usersTable.phone, phone)).limit(1);
+  if (existingPhone) {
+    res.status(400).json({ error: "This phone number is already registered with another account." });
+    return;
+  }
+
+  // Invalidate any existing unused OTPs for this email
+  const oldTokens = await db.select({ token: tokensTable.token })
+    .from(tokensTable)
+    .where(and(eq(tokensTable.email, email), eq(tokensTable.type, "email_otp"), isNull(tokensTable.usedAt)));
+  for (const t of oldTokens) {
+    await db.update(tokensTable).set({ usedAt: new Date() }).where(eq(tokensTable.token, t.token));
+  }
+
+  // Generate and store a 6-digit OTP (valid 10 minutes)
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  await db.insert(tokensTable).values({ email, token: otp, type: "email_otp", expiresAt });
+
+  await sendOtpEmail(email, otp);
+  req.log.info({ email }, "OTP sent for registration");
+  res.json({ message: "OTP sent to your email." });
+});
+
 // POST /auth/register
 router.post("/auth/register", async (req, res): Promise<void> => {
-  const { name, email, password, phone, userType } = req.body;
-  if (!name || !email || !password) {
-    res.status(400).json({ error: "name, email, and password are required" });
+  const { name, email, password, phone, otp, userType } = req.body;
+  if (!name || !email || !password || !phone || !otp) {
+    res.status(400).json({ error: "name, email, phone, password, and OTP are required" });
     return;
   }
   if (password.length < 8) {
@@ -20,27 +58,40 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     return;
   }
 
-  const [existing] = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
-  if (existing) {
+  // Verify OTP
+  const [otpRecord] = await db.select().from(tokensTable).where(
+    and(eq(tokensTable.token, otp), eq(tokensTable.type, "email_otp"), eq(tokensTable.email, email))
+  ).limit(1);
+  if (!otpRecord || otpRecord.usedAt || otpRecord.expiresAt < new Date()) {
+    res.status(400).json({ error: "Invalid or expired OTP. Please request a new one." });
+    return;
+  }
+
+  const [existingEmail] = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+  if (existingEmail) {
     res.status(400).json({ error: "Email already registered" });
     return;
   }
 
+  const [existingPhone] = await db.select().from(usersTable).where(eq(usersTable.phone, phone)).limit(1);
+  if (existingPhone) {
+    res.status(400).json({ error: "This phone number is already registered with another account." });
+    return;
+  }
+
+  // Mark OTP as used
+  await db.update(tokensTable).set({ usedAt: new Date() }).where(eq(tokensTable.id, otpRecord.id));
+
   const passwordHash = await hashPassword(password);
   const [user] = await db.insert(usersTable).values({
-    name, email, phone: phone ?? null, passwordHash,
+    name, email, phone, passwordHash,
     userType: userType === "business" ? "business" : "individual",
+    emailVerified: true, // OTP confirms email ownership
   }).returning();
-
-  const verifyToken = generateSecureToken();
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  await db.insert(tokensTable).values({ userId: user.id, token: verifyToken, type: "email_verification", expiresAt });
-
-  await sendWelcomeEmail(email, name);
-  await sendVerificationEmail(email, name, verifyToken);
 
   // Assign 90-day free trial membership (fire-and-forget — don't block the response)
   assignFreeTrial(user.id).catch(err => logger.warn({ err, userId: user.id }, "assignFreeTrial failed"));
+  sendWelcomeEmail(email, name).catch(() => {});
 
   const token = signToken({ userId: user.id, email: user.email, userType: user.userType });
   req.log.info({ userId: user.id }, "User registered");

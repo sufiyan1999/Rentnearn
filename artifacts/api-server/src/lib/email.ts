@@ -112,6 +112,15 @@ export async function sendPasswordResetEmail(to: string, name: string, token: st
   `));
 }
 
+export async function sendOtpEmail(to: string, otp: string): Promise<void> {
+  await sendMail(to, `${otp} is your RentNEarn verification code`, emailHtml(`
+    <h2>Your verification code</h2>
+    <p>Use the code below to verify your email and complete your RentNEarn registration.</p>
+    <div style="font-size:38px;font-weight:900;letter-spacing:10px;color:#FF6B00;text-align:center;padding:20px 0 24px;">${otp}</div>
+    <p style="font-size:13px;color:#6B7280;">This code expires in <strong>10 minutes</strong>. If you did not request this, please ignore this email.</p>
+  `));
+}
+
 export async function sendListingSubmittedEmail(to: string, name: string, title: string): Promise<void> {
   await sendMail(to, "Your listing is under review ⏳", emailHtml(`
     <h2>Hi ${name}, we've received your listing</h2>

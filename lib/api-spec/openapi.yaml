@@ -43,6 +43,31 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 
   # ── AUTH ──────────────────────────────────────────────────────────────────
+  /auth/send-otp:
+    post:
+      operationId: sendOtp
+      tags: [auth]
+      summary: Send a 6-digit OTP to an email address for registration verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOtpInput"
+      responses:
+        "200":
+          description: OTP sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: Email or phone already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /auth/register:
     post:
       operationId: register
@@ -968,9 +993,19 @@ components:
       required: [error]
 
     # ── AUTH ───────────────────────────────────────────────────────────────
+    SendOtpInput:
+      type: object
+      required: [email, phone]
+      properties:
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+
     RegisterInput:
       type: object
-      required: [name, email, password]
+      required: [name, email, password, phone, otp]
       properties:
         name:
           type: string
@@ -981,7 +1016,11 @@ components:
           type: string
           minLength: 8
         phone:
-          type: ["string", "null"]
+          type: string
+        otp:
+          type: string
+          minLength: 6
+          maxLength: 6
         userType:
           type: string
           enum: [individual, business]

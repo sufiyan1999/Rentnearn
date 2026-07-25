@@ -25,14 +25,24 @@ export const RegisterInputUserType = {
   business: 'business',
 } as const;
 
+export interface SendOtpInput {
+  /** @format email */
+  email: string;
+  phone: string;
+}
+
 export interface RegisterInput {
   /** @minLength 2 */
   name: string;
   email: string;
   /** @minLength 8 */
   password: string;
-  /** @nullable */
-  phone?: string | null;
+  phone: string;
+  /**
+   * @minLength 6
+   * @maxLength 6
+   */
+  otp: string;
   userType?: RegisterInputUserType;
 }
 

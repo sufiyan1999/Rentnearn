@@ -17,6 +17,7 @@ export * from './businessProfile';
 export * from './businessProfileInput';
 export * from './category';
 export * from './categoryCount';
+export * from './changePasswordInput';
 export * from './dashboardStats';
 export * from './errorResponse';
 export * from './favouriteIdsResponse';

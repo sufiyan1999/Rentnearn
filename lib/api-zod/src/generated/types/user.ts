@@ -14,9 +14,14 @@ export interface User {
   /** @nullable */
   phone?: string | null;
   /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  state?: string | null;
+  /** @nullable */
   profilePhoto?: string | null;
   userType: UserUserType;
   isVerified: boolean;
   emailVerified?: boolean;
+  hasPassword?: boolean;
   createdAt: Date;
 }

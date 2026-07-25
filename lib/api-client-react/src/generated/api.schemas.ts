@@ -45,6 +45,12 @@ export interface GoogleAuthInput {
   idToken: string;
 }
 
+export interface ChangePasswordInput {
+  currentPassword: string;
+  /** @minLength 8 */
+  newPassword: string;
+}
+
 export interface ForgotPasswordInput {
   email: string;
 }
@@ -75,10 +81,15 @@ export interface User {
   /** @nullable */
   phone?: string | null;
   /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  state?: string | null;
+  /** @nullable */
   profilePhoto?: string | null;
   userType: UserUserType;
   isVerified: boolean;
   emailVerified?: boolean;
+  hasPassword?: boolean;
   createdAt: string;
 }
 

@@ -40,10 +40,13 @@ export const RegisterResponse = zod.object({
   "name": zod.string(),
   "email": zod.string(),
   "phone": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "state": zod.string().nullish(),
   "profilePhoto": zod.string().nullish(),
   "userType": zod.enum(['individual', 'business', 'admin']),
   "isVerified": zod.boolean(),
   "emailVerified": zod.boolean().optional(),
+  "hasPassword": zod.boolean().optional(),
   "createdAt": zod.coerce.date()
 })
 })
@@ -64,10 +67,13 @@ export const LoginResponse = zod.object({
   "name": zod.string(),
   "email": zod.string(),
   "phone": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "state": zod.string().nullish(),
   "profilePhoto": zod.string().nullish(),
   "userType": zod.enum(['individual', 'business', 'admin']),
   "isVerified": zod.boolean(),
   "emailVerified": zod.boolean().optional(),
+  "hasPassword": zod.boolean().optional(),
   "createdAt": zod.coerce.date()
 })
 })
@@ -95,10 +101,13 @@ export const GoogleAuthResponse = zod.object({
   "name": zod.string(),
   "email": zod.string(),
   "phone": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "state": zod.string().nullish(),
   "profilePhoto": zod.string().nullish(),
   "userType": zod.enum(['individual', 'business', 'admin']),
   "isVerified": zod.boolean(),
   "emailVerified": zod.boolean().optional(),
+  "hasPassword": zod.boolean().optional(),
   "createdAt": zod.coerce.date()
 })
 })
@@ -134,6 +143,23 @@ export const ResetPasswordResponse = zod.object({
 
 
 /**
+ * @summary Change password (non-Google accounts only)
+ */
+export const changePasswordBodyNewPasswordMin = 8;
+
+
+
+export const ChangePasswordBody = zod.object({
+  "currentPassword": zod.string(),
+  "newPassword": zod.string().min(changePasswordBodyNewPasswordMin)
+})
+
+export const ChangePasswordResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
  * @summary Verify email with token
  */
 export const VerifyEmailBody = zod.object({
@@ -153,10 +179,13 @@ export const GetMeResponse = zod.object({
   "name": zod.string(),
   "email": zod.string(),
   "phone": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "state": zod.string().nullish(),
   "profilePhoto": zod.string().nullish(),
   "userType": zod.enum(['individual', 'business', 'admin']),
   "isVerified": zod.boolean(),
   "emailVerified": zod.boolean().optional(),
+  "hasPassword": zod.boolean().optional(),
   "createdAt": zod.coerce.date()
 })
 
@@ -180,10 +209,13 @@ export const UpdateProfileResponse = zod.object({
   "name": zod.string(),
   "email": zod.string(),
   "phone": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "state": zod.string().nullish(),
   "profilePhoto": zod.string().nullish(),
   "userType": zod.enum(['individual', 'business', 'admin']),
   "isVerified": zod.boolean(),
   "emailVerified": zod.boolean().optional(),
+  "hasPassword": zod.boolean().optional(),
   "createdAt": zod.coerce.date()
 })
 
@@ -1327,10 +1359,13 @@ export const AdminGetUsersResponse = zod.object({
   "name": zod.string(),
   "email": zod.string(),
   "phone": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "state": zod.string().nullish(),
   "profilePhoto": zod.string().nullish(),
   "userType": zod.enum(['individual', 'business', 'admin']),
   "isVerified": zod.boolean(),
   "emailVerified": zod.boolean().optional(),
+  "hasPassword": zod.boolean().optional(),
   "createdAt": zod.coerce.date()
 })),
   "total": zod.number(),
@@ -1351,10 +1386,13 @@ export const VerifyUserResponse = zod.object({
   "name": zod.string(),
   "email": zod.string(),
   "phone": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "state": zod.string().nullish(),
   "profilePhoto": zod.string().nullish(),
   "userType": zod.enum(['individual', 'business', 'admin']),
   "isVerified": zod.boolean(),
   "emailVerified": zod.boolean().optional(),
+  "hasPassword": zod.boolean().optional(),
   "createdAt": zod.coerce.date()
 })
 

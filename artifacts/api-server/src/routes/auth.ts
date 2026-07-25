@@ -198,16 +198,48 @@ router.get("/auth/me", async (req, res): Promise<void> => {
   }
 });
 
+// POST /auth/change-password
+router.post("/auth/change-password", async (req, res): Promise<void> => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) { res.status(401).json({ error: "Unauthorized" }); return; }
+  try {
+    const { verifyToken } = await import("../lib/auth");
+    const payload = verifyToken(authHeader.slice(7));
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      res.status(400).json({ error: "currentPassword and newPassword are required" }); return;
+    }
+    if (newPassword.length < 8) {
+      res.status(400).json({ error: "New password must be at least 8 characters" }); return;
+    }
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, payload.userId)).limit(1);
+    if (!user) { res.status(401).json({ error: "User not found" }); return; }
+    if (!user.passwordHash) {
+      res.status(400).json({ error: "Cannot change password for Google-linked accounts" }); return;
+    }
+    const valid = await comparePassword(currentPassword, user.passwordHash);
+    if (!valid) { res.status(401).json({ error: "Current password is incorrect" }); return; }
+    const newHash = await hashPassword(newPassword);
+    await db.update(usersTable).set({ passwordHash: newHash }).where(eq(usersTable.id, user.id));
+    res.json({ message: "Password changed successfully" });
+  } catch {
+    res.status(401).json({ error: "Invalid token" });
+  }
+});
+
 function sanitizeUser(user: typeof usersTable.$inferSelect) {
   return {
     id: user.id,
     name: user.name,
     email: user.email,
     phone: user.phone,
+    city: user.city ?? null,
+    state: user.state ?? null,
     profilePhoto: user.profilePhoto,
     userType: user.userType,
     isVerified: user.isVerified,
     emailVerified: user.emailVerified,
+    hasPassword: !!user.passwordHash,
     createdAt: user.createdAt,
   };
 }

@@ -64,8 +64,11 @@ router.get("/users/:userId", async (req, res): Promise<void> => {
 function sanitizeUser(user: typeof usersTable.$inferSelect) {
   return {
     id: user.id, name: user.name, email: user.email, phone: user.phone,
+    city: user.city ?? null, state: user.state ?? null,
     profilePhoto: user.profilePhoto, userType: user.userType,
-    isVerified: user.isVerified, emailVerified: user.emailVerified, createdAt: user.createdAt,
+    isVerified: user.isVerified, emailVerified: user.emailVerified,
+    hasPassword: !!user.passwordHash,
+    createdAt: user.createdAt,
   };
 }
 

@@ -238,7 +238,10 @@ export const GetListingsQueryParams = zod.object({
   "condition": zod.coerce.string().optional(),
   "page": zod.coerce.number().default(getListingsQueryPageDefault),
   "limit": zod.coerce.number().default(getListingsQueryLimitDefault),
-  "sortBy": zod.enum(['newest', 'price_asc', 'price_desc', 'distance']).optional()
+  "sortBy": zod.enum(['newest', 'price_asc', 'price_desc', 'distance']).optional(),
+  "featuredOnly": zod.coerce.boolean().optional(),
+  "businessOnly": zod.coerce.boolean().optional(),
+  "availableToday": zod.coerce.boolean().optional()
 })
 
 export const GetListingsResponse = zod.object({
@@ -451,7 +454,16 @@ export const GetNearbyListingsQueryParams = zod.object({
   "lng": zod.coerce.number(),
   "radiusKm": zod.coerce.number().default(getNearbyListingsQueryRadiusKmDefault),
   "limit": zod.coerce.number().default(getNearbyListingsQueryLimitDefault),
-  "category": zod.coerce.string().optional()
+  "category": zod.coerce.string().optional(),
+  "q": zod.coerce.string().optional(),
+  "city": zod.coerce.string().optional(),
+  "state": zod.coerce.string().optional(),
+  "condition": zod.coerce.string().optional(),
+  "minPrice": zod.coerce.number().optional(),
+  "maxPrice": zod.coerce.number().optional(),
+  "featuredOnly": zod.coerce.boolean().optional(),
+  "businessOnly": zod.coerce.boolean().optional(),
+  "availableToday": zod.coerce.boolean().optional()
 })
 
 export const GetNearbyListingsResponseItem = zod.object({

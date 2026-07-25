@@ -419,6 +419,9 @@ condition?: string;
 page?: number;
 limit?: number;
 sortBy?: GetListingsSortBy;
+featuredOnly?: boolean;
+businessOnly?: boolean;
+availableToday?: boolean;
 };
 
 export type GetListingsSortBy = typeof GetListingsSortBy[keyof typeof GetListingsSortBy];
@@ -441,6 +444,15 @@ lng: number;
 radiusKm?: number;
 limit?: number;
 category?: string;
+q?: string;
+city?: string;
+state?: string;
+condition?: string;
+minPrice?: number;
+maxPrice?: number;
+featuredOnly?: boolean;
+businessOnly?: boolean;
+availableToday?: boolean;
 };
 
 export type GetMyListingsParams = {

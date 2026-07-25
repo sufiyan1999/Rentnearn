@@ -18,4 +18,7 @@ condition?: string;
 page?: number;
 limit?: number;
 sortBy?: GetListingsSortBy;
+featuredOnly?: boolean;
+businessOnly?: boolean;
+availableToday?: boolean;
 };

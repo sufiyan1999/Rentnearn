@@ -13,7 +13,11 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 *
 
 // GET /listings
 router.get("/listings", optionalAuth, async (req, res): Promise<void> => {
-  const { q, category, city, state, minPrice, maxPrice, condition, page = "1", limit = "20", sortBy } = req.query as Record<string, string>;
+  const {
+    q, category, city, state, minPrice, maxPrice, condition,
+    page = "1", limit = "20", sortBy,
+    featuredOnly, businessOnly, availableToday,
+  } = req.query as Record<string, string>;
   const pageNum = Math.max(1, parseInt(page, 10));
   const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10)));
   const offset = (pageNum - 1) * limitNum;
@@ -26,12 +30,44 @@ router.get("/listings", optionalAuth, async (req, res): Promise<void> => {
   if (condition) conditions.push(eq(listingsTable.condition, condition as typeof listingsTable.$inferSelect.condition));
   if (minPrice) conditions.push(gte(listingsTable.dailyPrice, minPrice));
   if (maxPrice) conditions.push(lte(listingsTable.dailyPrice, maxPrice));
+  if (featuredOnly === "true") conditions.push(eq(listingsTable.isFeatured, true));
+  // availableToday: approved + not expired (already filtered by status=approved above; also exclude expired)
+  if (availableToday === "true") conditions.push(sql`(${listingsTable.expiresAt} IS NULL OR ${listingsTable.expiresAt} > now())`);
+  // businessOnly: join with users to filter by userType='business'
+  // handled below via subquery
 
   let orderBy;
   switch (sortBy) {
     case "price_asc": orderBy = asc(listingsTable.dailyPrice); break;
     case "price_desc": orderBy = desc(listingsTable.dailyPrice); break;
     default: orderBy = desc(listingsTable.createdAt);
+  }
+
+  if (businessOnly === "true") {
+    // Join with users to filter business-type owners
+    const [{ total }] = await db
+      .select({ total: sql<number>`count(*)::int` })
+      .from(listingsTable)
+      .innerJoin(usersTable, and(eq(listingsTable.ownerId, usersTable.id), eq(usersTable.userType, "business")))
+      .where(and(...conditions));
+
+    const rows = await db
+      .select({ listing: listingsTable, owner: { id: usersTable.id, name: usersTable.name, profilePhoto: usersTable.profilePhoto, userType: usersTable.userType, isVerified: usersTable.isVerified, phone: usersTable.phone, createdAt: usersTable.createdAt } })
+      .from(listingsTable)
+      .innerJoin(usersTable, and(eq(listingsTable.ownerId, usersTable.id), eq(usersTable.userType, "business")))
+      .where(and(...conditions))
+      .orderBy(orderBy)
+      .limit(limitNum)
+      .offset(offset);
+
+    res.json({
+      data: rows.map(r => formatListing(r.listing, r.owner)),
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(total / limitNum),
+    });
+    return;
   }
 
   const [{ total }] = await db.select({ total: sql<number>`count(*)::int` }).from(listingsTable).where(and(...conditions));
@@ -126,7 +162,11 @@ router.get("/listings/featured", async (req, res): Promise<void> => {
 
 // GET /listings/nearby
 router.get("/listings/nearby", async (req, res): Promise<void> => {
-  const { lat, lng, radiusKm = "25", limit = "20", category } = req.query as Record<string, string>;
+  const {
+    lat, lng, radiusKm = "25", limit = "20",
+    category, q, city, state, condition, minPrice, maxPrice,
+    featuredOnly, businessOnly, availableToday,
+  } = req.query as Record<string, string>;
   if (!lat || !lng) { res.status(400).json({ error: "lat and lng are required" }); return; }
 
   const latNum = parseFloat(lat);
@@ -146,7 +186,22 @@ router.get("/listings/nearby", async (req, res): Promise<void> => {
       )
     ) <= ${radius}`,
   ];
-  if (category) conditions.push(eq(listingsTable.category, category));
+  if (category)  conditions.push(eq(listingsTable.category, category));
+  if (q)         conditions.push(ilike(listingsTable.title, `%${q}%`));
+  if (city)      conditions.push(ilike(listingsTable.city, `%${city}%`));
+  if (state)     conditions.push(eq(listingsTable.state, state));
+  if (condition) conditions.push(eq(listingsTable.condition, condition as typeof listingsTable.$inferSelect.condition));
+  if (minPrice)  conditions.push(gte(listingsTable.dailyPrice, minPrice));
+  if (maxPrice)  conditions.push(lte(listingsTable.dailyPrice, maxPrice));
+  if (featuredOnly === "true")   conditions.push(eq(listingsTable.isFeatured, true));
+  if (availableToday === "true") conditions.push(sql`(${listingsTable.expiresAt} IS NULL OR ${listingsTable.expiresAt} > now())`);
+  // businessOnly: use subquery — no join, no type complications
+  if (businessOnly === "true") {
+    conditions.push(inArray(
+      listingsTable.ownerId,
+      db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.userType, "business")),
+    ));
+  }
 
   const rows = await db.select({
     listing: listingsTable,

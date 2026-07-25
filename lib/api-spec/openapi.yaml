@@ -290,6 +290,18 @@ paths:
           schema:
             type: string
             enum: [newest, price_asc, price_desc, distance]
+        - name: featuredOnly
+          in: query
+          schema:
+            type: boolean
+        - name: businessOnly
+          in: query
+          schema:
+            type: boolean
+        - name: availableToday
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: Paginated listings
@@ -367,6 +379,42 @@ paths:
           in: query
           schema:
             type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+        - name: condition
+          in: query
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+        - name: featuredOnly
+          in: query
+          schema:
+            type: boolean
+        - name: businessOnly
+          in: query
+          schema:
+            type: boolean
+        - name: availableToday
+          in: query
+          schema:
+            type: boolean
       responses:
         "200":
           description: Nearby listings with distances

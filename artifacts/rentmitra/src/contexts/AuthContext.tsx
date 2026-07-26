@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { User } from "@workspace/api-client-react";
+import { User, setAuthTokenGetter } from "@workspace/api-client-react";
 
 interface AuthContextType {
   user: User | null;
@@ -20,6 +20,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => {
     return localStorage.getItem("rentnearn_token") || null;
   });
+
+  // Wire the JWT token into every customFetch call (used by the generated API client)
+  useEffect(() => {
+    setAuthTokenGetter(() => localStorage.getItem("rentnearn_token"));
+    return () => setAuthTokenGetter(null);
+  }, []);
 
   const login = (newToken: string, newUser: User) => {
     localStorage.setItem("rentnearn_token", newToken);

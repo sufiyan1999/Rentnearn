@@ -43,7 +43,7 @@ export default function CreateListing() {
     monthlyPrice: null,
     city: "",
     state: "",
-    area: null,
+    area: "",
     pincode: "",
   });
 
@@ -62,7 +62,7 @@ export default function CreateListing() {
         monthlyPrice: existingListing.rentalPrice?.monthly || null,
         city: existingListing.city || "",
         state: existingListing.state || "",
-        area: (existingListing as any).area || null,
+        area: (existingListing as any).area || "",
         pincode: existingListing.pincode || "",
       });
       if (existingListing.images) {
@@ -388,10 +388,11 @@ export default function CreateListing() {
             </div>
 
             <div className="space-y-2">
-              <Label>Area / Locality <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label>
+              <Label>Area / Locality <span className="text-destructive">*</span></Label>
               <Input
+                required
                 value={formData.area ?? ""}
-                onChange={e => setFormData(p => ({ ...p, area: e.target.value || null }))}
+                onChange={e => setFormData(p => ({ ...p, area: e.target.value }))}
                 placeholder="e.g. Bandra West, Koramangala, Connaught Place"
               />
               <p className="text-xs text-muted-foreground">

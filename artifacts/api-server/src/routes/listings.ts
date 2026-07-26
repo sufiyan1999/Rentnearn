@@ -93,8 +93,8 @@ router.get("/listings", optionalAuth, async (req, res): Promise<void> => {
 router.post("/listings", requireAuth, async (req, res): Promise<void> => {
   const { title, description, category, customCategory, brand, condition, dailyPrice, weeklyPrice, monthlyPrice, city, state, area, pincode, latitude, longitude } = req.body;
 
-  if (!title || !category || !city || !state) {
-    res.status(400).json({ error: "title, category, city, state are required" });
+  if (!title || !category || !city || !state || !area) {
+    res.status(400).json({ error: "title, category, city, state, area are required" });
     return;
   }
 
@@ -143,7 +143,7 @@ router.post("/listings", requireAuth, async (req, res): Promise<void> => {
     dailyPrice: dailyPrice ? String(dailyPrice) : null,
     weeklyPrice: weeklyPrice ? String(weeklyPrice) : null,
     monthlyPrice: monthlyPrice ? String(monthlyPrice) : null,
-    city, state, area: area ?? null, pincode: pincode ?? null,
+    city, state, area: area, pincode: pincode ?? null,
     latitude: latitude ? String(latitude) : null,
     longitude: longitude ? String(longitude) : null,
     expiresAt,

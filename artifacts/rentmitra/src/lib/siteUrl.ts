@@ -1,20 +1,15 @@
 /**
- * SITE_URL — the single source of truth for the canonical production domain.
+ * SITE_URL — canonical production domain, always https://www.rentnearn.com.
  *
- * Rules:
- *  - Production build (import.meta.env.PROD === true):
- *    always "https://www.rentnearn.com" — baked in at build time.
- *  - Development (Vite dev server):
- *    uses the current browser origin so local previews work correctly.
+ * This is a FIXED constant. Share links, QR codes, canonical URLs, Open Graph
+ * tags, JSON-LD structured data, and email links must always point to the
+ * production domain — never to a Replit preview URL, localhost, or any
+ * dynamically detected hostname.
  *
- * Never use window.location.origin directly in share links, OG tags, JSON-LD,
- * or QR code targets — those will leak the .replit.dev preview domain.
+ * Do NOT use window.location.origin here. The dev server runs on a .replit.dev
+ * domain; using it would leak preview URLs into share links and social metadata.
  */
-export const SITE_URL: string = import.meta.env.PROD
-  ? "https://www.rentnearn.com"
-  : typeof window !== "undefined"
-    ? window.location.origin
-    : "https://www.rentnearn.com";
+export const SITE_URL = "https://www.rentnearn.com";
 
 /**
  * Returns an absolute URL for the given path using SITE_URL.

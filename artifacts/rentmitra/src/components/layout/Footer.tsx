@@ -43,7 +43,7 @@ const COLUMNS = [
 const SOCIAL = [
   { icon: Facebook,  label: "Facebook",  href: "https://www.facebook.com/profile.php?id=61592110517886" },
   { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/rentnearn/" },
-  { icon: Linkedin,  label: "LinkedIn",  href: "https://linkedin.com/company/rentnearn" },
+  { icon: Linkedin,  label: "LinkedIn",  href: "https://linkedin.com/company/rent-n-earn" },
   { icon: Twitter,   label: "X (Twitter)", href: "https://x.com/rentnearn" },
 ];
 

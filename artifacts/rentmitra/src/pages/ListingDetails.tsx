@@ -220,16 +220,16 @@ export default function ListingDetails() {
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setLocation(-1 as any)}
-          className="w-10 h-10 glass rounded-full flex items-center justify-center pointer-events-auto shadow-md"
+          className="w-10 h-10 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center pointer-events-auto shadow-lg border border-black/10 dark:border-white/10"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 text-zinc-800 dark:text-zinc-100" />
         </motion.button>
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setShowShare(true)}
-          className="w-10 h-10 glass rounded-full flex items-center justify-center pointer-events-auto shadow-md"
+          className="w-10 h-10 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center pointer-events-auto shadow-lg border border-black/10 dark:border-white/10"
         >
-          <Share2 className="w-4 h-4" />
+          <Share2 className="w-4 h-4 text-zinc-800 dark:text-zinc-100" />
         </motion.button>
       </div>
 
@@ -267,6 +267,11 @@ export default function ListingDetails() {
               transition={{ duration: 0.3, ease: "easeOut" }}
               className="relative z-10 w-full h-full object-contain"
               style={{ maxHeight: "88vw", minHeight: 260 }}
+              onError={(e) => {
+                const img = e.currentTarget;
+                img.onerror = null; // prevent infinite loop
+                img.src = `https://placehold.co/800x600/1f1f1f/666666?text=${encodeURIComponent(listing.title)}`;
+              }}
             />
           </AnimatePresence>
         </div>

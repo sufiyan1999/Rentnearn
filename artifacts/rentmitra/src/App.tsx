@@ -28,6 +28,7 @@ import Pricing from "./pages/Pricing";
 // Info pages
 import About from "./pages/About";
 import FairUsagePolicy from "./pages/FairUsagePolicy";
+import ProhibitedItems from "./pages/ProhibitedItems";
 import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
 import Safety from "./pages/Safety";
@@ -82,6 +83,7 @@ function Router() {
         <Route path="/cookies" component={CookiePolicy} />
         <Route path="/disclaimer" component={Disclaimer} />
         <Route path="/fair-usage-policy" component={FairUsagePolicy} />
+        <Route path="/prohibited-items" component={ProhibitedItems} />
         {/* 404 */}
         <Route component={NotFound} />
       </Switch>

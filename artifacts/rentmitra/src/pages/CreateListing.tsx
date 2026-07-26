@@ -207,7 +207,10 @@ export default function CreateListing() {
                     ))}
                   </ul>
                   <p className="text-xs text-amber-600 dark:text-amber-500 mt-3">
-                    Listings violating this policy will be removed and may be reported to authorities.
+                    Listings violating this policy will be removed and may be reported to authorities.{" "}
+                    <a href="/prohibited-items" target="_blank" className="underline font-semibold hover:text-amber-800">
+                      Full policy →
+                    </a>
                   </p>
                 </div>
               )}

@@ -34,7 +34,8 @@ const COLUMNS = [
       { label: "Terms of Service", href: "/terms" },
       { label: "Cookie Policy", href: "/cookies" },
       { label: "Disclaimer", href: "/disclaimer" },
-    { label: "Fair Usage Policy", href: "/fair-usage-policy" },
+      { label: "Fair Usage Policy", href: "/fair-usage-policy" },
+      { label: "Prohibited Items Policy", href: "/prohibited-items" },
     ],
   },
 ];

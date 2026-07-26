@@ -1,20 +1,22 @@
 import { useRoute, useLocation } from "wouter";
-import { useGetListing, getGetListingQueryKey, useGetListingQr, getGetListingQrQueryKey } from "@workspace/api-client-react";
+import { useGetListing, getGetListingQueryKey, useGetListingQr, getGetListingQrQueryKey, useApproveListing, useRejectListing } from "@workspace/api-client-react";
 import { SeoHead } from "@/components/SeoHead";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/ui-core";
-import { ArrowLeft, MapPin, Share2, MessageCircle, AlertTriangle, ShieldCheck, QrCode, Star, Calendar, Tag } from "lucide-react";
+import { ArrowLeft, MapPin, Share2, MessageCircle, AlertTriangle, ShieldCheck, QrCode, Star, Calendar, Tag, Check, X, Clock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ListingDetails() {
   const [, params] = useRoute("/listings/:id");
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const id = Number(params?.id);
+  const qc = useQueryClient();
 
   const [activeImage, setActiveImage] = useState(0);
   const [showQr, setShowQr] = useState(false);
@@ -25,6 +27,31 @@ export default function ListingDetails() {
   const { data: qrData } = useGetListingQr(id, {
     query: { enabled: !!id, queryKey: getGetListingQrQueryKey(id) },
   });
+
+  const approveMutation = useApproveListing();
+  const rejectMutation = useRejectListing();
+
+  const handleAdminApprove = () => {
+    approveMutation.mutate({ id }, {
+      onSuccess: () => {
+        toast.success("Listing approved");
+        qc.invalidateQueries({ queryKey: getGetListingQueryKey(id) });
+      },
+      onError: () => toast.error("Failed to approve listing"),
+    });
+  };
+
+  const handleAdminReject = () => {
+    const reason = prompt("Enter rejection reason:");
+    if (!reason) return;
+    rejectMutation.mutate({ id, data: { reason } }, {
+      onSuccess: () => {
+        toast.success("Listing rejected");
+        qc.invalidateQueries({ queryKey: getGetListingQueryKey(id) });
+      },
+      onError: () => toast.error("Failed to reject listing"),
+    });
+  };
 
   if (isLoading) {
     return (
@@ -126,8 +153,50 @@ export default function ListingDetails() {
     ],
   };
 
+  const isAdmin = user?.userType === "admin";
+
   return (
     <div className="pb-32 md:pb-8">
+      {/* ── Admin review banner ── */}
+      {isAdmin && listing.status !== "approved" && (
+        <div className={cn(
+          "sticky top-16 z-40 flex items-center justify-between gap-4 px-4 py-3 text-sm font-semibold",
+          listing.status === "pending" ? "bg-amber-500 text-white" : "bg-red-500 text-white"
+        )}>
+          <div className="flex items-center gap-2">
+            {listing.status === "pending"
+              ? <Clock className="w-4 h-4 shrink-0" />
+              : <X className="w-4 h-4 shrink-0" />}
+            <span>
+              {listing.status === "pending"
+                ? "This listing is pending review — not visible to the public."
+                : "This listing has been rejected — not visible to the public."}
+            </span>
+          </div>
+          {listing.status === "pending" && (
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-white text-green-700 border-white hover:bg-green-50 h-7 px-3"
+                onClick={handleAdminApprove}
+                disabled={approveMutation.isPending}
+              >
+                <Check className="w-3.5 h-3.5 mr-1" /> Approve
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-white text-red-700 border-white hover:bg-red-50 h-7 px-3"
+                onClick={handleAdminReject}
+                disabled={rejectMutation.isPending}
+              >
+                <X className="w-3.5 h-3.5 mr-1" /> Reject
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
       <SeoHead
         title={seoTitle}
         description={seoDescription}

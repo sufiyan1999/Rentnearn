@@ -253,7 +253,8 @@ router.get("/listings/:id", optionalAuth, async (req, res): Promise<void> => {
   if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
 
   const [row] = await db.select().from(listingsTable).where(eq(listingsTable.id, id)).limit(1);
-  if (!row || row.status !== "approved") { res.status(404).json({ error: "Listing not found" }); return; }
+  const isAdmin = req.user?.userType === "admin";
+  if (!row || (row.status !== "approved" && !isAdmin)) { res.status(404).json({ error: "Listing not found" }); return; }
 
   const [owner] = await db.select({ id: usersTable.id, name: usersTable.name, profilePhoto: usersTable.profilePhoto, userType: usersTable.userType, isVerified: usersTable.isVerified, phone: usersTable.phone, createdAt: usersTable.createdAt }).from(usersTable).where(eq(usersTable.id, row.ownerId)).limit(1);
 

@@ -340,26 +340,40 @@ export default function ListingDetails() {
             </div>
 
             {/* Pricing */}
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: "Daily", value: listing.rentalPrice?.daily, highlight: true },
-                { label: "Weekly", value: listing.rentalPrice?.weekly },
-                { label: "Monthly", value: listing.rentalPrice?.monthly },
-              ].map(({ label, value, highlight }) => (
-                <div key={label}
-                  className={cn(
-                    "rounded-2xl p-4 text-center border transition-all",
-                    highlight
-                      ? "border-primary/30 bg-primary/5"
-                      : "border-border bg-card"
-                  )}
-                >
-                  <p className="text-xs font-semibold text-muted-foreground mb-1">{label}</p>
-                  <p className={cn("text-xl font-extrabold tracking-tight", highlight ? "text-primary" : "text-foreground")}>
-                    {value ? `₹${value}` : <span className="text-muted-foreground text-base">—</span>}
-                  </p>
+            <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "Daily", value: listing.rentalPrice?.daily, highlight: true },
+                  { label: "Weekly", value: listing.rentalPrice?.weekly },
+                  { label: "Monthly", value: listing.rentalPrice?.monthly },
+                ].map(({ label, value, highlight }) => (
+                  <div key={label}
+                    className={cn(
+                      "rounded-2xl p-4 text-center border transition-all",
+                      highlight
+                        ? "border-primary/30 bg-primary/5"
+                        : "border-border bg-card"
+                    )}
+                  >
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">{label}</p>
+                    <p className={cn("text-xl font-extrabold tracking-tight", highlight ? "text-primary" : "text-foreground")}>
+                      {value ? `₹${value}` : <span className="text-muted-foreground text-base">—</span>}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              {(listing as any).securityDeposit && (
+                <div className="flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/20 px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <div>
+                      <p className="text-xs font-semibold text-amber-800 dark:text-amber-300">Refundable Security Deposit</p>
+                      <p className="text-xs text-amber-700/70 dark:text-amber-400/60">Returned after rental ends in good condition</p>
+                    </div>
+                  </div>
+                  <p className="text-lg font-extrabold text-amber-700 dark:text-amber-300">₹{(listing as any).securityDeposit}</p>
                 </div>
-              ))}
+              )}
             </div>
 
             {/* Description */}
@@ -433,6 +447,15 @@ export default function ListingDetails() {
                 </Button>
               )}
 
+              {(listing as any).securityDeposit && (
+                <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/20 px-3 py-2.5">
+                  <div>
+                    <p className="text-xs font-semibold text-amber-800 dark:text-amber-300">Security Deposit</p>
+                    <p className="text-xs text-amber-700/60 dark:text-amber-400/50">Refundable</p>
+                  </div>
+                  <p className="font-extrabold text-amber-700 dark:text-amber-300">₹{(listing as any).securityDeposit}</p>
+                </div>
+              )}
               <div className="flex flex-col gap-2 pt-1">
                 {[
                   { icon: ShieldCheck, text: "Verified by RentNEarn" },

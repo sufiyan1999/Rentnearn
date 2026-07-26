@@ -92,7 +92,7 @@ router.get("/listings", optionalAuth, async (req, res): Promise<void> => {
 
 // POST /listings
 router.post("/listings", requireAuth, async (req, res): Promise<void> => {
-  const { title, description, category, customCategory, brand, condition, dailyPrice, weeklyPrice, monthlyPrice, city, state, area, pincode, latitude, longitude } = req.body;
+  const { title, description, category, customCategory, brand, condition, dailyPrice, weeklyPrice, monthlyPrice, securityDeposit, city, state, area, pincode, latitude, longitude } = req.body;
 
   if (!title || !category || !city || !state || !area) {
     res.status(400).json({ error: "title, category, city, state, area are required" });
@@ -144,6 +144,7 @@ router.post("/listings", requireAuth, async (req, res): Promise<void> => {
     dailyPrice: dailyPrice ? String(dailyPrice) : null,
     weeklyPrice: weeklyPrice ? String(weeklyPrice) : null,
     monthlyPrice: monthlyPrice ? String(monthlyPrice) : null,
+    securityDeposit: securityDeposit ? String(securityDeposit) : null,
     city, state, area: area, pincode: pincode ?? null,
     latitude: latitude ? String(latitude) : null,
     longitude: longitude ? String(longitude) : null,
@@ -284,7 +285,7 @@ router.patch("/listings/:id", requireAuth, async (req, res): Promise<void> => {
   if (!existing) { res.status(404).json({ error: "Listing not found" }); return; }
   if (existing.ownerId !== req.user!.id) { res.status(403).json({ error: "Not authorized" }); return; }
 
-  const { title, description, category, brand, condition, dailyPrice, weeklyPrice, monthlyPrice, city, state, area, pincode, latitude, longitude } = req.body;
+  const { title, description, category, brand, condition, dailyPrice, weeklyPrice, monthlyPrice, securityDeposit, city, state, area, pincode, latitude, longitude } = req.body;
 
   // Restricted items policy check on edited fields
   const patchRestricted = checkRestrictedContent(title, description, category);
@@ -305,6 +306,7 @@ router.patch("/listings/:id", requireAuth, async (req, res): Promise<void> => {
   if (dailyPrice !== undefined) updates.dailyPrice = dailyPrice ? String(dailyPrice) : null;
   if (weeklyPrice !== undefined) updates.weeklyPrice = weeklyPrice ? String(weeklyPrice) : null;
   if (monthlyPrice !== undefined) updates.monthlyPrice = monthlyPrice ? String(monthlyPrice) : null;
+  if (securityDeposit !== undefined) updates.securityDeposit = securityDeposit ? String(securityDeposit) : null;
   if (city) updates.city = city;
   if (state) updates.state = state;
   if (area !== undefined) updates.area = area ?? null;
@@ -415,6 +417,7 @@ function formatListing(listing: typeof listingsTable.$inferSelect, owner?: { id:
       weekly: listing.weeklyPrice ? Number(listing.weeklyPrice) : null,
       monthly: listing.monthlyPrice ? Number(listing.monthlyPrice) : null,
     },
+    securityDeposit: listing.securityDeposit ? Number(listing.securityDeposit) : null,
     city: listing.city,
     state: listing.state,
     area: listing.area,

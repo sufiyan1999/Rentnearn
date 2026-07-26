@@ -41,6 +41,7 @@ export default function CreateListing() {
     dailyPrice: null,
     weeklyPrice: null,
     monthlyPrice: null,
+    securityDeposit: null,
     city: "",
     state: "",
     area: "",
@@ -60,6 +61,7 @@ export default function CreateListing() {
         dailyPrice: existingListing.rentalPrice?.daily || null,
         weeklyPrice: existingListing.rentalPrice?.weekly || null,
         monthlyPrice: existingListing.rentalPrice?.monthly || null,
+        securityDeposit: (existingListing as any).securityDeposit || null,
         city: existingListing.city || "",
         state: existingListing.state || "",
         area: (existingListing as any).area || "",
@@ -302,6 +304,18 @@ export default function CreateListing() {
                   placeholder="10000"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Security Deposit (₹) <span className="text-muted-foreground font-normal text-xs">— optional, refundable</span></Label>
+              <Input
+                type="number"
+                min={0}
+                value={(formData as any).securityDeposit || ""}
+                onChange={e => setFormData(p => ({ ...p, securityDeposit: Number(e.target.value) || null }))}
+                placeholder="e.g. 5000 — leave blank if no deposit required"
+              />
+              <p className="text-xs text-muted-foreground">This amount is collected from the renter as a refundable deposit and returned after the rental period ends in good condition.</p>
             </div>
 
             <div className="space-y-2">

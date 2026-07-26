@@ -18,6 +18,7 @@ export const listingsTable = pgTable("listings", {
   dailyPrice: numeric("daily_price", { precision: 10, scale: 2 }),
   weeklyPrice: numeric("weekly_price", { precision: 10, scale: 2 }),
   monthlyPrice: numeric("monthly_price", { precision: 10, scale: 2 }),
+  securityDeposit: numeric("security_deposit", { precision: 10, scale: 2 }),
   city: text("city").notNull(),
   state: text("state").notNull(),
   area: text("area"),

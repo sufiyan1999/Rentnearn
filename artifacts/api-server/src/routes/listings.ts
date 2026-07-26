@@ -387,6 +387,15 @@ router.get("/listings/:id/qr", async (req, res): Promise<void> => {
   res.json({ qrDataUrl, listingUrl });
 });
 
+const APP_BASE = (process.env.APP_URL ?? "").replace(/\/$/, "");
+
+/** Ensure image URLs are always absolute, regardless of when they were uploaded. */
+function toAbsoluteUrl(url: string): string {
+  if (!url) return url;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${APP_BASE}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
 function formatListing(listing: typeof listingsTable.$inferSelect, owner?: { id: number; name: string; profilePhoto: string | null; userType: string; isVerified: boolean; phone: string | null; createdAt: Date } | undefined) {
   return {
     id: listing.id,
@@ -407,8 +416,8 @@ function formatListing(listing: typeof listingsTable.$inferSelect, owner?: { id:
     pincode: listing.pincode,
     latitude: listing.latitude ? Number(listing.latitude) : null,
     longitude: listing.longitude ? Number(listing.longitude) : null,
-    images: listing.images ?? [],
-    thumbnails: listing.thumbnails ?? [],
+    images: (listing.images ?? []).map(toAbsoluteUrl),
+    thumbnails: (listing.thumbnails ?? []).map(toAbsoluteUrl),
     status: listing.status,
     isFeatured: listing.isFeatured,
     rejectionReason: listing.rejectionReason,

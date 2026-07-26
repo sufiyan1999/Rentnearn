@@ -17,7 +17,7 @@ const NOT_HANDLED = [
 const SECTIONS = [
   {
     title: "1. Platform Role",
-    body: `RentNEarn ("we", "the platform") operates solely as a technology intermediary. We provide a listing service that connects people who wish to rent out items with people who wish to rent them. RentNEarn is not an owner, operator, seller, lessor, or agent for any listed item. We do not take part in, supervise, or guarantee any transaction between users.`,
+    body: `RentNEarn is a product of AlliedReach ("we", "the company"). The platform operates solely as a technology intermediary, providing a listing service that connects people who wish to rent out items with people who wish to rent them. AlliedReach is not an owner, operator, seller, lessor, or agent for any listed item and does not take part in, supervise, or guarantee any transaction between users.`,
   },
   {
     title: "2. No Warranty on Listed Items",
@@ -41,7 +41,7 @@ const SECTIONS = [
   },
   {
     title: "7. Limitation of Liability",
-    body: `To the fullest extent permitted by applicable Indian law, RentNEarn India, its directors, employees, and agents shall not be liable for any indirect, incidental, special, consequential, punitive, or exemplary damages, including loss of profits, goodwill, data, or other intangible losses, even if advised of the possibility of such damages.`,
+    body: `To the fullest extent permitted by applicable Indian law, AlliedReach, its directors, employees, and agents shall not be liable for any indirect, incidental, special, consequential, punitive, or exemplary damages, including loss of profits, goodwill, data, or other intangible losses, even if advised of the possibility of such damages.`,
   },
   {
     title: "8. Third-Party Links",
@@ -49,7 +49,7 @@ const SECTIONS = [
   },
   {
     title: "9. Governing Law",
-    body: `This Disclaimer is governed by the laws of the Republic of India. Any dispute shall be subject to the exclusive jurisdiction of the courts of Bangalore, Karnataka, India.`,
+    body: `This Disclaimer is governed by the laws of the Republic of India. Any dispute shall be subject to the exclusive jurisdiction of the courts of Mumbai, Maharashtra, India.`,
   },
   {
     title: "10. Contact",

@@ -113,7 +113,7 @@ export default function Footer() {
                 <Mail className="w-4 h-4 text-primary" />
                 support@rentnearn.com
               </a>
-              <a href="https://wa.me/919999000001" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-white/55 hover:text-white transition-colors">
+              <a href="https://wa.me/917039363031" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-white/55 hover:text-white transition-colors">
                 <MessageCircle className="w-4 h-4 text-green-400" />
                 WhatsApp Support
               </a>
@@ -135,7 +135,7 @@ export default function Footer() {
       <div className="border-t border-white/8">
         <div className="container mx-auto px-4 py-5 max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-white/35 text-center sm:text-left">
-            &copy; 2026 RentNEarn. All Rights Reserved.
+            &copy; 2026 AlliedReach. All Rights Reserved.
           </p>
           <div className="flex items-center gap-4 flex-wrap justify-center">
             {[

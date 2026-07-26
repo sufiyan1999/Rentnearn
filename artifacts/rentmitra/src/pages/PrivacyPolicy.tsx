@@ -75,7 +75,7 @@ export default function PrivacyPolicy() {
           },
           {
             title: "10. Contact Us",
-            body: `For privacy-related queries: support@rentnearn.com — RentNEarn India`,
+            body: `For privacy-related queries: support@rentnearn.com — AlliedReach, 11 Granada, LBS Marg, Opp. Phoenix Mall, Kurla West, Mumbai – 400070`,
           },
         ].map(({ title, body, subsections }) => (
           <motion.section key={title} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>

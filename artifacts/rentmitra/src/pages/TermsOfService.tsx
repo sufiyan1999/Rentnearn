@@ -42,7 +42,7 @@ export default function TermsOfService() {
           },
           {
             title: "7. Intellectual Property",
-            body: `All content, trademarks, logos, and design elements on RentNEarn are owned by or licensed to RentNEarn India and may not be reproduced without written consent. By uploading photos or content, you grant RentNEarn a non-exclusive, royalty-free licence to display that content on the platform.`,
+            body: `All content, trademarks, logos, and design elements on RentNEarn are owned by or licensed to AlliedReach and may not be reproduced without written consent. By uploading photos or content, you grant RentNEarn a non-exclusive, royalty-free licence to display that content on the platform.`,
           },
           {
             title: "8. Limitation of Liability",
@@ -50,7 +50,7 @@ export default function TermsOfService() {
           },
           {
             title: "9. Governing Law",
-            body: `These Terms are governed by and construed in accordance with the laws of India. Any dispute arising from these Terms shall be subject to the exclusive jurisdiction of the courts located in Bangalore, Karnataka, India.`,
+            body: `These Terms are governed by and construed in accordance with the laws of India. Any dispute arising from these Terms shall be subject to the exclusive jurisdiction of the courts located in Mumbai, Maharashtra, India.`,
           },
           {
             title: "10. Changes to Terms",
@@ -58,7 +58,7 @@ export default function TermsOfService() {
           },
           {
             title: "11. Contact",
-            body: `For legal enquiries: support@rentnearn.com — RentNEarn India`,
+            body: `For legal enquiries: support@rentnearn.com — AlliedReach, 11 Granada, LBS Marg, Opp. Phoenix Mall, Kurla West, Mumbai – 400070`,
           },
         ].map(({ title, body }) => (
           <motion.section key={title} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>

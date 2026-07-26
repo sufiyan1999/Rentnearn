@@ -8,8 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 const CONTACT_OPTIONS = [
   { icon: Mail, title: "Email Support", detail: "support@rentnearn.com", desc: "Typically replies within 24 hours", href: "mailto:support@rentnearn.com", color: "text-primary" },
-  { icon: MessageCircle, title: "WhatsApp", detail: "+91 9999 000 001", desc: "Mon–Sat, 9 AM – 6 PM IST", href: "https://wa.me/919999000001", color: "text-green-500" },
-  { icon: MapPin, title: "Registered Office", detail: "India", desc: "Available in 50+ cities", href: null, color: "text-primary" },
+  { icon: MessageCircle, title: "WhatsApp", detail: "+91 70393 63031", desc: "Mon–Sat, 9 AM – 6 PM IST", href: "https://wa.me/917039363031", color: "text-green-500" },
+  { icon: MapPin, title: "Registered Office", detail: "11 Granada, LBS Marg, Opp. Phoenix Mall, Kurla West, Mumbai – 400070", desc: "AlliedReach", href: null, color: "text-primary" },
   { icon: Clock, title: "Support Hours", detail: "Mon–Sat", desc: "9:00 AM – 6:00 PM IST", href: null, color: "text-amber-500" },
 ];
 

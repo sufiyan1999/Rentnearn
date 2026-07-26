@@ -1,44 +1,60 @@
-import path from "path";
-import fs from "fs/promises";
 import sharp from "sharp";
-import { logger } from "./logger";
+import { objectStorageClient } from "./objectStorage";
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR ?? path.join(process.cwd(), "uploads");
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+// ── Derived from env vars set by setupObjectStorage() ────────────────────────
+// PUBLIC_OBJECT_SEARCH_PATHS = "/bucket-id/public"
+// Files stored at  gs://bucket-id/public/<folder>/<name>
+// Served at        /api/storage/public-objects/<folder>/<name>
 
-export async function ensureUploadDir(): Promise<void> {
-  await fs.mkdir(UPLOAD_DIR, { recursive: true });
-  await fs.mkdir(path.join(UPLOAD_DIR, "listings"), { recursive: true });
-  await fs.mkdir(path.join(UPLOAD_DIR, "profiles"), { recursive: true });
+function parsedPublicPath(): { bucketName: string; folderPrefix: string } {
+  const raw = (process.env.PUBLIC_OBJECT_SEARCH_PATHS ?? "").split(",")[0].trim();
+  // raw = "/replit-objstore-xxx/public"
+  const parts = raw.replace(/^\//, "").split("/");
+  return { bucketName: parts[0], folderPrefix: parts.slice(1).join("/") };
 }
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 export async function processAndSaveImage(
   buffer: Buffer,
   folder: "listings" | "profiles",
-  filename: string
+  filename: string,
 ): Promise<{ imageUrl: string; thumbnailUrl: string }> {
   const baseName = `${Date.now()}_${filename.replace(/[^a-z0-9.]/gi, "_")}`;
   const imageName = baseName.replace(/\.[^.]+$/, "") + "_display.webp";
-  const thumbName = baseName.replace(/\.[^.]+$/, "") + "_thumb.webp";
+  const thumbName  = baseName.replace(/\.[^.]+$/, "") + "_thumb.webp";
 
-  const imageDir = path.join(UPLOAD_DIR, folder);
-  const imagePath = path.join(imageDir, imageName);
-  const thumbPath = path.join(imageDir, thumbName);
+  const [displayBuf, thumbBuf] = await Promise.all([
+    sharp(buffer)
+      .resize(1000, 1000, { fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 85 })
+      .toBuffer(),
+    sharp(buffer)
+      .resize(400, 400, { fit: "cover" })
+      .webp({ quality: 80 })
+      .toBuffer(),
+  ]);
 
-  await sharp(buffer)
-    .resize(1000, 1000, { fit: "inside", withoutEnlargement: true })
-    .webp({ quality: 85 })
-    .toFile(imagePath);
+  const { bucketName, folderPrefix } = parsedPublicPath();
+  const bucket = objectStorageClient.bucket(bucketName);
 
-  await sharp(buffer)
-    .resize(400, 400, { fit: "cover" })
-    .webp({ quality: 80 })
-    .toFile(thumbPath);
+  const imageObject = `${folderPrefix}/${folder}/${imageName}`;
+  const thumbObject  = `${folderPrefix}/${folder}/${thumbName}`;
 
-  const APP_URL = process.env.APP_URL ?? "";
+  await Promise.all([
+    bucket.file(imageObject).save(displayBuf, {
+      metadata: { contentType: "image/webp" },
+      resumable: false,
+    }),
+    bucket.file(thumbObject).save(thumbBuf, {
+      metadata: { contentType: "image/webp" },
+      resumable: false,
+    }),
+  ]);
+
   return {
-    imageUrl: `${APP_URL}/api/uploads/${folder}/${imageName}`,
-    thumbnailUrl: `${APP_URL}/api/uploads/${folder}/${thumbName}`,
+    imageUrl:      `/api/storage/public-objects/${folder}/${imageName}`,
+    thumbnailUrl:  `/api/storage/public-objects/${folder}/${thumbName}`,
   };
 }
 
@@ -51,4 +67,6 @@ export function validateImageBuffer(buffer: Buffer, mimetype: string): void {
   }
 }
 
-export { UPLOAD_DIR };
+// Kept for backward compat (app.ts static serving — now a no-op stub)
+export const UPLOAD_DIR = "";
+export async function ensureUploadDir(): Promise<void> { /* no-op — using GCS */ }

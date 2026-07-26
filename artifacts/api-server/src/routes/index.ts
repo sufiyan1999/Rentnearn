@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
+import storageRouter from "./storage";
 import authRouter from "./auth";
 import usersRouter from "./users";
 import listingsRouter from "./listings";
@@ -17,6 +18,7 @@ const router: IRouter = Router();
 
 // Public routes first — must come before adminRouter which has a global requireAuth middleware
 router.use(seoRouter);
+router.use(storageRouter);
 router.use(healthRouter);
 router.use(authRouter);
 router.use(usersRouter);

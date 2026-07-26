@@ -36,9 +36,12 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use("/", seoRouter);
 
-// ── Uploaded images ───────────────────────────────────────────────────────────
-// Serve uploaded images statically
-app.use("/api/uploads", express.static(UPLOAD_DIR));
+// ── Legacy /api/uploads fallback ─────────────────────────────────────────────
+// Old images stored on disk before GCS migration — serve as 404 so they never
+// fall through to the auth-protected /api router and incorrectly return 401.
+app.use("/api/uploads", (_req, res) => {
+  res.status(404).json({ error: "Image not found" });
+});
 
 app.use("/api", router);
 

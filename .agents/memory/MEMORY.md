@@ -1,0 +1,1 @@
+- [GCS image storage](gcs-image-storage.md) — listing images stored in Replit Object Storage (GCS), served at /api/storage/public-objects/*; local disk was ephemeral across dev/prod.

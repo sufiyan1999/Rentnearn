@@ -37,7 +37,7 @@ const SECTIONS = [
   },
   {
     title: "6. Revenue Model",
-    body: `RentNEarn earns revenue solely from listing fees and featured listing promotions. We do not earn commissions from rentals, take a percentage of transactions, or receive payments from renters on behalf of owners. The current fee schedule is: ₹49 for 1 listing (30 days); ₹199 for 5 listings (30 days); ₹499/month for unlimited listings (businesses); and ₹99 to feature any approved listing for 7 days. These fees may change from time to time with notice.`,
+    body: `RentNEarn earns revenue solely from subscription plans and featured listing promotions. We do not earn commissions from rentals, take a percentage of transactions, or receive payments from renters on behalf of owners. Current plans: Basic ₹49/month (up to 5 listings); Plus ₹199/month (up to 20 listings); Business ₹1,999/year (unlimited listings). Featured listing boosts are available as add-ons at ₹29 for 7 days or ₹99 for 30 days. These fees may change from time to time with notice on our Pricing page.`,
   },
   {
     title: "7. Limitation of Liability",
@@ -53,7 +53,7 @@ const SECTIONS = [
   },
   {
     title: "10. Contact",
-    body: `For questions about this Disclaimer: legal@rentnearn.com`,
+    body: `For questions about this Disclaimer: support@rentnearn.com`,
   },
 ];
 
@@ -120,10 +120,10 @@ export default function Disclaimer() {
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: "1 Listing", price: "₹49", sub: "30 days" },
-              { label: "5 Listings", price: "₹199", sub: "30 days" },
-              { label: "Unlimited", price: "₹499", sub: "per month" },
-              { label: "Featured", price: "₹99", sub: "per listing · 7 days" },
+              { label: "Basic", price: "₹49", sub: "per month · 5 listings" },
+              { label: "Plus", price: "₹199", sub: "per month · 20 listings" },
+              { label: "Business", price: "₹1,999", sub: "per year · unlimited" },
+              { label: "Featured", price: "₹29–₹99", sub: "7 or 30 day boost" },
             ].map(t => (
               <div key={t.label} className="bg-white dark:bg-green-900/30 rounded-xl p-3 text-center border border-green-100 dark:border-green-800">
                 <p className="text-xs text-green-700 dark:text-green-300 font-medium">{t.label}</p>

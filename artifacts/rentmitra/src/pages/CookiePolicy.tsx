@@ -98,7 +98,7 @@ export default function CookiePolicy() {
           <h2 className="text-xl font-bold mb-3">Contact</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
             If you have questions about our use of cookies, contact us at{" "}
-            <a href="mailto:privacy@rentnearn.com" className="text-primary underline underline-offset-2">privacy@rentnearn.com</a>.
+            <a href="mailto:support@rentnearn.com" className="text-primary underline underline-offset-2">support@rentnearn.com</a>.
           </p>
         </motion.section>
       </div>

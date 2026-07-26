@@ -58,7 +58,7 @@ export default function TermsOfService() {
           },
           {
             title: "11. Contact",
-            body: `For legal enquiries: legal@rentnearn.com — RentNEarn India`,
+            body: `For legal enquiries: support@rentnearn.com — RentNEarn India`,
           },
         ].map(({ title, body }) => (
           <motion.section key={title} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>

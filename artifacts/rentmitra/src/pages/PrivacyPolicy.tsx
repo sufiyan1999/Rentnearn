@@ -63,7 +63,7 @@ export default function PrivacyPolicy() {
           },
           {
             title: "7. Your Rights",
-            body: `You have the right to: access the personal data we hold about you; correct inaccurate data; request deletion of your account and data; withdraw consent for non-essential cookies at any time. To exercise these rights, email privacy@rentnearn.com.`,
+            body: `You have the right to: access the personal data we hold about you; correct inaccurate data; request deletion of your account and data; withdraw consent for non-essential cookies at any time. To exercise these rights, email support@rentnearn.com.`,
           },
           {
             title: "8. Children's Privacy",
@@ -75,7 +75,7 @@ export default function PrivacyPolicy() {
           },
           {
             title: "10. Contact Us",
-            body: `For privacy-related queries: privacy@rentnearn.com — RentNEarn India, support@rentnearn.com`,
+            body: `For privacy-related queries: support@rentnearn.com — RentNEarn India`,
           },
         ].map(({ title, body, subsections }) => (
           <motion.section key={title} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>

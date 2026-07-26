@@ -4,7 +4,7 @@ import { useGetListing, getGetListingQueryKey, useGetListingQr, getGetListingQrQ
 import { SeoHead } from "@/components/SeoHead";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/ui-core";
-import { ArrowLeft, MapPin, Share2, MessageCircle, AlertTriangle, ShieldCheck, QrCode, Star, Calendar, Tag, Check, X, Clock } from "lucide-react";
+import { ArrowLeft, MapPin, Share2, MessageCircle, AlertTriangle, ShieldCheck, QrCode, Star, Calendar, Tag, Check, X, Clock, Copy, Link2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -21,6 +21,8 @@ export default function ListingDetails() {
 
   const [activeImage, setActiveImage] = useState(0);
   const [showQr, setShowQr] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const { data: listing, isLoading, error } = useGetListing(id, {
     query: { enabled: !!id, queryKey: getGetListingQueryKey(id) },
@@ -89,16 +91,17 @@ export default function ListingDetails() {
 
   // Canonical share URL — always the production domain, never a .replit.dev preview URL
   const shareUrl = `${SITE_URL}/listings/${listing.id}`;
+  const shareText = `Check out "${listing.title}" for rent in ${listing.city} on RentNEarn!\n${shareUrl}`;
+  const shareTweet = `Check out "${listing.title}" for rent in ${listing.city} on RentNEarn!`;
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try { await navigator.share({ title: listing.title, text: `Check out ${listing.title} on RentNEarn`, url: shareUrl }); }
-      catch (e) { /* user cancelled */ }
-    } else {
-      navigator.clipboard.writeText(shareUrl);
-      toast.success("Link copied!");
-    }
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    toast.success("Link copied!");
+    setTimeout(() => setCopied(false), 2000);
   };
+
+  const openSharePlatform = (url: string) => window.open(url, "_blank", "noopener,noreferrer");
 
   const handleWhatsApp = () => {
     if (!listing.owner?.phone) { toast.error("Owner phone number not available"); return; }
@@ -223,7 +226,7 @@ export default function ListingDetails() {
         </motion.button>
         <motion.button
           whileTap={{ scale: 0.9 }}
-          onClick={handleShare}
+          onClick={() => setShowShare(true)}
           className="w-10 h-10 glass rounded-full flex items-center justify-center pointer-events-auto shadow-md"
         >
           <Share2 className="w-4 h-4" />
@@ -319,7 +322,7 @@ export default function ListingDetails() {
                   {isOwner && (
                     <Button variant="outline" size="sm" onClick={() => setLocation(`/listings/${listing.id}/edit`)}>Edit</Button>
                   )}
-                  <Button variant="secondary" size="icon" onClick={handleShare}>
+                  <Button variant="secondary" size="icon" onClick={() => setShowShare(true)}>
                     <Share2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -463,6 +466,97 @@ export default function ListingDetails() {
           )}
         </div>
       </div>
+
+      {/* Share Modal */}
+      <AnimatePresence>
+        {showShare && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowShare(false)}
+          >
+            <motion.div
+              initial={{ y: 48, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 48, opacity: 0 }}
+              transition={{ type: "spring", bounce: 0.25, duration: 0.4 }}
+              className="bg-card border border-border rounded-3xl p-6 w-full max-w-sm flex flex-col gap-5 shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-extrabold text-lg">Share listing</h3>
+                  <p className="text-muted-foreground text-sm mt-0.5 truncate max-w-[220px]">{listing.title}</p>
+                </div>
+                <button onClick={() => setShowShare(false)} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0 hover:bg-muted transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Platform grid */}
+              <div className="grid grid-cols-4 gap-2">
+                {/* WhatsApp */}
+                <button
+                  onClick={() => openSharePlatform(`https://wa.me/?text=${encodeURIComponent(shareText)}`)}
+                  className="flex flex-col items-center gap-2 group"
+                >
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md transition-transform group-hover:scale-105 group-active:scale-95" style={{ background: "#25D366" }}>
+                    <svg className="w-7 h-7 fill-white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground">WhatsApp</span>
+                </button>
+
+                {/* Facebook */}
+                <button
+                  onClick={() => openSharePlatform(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`)}
+                  className="flex flex-col items-center gap-2 group"
+                >
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md transition-transform group-hover:scale-105 group-active:scale-95" style={{ background: "#1877F2" }}>
+                    <svg className="w-7 h-7 fill-white" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground">Facebook</span>
+                </button>
+
+                {/* X / Twitter */}
+                <button
+                  onClick={() => openSharePlatform(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTweet)}&url=${encodeURIComponent(shareUrl)}`)}
+                  className="flex flex-col items-center gap-2 group"
+                >
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md transition-transform group-hover:scale-105 group-active:scale-95 bg-black dark:bg-white">
+                    <svg className="w-6 h-6 fill-white dark:fill-black" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground">X (Twitter)</span>
+                </button>
+
+                {/* Instagram — copy link (no web share API) */}
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(shareUrl);
+                    toast.success("Link copied — paste it in Instagram!");
+                  }}
+                  className="flex flex-col items-center gap-2 group"
+                >
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md transition-transform group-hover:scale-105 group-active:scale-95" style={{ background: "linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)" }}>
+                    <svg className="w-7 h-7 fill-white" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground">Instagram</span>
+                </button>
+              </div>
+
+              {/* Copy link bar */}
+              <div className="flex items-center gap-2 px-3 py-2.5 bg-secondary rounded-2xl border border-border">
+                <Link2 className="w-4 h-4 text-muted-foreground shrink-0" />
+                <p className="flex-1 text-sm text-muted-foreground truncate select-all">{shareUrl}</p>
+                <button
+                  onClick={handleCopyLink}
+                  className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-primary text-white hover:bg-primary/90 active:scale-95"
+                >
+                  {copied ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* QR Modal */}
       <AnimatePresence>

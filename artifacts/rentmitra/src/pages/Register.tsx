@@ -92,13 +92,13 @@ export default function Register() {
       >
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <Link href="/" className="flex items-center gap-2.5 mb-6">
-            <div className="overflow-hidden flex items-center" style={{ height: 40, width: 160 }}>
+          <Link href="/" className="mb-6">
+            <div style={{ overflow: "hidden", height: 48, width: 192 }}>
               <img
                 src="/rentnearn-logo.jpg"
                 alt="RentNEarn"
                 draggable={false}
-                style={{ height: 130, width: "auto", marginTop: -30, mixBlendMode: "multiply" }}
+                style={{ height: 156, width: "auto", marginTop: -36, mixBlendMode: "multiply" }}
               />
             </div>
           </Link>

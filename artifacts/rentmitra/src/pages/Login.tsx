@@ -36,13 +36,15 @@ export default function Login() {
       >
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <Link href="/" className="flex items-center gap-2.5 mb-6">
-            <div className="w-11 h-11 rounded-2xl gradient-primary flex items-center justify-center text-white font-black text-xl shadow-lg shadow-primary/30">
-              R
+          <Link href="/" className="mb-6">
+            <div style={{ overflow: "hidden", height: 48, width: 192 }}>
+              <img
+                src="/rentnearn-logo.jpg"
+                alt="RentNEarn"
+                draggable={false}
+                style={{ height: 156, width: "auto", marginTop: -36, mixBlendMode: "multiply" }}
+              />
             </div>
-            <span className="font-extrabold text-xl tracking-tight">
-              Rent<span className="gradient-text">Mitra</span>
-            </span>
           </Link>
           <h1 className="text-2xl font-extrabold tracking-tight">Welcome back</h1>
           <p className="text-muted-foreground text-sm mt-1.5">Sign in to your account</p>

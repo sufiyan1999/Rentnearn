@@ -14,10 +14,10 @@ import { motion, AnimatePresence } from "framer-motion";
 const HOME_CATS = CATEGORIES.slice(0, 12);
 
 const STATS = [
-  { value: "10,000+", label: "Active Listings" },
-  { value: "50+", label: "Cities" },
   { value: "₹0", label: "Commission" },
   { value: "100%", label: "Peer-to-Peer" },
+  { value: "Pan India", label: "Coverage" },
+  { value: "Free", label: "To List" },
 ];
 
 const POPULAR_SEARCHES = ["Sony Camera", "Bosch Drill", "Baby Stroller", "Wheelchair", "Camping Tent", "DJ Speakers", "Projector", "Mountain Bike"];

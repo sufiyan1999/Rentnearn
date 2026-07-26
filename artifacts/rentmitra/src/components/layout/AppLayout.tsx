@@ -80,8 +80,12 @@ export function TopNav() {
       <div className="glass border-b shadow-sm shadow-black/5 dark:shadow-black/20">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
 
-          {/* Logo — cropped to the wordmark area */}
-          <Link href="/" className="shrink-0 overflow-hidden" style={{ height: 40, width: 160 }}>
+          {/* Logo — cropped to the wordmark area.
+              Light mode: multiply blend removes the white JPEG background so the
+              logo floats on the glass header.
+              Dark mode: give the container a white pill so multiply still works
+              correctly (multiply on white = original colours, no inversion needed). */}
+          <Link href="/" className="shrink-0 overflow-hidden dark:bg-white dark:rounded-lg" style={{ height: 40, width: 160 }}>
             <img
               src="/rentnearn-logo.jpg"
               alt="RentNEarn"

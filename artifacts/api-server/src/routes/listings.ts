@@ -387,13 +387,19 @@ router.get("/listings/:id/qr", async (req, res): Promise<void> => {
   res.json({ qrDataUrl, listingUrl });
 });
 
-const APP_BASE = (process.env.APP_URL ?? "").replace(/\/$/, "");
-
-/** Ensure image URLs are always absolute, regardless of when they were uploaded. */
-function toAbsoluteUrl(url: string): string {
+/**
+ * Normalise image URLs to root-relative paths (/api/uploads/...) so they
+ * work in both dev and production regardless of which domain the browser is on.
+ * Older uploads may be stored as relative paths; newer ones (after APP_URL was
+ * set) may be stored as absolute URLs — both are handled here.
+ */
+function toRelativeUrl(url: string): string {
   if (!url) return url;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  return `${APP_BASE}${url.startsWith("/") ? "" : "/"}${url}`;
+  try {
+    return new URL(url).pathname; // strips scheme + host → /api/uploads/...
+  } catch {
+    return url; // already relative
+  }
 }
 
 function formatListing(listing: typeof listingsTable.$inferSelect, owner?: { id: number; name: string; profilePhoto: string | null; userType: string; isVerified: boolean; phone: string | null; createdAt: Date } | undefined) {
@@ -416,8 +422,8 @@ function formatListing(listing: typeof listingsTable.$inferSelect, owner?: { id:
     pincode: listing.pincode,
     latitude: listing.latitude ? Number(listing.latitude) : null,
     longitude: listing.longitude ? Number(listing.longitude) : null,
-    images: (listing.images ?? []).map(toAbsoluteUrl),
-    thumbnails: (listing.thumbnails ?? []).map(toAbsoluteUrl),
+    images: (listing.images ?? []).map(toRelativeUrl),
+    thumbnails: (listing.thumbnails ?? []).map(toRelativeUrl),
     status: listing.status,
     isFeatured: listing.isFeatured,
     rejectionReason: listing.rejectionReason,

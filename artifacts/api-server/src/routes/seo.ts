@@ -39,6 +39,31 @@ function urlEntry(loc: string, opts: { lastmod?: string; changefreq: string; pri
     .join("\n");
 }
 
+// GET /robots.txt
+router.get("/robots.txt", (req, res): void => {
+  const APP_URL = (process.env.APP_URL ?? "https://www.rentnearn.com").replace(/\/$/, "");
+  const body = [
+    "User-agent: *",
+    "Allow: /",
+    "",
+    "# Private / authenticated paths — do not index",
+    "Disallow: /admin",
+    "Disallow: /dashboard",
+    "Disallow: /profile",
+    "Disallow: /favourites",
+    "Disallow: /listings/new",
+    "Disallow: /listings/*/edit",
+    "Disallow: /login",
+    "Disallow: /register",
+    "Disallow: /forgot-password",
+    "",
+    `Sitemap: ${APP_URL}/sitemap.xml`,
+  ].join("\n");
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.send(body);
+});
+
 // GET /sitemap.xml — dynamically generated sitemap
 router.get("/sitemap.xml", async (req, res): Promise<void> => {
   const APP_URL = (process.env.APP_URL ?? "https://rentnearn.com").replace(/\/$/, "");

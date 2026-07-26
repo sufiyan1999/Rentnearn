@@ -12,4 +12,4 @@ Disallow: /login
 Disallow: /register
 Disallow: /forgot-password
 
-Sitemap: https://www.rentnearn.com/api/sitemap.xml
+Sitemap: https://www.rentnearn.com/sitemap.xml

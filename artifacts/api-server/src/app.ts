@@ -3,6 +3,7 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import path from "path";
 import router from "./routes";
+import seoRouter from "./routes/seo";
 import { logger } from "./lib/logger";
 import { ensureUploadDir, UPLOAD_DIR } from "./lib/images";
 
@@ -29,6 +30,13 @@ app.use(cors({ origin: "*", methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
+// ── Root-level SEO routes (no /api prefix) ───────────────────────────────────
+// These MUST be registered before the /api mount so the proxy can reach them
+// at https://www.rentnearn.com/sitemap.xml and https://www.rentnearn.com/robots.txt
+
+app.use("/", seoRouter);
+
+// ── Uploaded images ───────────────────────────────────────────────────────────
 // Serve uploaded images statically
 app.use("/api/uploads", express.static(UPLOAD_DIR));
 

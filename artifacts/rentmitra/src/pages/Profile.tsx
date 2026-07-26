@@ -57,8 +57,8 @@ export default function Profile() {
           </div>
         </div>
         <div className="flex flex-col gap-2 w-full md:w-auto">
-          <Button variant="outline" className="w-full justify-start" onClick={() => toast.info("Settings coming soon")}>
-            <Settings className="w-4 h-4 mr-2" /> Settings
+          <Button variant="outline" className="w-full justify-start" onClick={() => setLocation("/dashboard?tab=profile")}>
+            <Settings className="w-4 h-4 mr-2" /> Edit Profile
           </Button>
           <Button variant="destructive" className="w-full justify-start bg-red-50 text-red-600 border-none shadow-none hover:bg-red-100" onClick={handleLogout} isLoading={logoutMutation.isPending}>
             <LogOut className="w-4 h-4 mr-2" /> Log out

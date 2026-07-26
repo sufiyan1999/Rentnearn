@@ -10,15 +10,17 @@ import { motion } from "framer-motion";
 
 export function BottomNav() {
   const [location] = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
-  const navItems = [
-    { icon: Home,       label: "Home",       href: "/" },
-    { icon: Search,     label: "Search",     href: "/search" },
-    { icon: PlusCircle, label: "List",        href: "/listings/new", highlight: true },
-    { icon: Heart,      label: "Saved",      href: "/favourites" },
-    { icon: User,       label: "Profile",    href: "/profile" },
+  const allNavItems = [
+    { icon: Home,       label: "Home",       href: "/",            highlight: false, adminHide: false },
+    { icon: Search,     label: "Search",     href: "/search",      highlight: false, adminHide: false },
+    { icon: PlusCircle, label: "List",        href: "/listings/new", highlight: true,  adminHide: true  },
+    { icon: Heart,      label: "Saved",      href: "/favourites",  highlight: false, adminHide: false },
+    { icon: User,       label: "Profile",    href: "/profile",     highlight: false, adminHide: false },
   ];
+
+  const navItems = allNavItems.filter(item => !(item.adminHide && user?.userType === 'admin'));
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)]">
@@ -143,13 +145,15 @@ export function TopNav() {
 
             {isAuthenticated ? (
               <>
-                <Link
-                  href="/listings/new"
-                  className="hidden md:flex items-center gap-1.5 gradient-primary text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-px transition-all duration-200 shine-on-hover"
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  List Item
-                </Link>
+                {user?.userType !== 'admin' && (
+                  <Link
+                    href="/listings/new"
+                    className="hidden md:flex items-center gap-1.5 gradient-primary text-white px-4 py-2 rounded-full text-sm font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-px transition-all duration-200 shine-on-hover"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    List Item
+                  </Link>
+                )}
                 <Link
                   href="/profile"
                   className="w-9 h-9 rounded-full bg-secondary border border-border flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-primary/40 transition-all duration-200"

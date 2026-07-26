@@ -1,11 +1,11 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useEffect, useState } from "react";
 import { useAdminGetListings, getAdminGetListingsQueryKey, useApproveListing, useRejectListing, useFeatureListing, AdminGetListingsStatus } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/ui-core";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, X, Star } from "lucide-react";
+import { Check, X, Star, Eye } from "lucide-react";
 
 export default function AdminListings() {
   const { user, isAuthenticated } = useAuth();
@@ -121,12 +121,17 @@ export default function AdminListings() {
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <Link href={`/listings/${listing.id}`} target="_blank">
+                          <Button size="sm" variant="outline" className="text-muted-foreground hover:text-foreground" title="View listing">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </Link>
                         {listing.status === 'pending' && (
                           <>
-                            <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50" onClick={() => handleApprove(listing.id)}>
+                            <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50" title="Approve" onClick={() => handleApprove(listing.id)}>
                               <Check className="w-4 h-4" />
                             </Button>
-                            <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleReject(listing.id)}>
+                            <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" title="Reject" onClick={() => handleReject(listing.id)}>
                               <X className="w-4 h-4" />
                             </Button>
                           </>
@@ -136,6 +141,7 @@ export default function AdminListings() {
                             size="sm" 
                             variant="outline" 
                             className={listing.isFeatured ? "text-primary border-primary bg-primary/10" : "text-muted-foreground"}
+                            title={listing.isFeatured ? "Unfeature" : "Feature"}
                             onClick={() => toggleFeature(listing.id, listing.isFeatured || false)}
                           >
                             <Star className={`w-4 h-4 ${listing.isFeatured ? "fill-primary" : ""}`} />

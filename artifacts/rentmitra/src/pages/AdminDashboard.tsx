@@ -872,17 +872,15 @@ export default function AdminDashboard() {
                           <th className="pb-2 pr-4 font-semibold">Name</th>
                           <th className="pb-2 pr-4 font-semibold hidden sm:table-cell">Email</th>
                           <th className="pb-2 pr-4 font-semibold">Type</th>
-                          <th className="pb-2 font-semibold">Status</th>
+                          <th className="pb-2 font-semibold">Email</th>
+                          <th className="pb-2 font-semibold hidden md:table-cell">Identity</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/50">
                         {users.map((u: any) => (
                           <tr key={u.id} className="hover:bg-muted/40 transition-colors">
                             <td className="py-2.5 pr-4">
-                              <span className="font-medium flex items-center gap-1">
-                                {u.name}
-                                {u.isVerified && <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
-                              </span>
+                              <span className="font-medium">{u.name}</span>
                             </td>
                             <td className="py-2.5 pr-4 text-muted-foreground hidden sm:table-cell">{u.email}</td>
                             <td className="py-2.5 pr-4">
@@ -893,8 +891,13 @@ export default function AdminDashboard() {
                                 "text-xs px-2 py-0.5 rounded-full font-medium",
                                 u.emailVerified ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
                               )}>
-                                {u.emailVerified ? "Verified" : "Unverified"}
+                                {u.emailVerified ? "Email verified" : "Unverified"}
                               </span>
+                            </td>
+                            <td className="py-2.5 hidden md:table-cell">
+                              {u.isVerified
+                                ? <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-100 text-blue-700 flex items-center gap-1 w-fit"><ShieldCheck className="w-3 h-3" /> ID verified</span>
+                                : <span className="text-xs text-muted-foreground">—</span>}
                             </td>
                           </tr>
                         ))}

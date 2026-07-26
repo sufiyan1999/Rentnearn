@@ -227,27 +227,51 @@ export default function ListingDetails() {
       </div>
 
       {/* Gallery */}
-      <div className="relative w-full aspect-square md:aspect-[16/8] bg-secondary overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.img
-            key={activeImage}
-            src={images[activeImage]}
-            alt={listing.title}
-            initial={{ opacity: 0, scale: 1.04 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="w-full h-full object-cover"
-          />
-        </AnimatePresence>
+      <div className="relative w-full bg-black overflow-hidden" style={{ maxHeight: "88vw", minHeight: 260 }}>
+        <div className="relative w-full h-full flex items-center justify-center" style={{ maxHeight: "88vw", minHeight: 260 }}>
+          {/* Blurred background fill — masks letterbox areas for any orientation */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`bg-${activeImage}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `url(${images[activeImage]})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                filter: "blur(24px) brightness(0.45) saturate(1.4)",
+                transform: "scale(1.12)",
+              }}
+            />
+          </AnimatePresence>
+
+          {/* Foreground image — full image visible, no cropping */}
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={activeImage}
+              src={images[activeImage]}
+              alt={listing.title}
+              initial={{ opacity: 0, scale: 1.03 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="relative z-10 w-full h-full object-contain"
+              style={{ maxHeight: "88vw", minHeight: 260 }}
+            />
+          </AnimatePresence>
+        </div>
+
         {listing.isFeatured && (
-          <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-amber-900 shadow-sm"
+          <div className="absolute top-4 left-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-amber-900 shadow-sm"
             style={{ background: "linear-gradient(135deg,#fde68a,#fbbf24)" }}>
             <Star className="w-3 h-3 fill-amber-700 text-amber-700" /> FEATURED
           </div>
         )}
         {images.length > 1 && (
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5">
+          <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-1.5">
             {images.map((_, i) => (
               <button key={i} onClick={() => setActiveImage(i)}
                 className={cn("h-1.5 rounded-full transition-all duration-300", i === activeImage ? "bg-white w-5" : "bg-white/50 w-1.5")} />
@@ -258,13 +282,13 @@ export default function ListingDetails() {
 
       {/* Thumbnail strip (desktop) */}
       {images.length > 1 && (
-        <div className="hidden md:flex gap-3 container mx-auto px-4 max-w-5xl mt-4 overflow-x-auto">
+        <div className="hidden md:flex gap-3 container mx-auto px-4 max-w-5xl mt-4 overflow-x-auto pb-1">
           {images.map((img, i) => (
             <button key={i} onClick={() => setActiveImage(i)}
-              className={cn("w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all duration-200",
+              className={cn("w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all duration-200 bg-black",
                 i === activeImage ? "border-primary shadow-md shadow-primary/20" : "border-transparent opacity-60 hover:opacity-100"
               )}>
-              <img src={img} alt="" className="w-full h-full object-cover" />
+              <img src={img} alt="" className="w-full h-full object-contain" />
             </button>
           ))}
         </div>

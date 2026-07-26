@@ -41,8 +41,8 @@ const COLUMNS = [
 ];
 
 const SOCIAL = [
-  { icon: Facebook,  label: "Facebook",  href: "https://facebook.com/rentnearn" },
-  { icon: Instagram, label: "Instagram", href: "https://instagram.com/rentnearn" },
+  { icon: Facebook,  label: "Facebook",  href: "https://www.facebook.com/profile.php?id=61592110517886" },
+  { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/rentnearn/" },
   { icon: Linkedin,  label: "LinkedIn",  href: "https://linkedin.com/company/rentnearn" },
   { icon: Twitter,   label: "X (Twitter)", href: "https://x.com/rentnearn" },
 ];

@@ -3,8 +3,9 @@ import { useLocation, useRoute } from "wouter";
 import { useCreateListing, useGetListing, getGetListingQueryKey, useUpdateListing, ListingInput, ListingInputCondition } from "@workspace/api-client-react";
 import { Button, Input, Label, Textarea } from "@/components/ui/ui-core";
 import { CATEGORIES, STATES, CITIES_BY_STATE } from "@/lib/constants";
+import { checkRestrictedContent, PROHIBITED_CATEGORIES } from "@/lib/restrictedItems";
 import { toast } from "sonner";
-import { ImagePlus, X, MapPin } from "lucide-react";
+import { ImagePlus, X, MapPin, ShieldAlert, ChevronDown, ChevronUp } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function CreateListing() {
@@ -31,6 +32,7 @@ export default function CreateListing() {
   }, [isAuthenticated, setLocation]);
 
   const [step, setStep] = useState(1);
+  const [policyExpanded, setPolicyExpanded] = useState(false);
   const [formData, setFormData] = useState<ListingInput>({
     title: "",
     description: "",
@@ -117,6 +119,14 @@ export default function CreateListing() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (step === 1) {
+      // Client-side restricted content check before advancing
+      const check = checkRestrictedContent(formData.title, formData.description);
+      if (check.restricted) {
+        toast.error(`Prohibited item detected: ${check.label}. This category is not allowed on RentNEarn as per Indian law.`);
+        return;
+      }
+    }
     if (step < 3) {
       setStep(s => s + 1);
       return;
@@ -166,6 +176,42 @@ export default function CreateListing() {
         {step === 1 && (
           <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4">
             <h2 className="text-xl font-bold border-b pb-2">Basic Details</h2>
+
+            {/* Prohibited items notice */}
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 dark:border-amber-800/60 dark:bg-amber-950/30 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setPolicyExpanded(p => !p)}
+                className="w-full flex items-center gap-3 px-4 py-3 text-left"
+              >
+                <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span className="text-sm font-semibold text-amber-800 dark:text-amber-300 flex-1">
+                  Prohibited items — not allowed on RentNEarn
+                </span>
+                {policyExpanded
+                  ? <ChevronUp className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                  : <ChevronDown className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                }
+              </button>
+              {policyExpanded && (
+                <div className="px-4 pb-4">
+                  <p className="text-xs text-amber-700 dark:text-amber-400 mb-2">
+                    The following are banned as per Indian law (Arms Act, NDPS Act, IPC, Wildlife Protection Act, etc.):
+                  </p>
+                  <ul className="space-y-1">
+                    {PROHIBITED_CATEGORIES.map(cat => (
+                      <li key={cat} className="flex items-start gap-2 text-xs text-amber-800 dark:text-amber-300">
+                        <span className="mt-0.5 text-amber-500">✕</span>
+                        {cat}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-xs text-amber-600 dark:text-amber-500 mt-3">
+                    Listings violating this policy will be removed and may be reported to authorities.
+                  </p>
+                </div>
+              )}
+            </div>
             
             <div className="space-y-2">
               <Label>Title</Label>

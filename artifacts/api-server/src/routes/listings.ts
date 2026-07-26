@@ -7,6 +7,7 @@ import multer from "multer";
 import { processAndSaveImage, validateImageBuffer } from "../lib/images";
 import QRCode from "qrcode";
 import { getListingLimit, countActiveListings } from "../lib/membership";
+import { checkRestrictedContent } from "../lib/restrictedItems";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -94,6 +95,16 @@ router.post("/listings", requireAuth, async (req, res): Promise<void> => {
 
   if (!title || !category || !city || !state) {
     res.status(400).json({ error: "title, category, city, state are required" });
+    return;
+  }
+
+  // Restricted items policy check (India)
+  const restrictedCheck = checkRestrictedContent(title, description, customCategory);
+  if (restrictedCheck.restricted) {
+    res.status(400).json({
+      error: `This listing contains prohibited content (${restrictedCheck.category}). Listing such items violates RentNEarn's policy and applicable Indian law. Please review our prohibited items policy.`,
+      code: "RESTRICTED_CONTENT",
+    });
     return;
   }
 
@@ -273,6 +284,17 @@ router.patch("/listings/:id", requireAuth, async (req, res): Promise<void> => {
   if (existing.ownerId !== req.user!.id) { res.status(403).json({ error: "Not authorized" }); return; }
 
   const { title, description, category, brand, condition, dailyPrice, weeklyPrice, monthlyPrice, city, state, area, pincode, latitude, longitude } = req.body;
+
+  // Restricted items policy check on edited fields
+  const patchRestricted = checkRestrictedContent(title, description, category);
+  if (patchRestricted.restricted) {
+    res.status(400).json({
+      error: `This listing contains prohibited content (${patchRestricted.category}). Listing such items violates RentNEarn's policy and applicable Indian law.`,
+      code: "RESTRICTED_CONTENT",
+    });
+    return;
+  }
+
   const updates: Partial<typeof listingsTable.$inferInsert> = {};
   if (title) updates.title = title;
   if (description !== undefined) updates.description = description;

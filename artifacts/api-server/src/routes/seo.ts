@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { eq, desc, isNull, and } from "drizzle-orm";
 import { db, listingsTable, categoriesTable } from "@workspace/db";
+import { SITE_URL } from "../lib/config";
 
 const router = Router();
 
@@ -41,7 +42,6 @@ function urlEntry(loc: string, opts: { lastmod?: string; changefreq: string; pri
 
 // GET /robots.txt
 router.get("/robots.txt", (req, res): void => {
-  const APP_URL = (process.env.APP_URL ?? "https://www.rentnearn.com").replace(/\/$/, "");
   const body = [
     "User-agent: *",
     "Allow: /",
@@ -57,7 +57,7 @@ router.get("/robots.txt", (req, res): void => {
     "Disallow: /register",
     "Disallow: /forgot-password",
     "",
-    `Sitemap: ${APP_URL}/sitemap.xml`,
+    `Sitemap: ${SITE_URL}/sitemap.xml`,
   ].join("\n");
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
   res.setHeader("Cache-Control", "public, max-age=86400");
@@ -66,8 +66,6 @@ router.get("/robots.txt", (req, res): void => {
 
 // GET /sitemap.xml — dynamically generated sitemap
 router.get("/sitemap.xml", async (req, res): Promise<void> => {
-  const APP_URL = (process.env.APP_URL ?? "https://rentnearn.com").replace(/\/$/, "");
-
   const [listings, categories] = await Promise.all([
     db
       .select({ id: listingsTable.id, updatedAt: listingsTable.updatedAt })
@@ -86,13 +84,13 @@ router.get("/sitemap.xml", async (req, res): Promise<void> => {
 
   // 1. Static pages
   for (const page of STATIC_PAGES) {
-    entries.push(urlEntry(`${APP_URL}${page.loc}`, { changefreq: page.changefreq, priority: page.priority }));
+    entries.push(urlEntry(`${SITE_URL}${page.loc}`, { changefreq: page.changefreq, priority: page.priority }));
   }
 
   // 2. Category search pages
   for (const cat of categories) {
     entries.push(
-      urlEntry(`${APP_URL}/search?category=${encodeURIComponent(cat.slug)}`, {
+      urlEntry(`${SITE_URL}/search?category=${encodeURIComponent(cat.slug)}`, {
         changefreq: "daily",
         priority: "0.7",
       }),
@@ -103,7 +101,7 @@ router.get("/sitemap.xml", async (req, res): Promise<void> => {
   for (const listing of listings) {
     const lastmod = listing.updatedAt?.toISOString().split("T")[0];
     entries.push(
-      urlEntry(`${APP_URL}/listings/${listing.id}`, {
+      urlEntry(`${SITE_URL}/listings/${listing.id}`, {
         lastmod,
         changefreq: "weekly",
         priority: "0.8",

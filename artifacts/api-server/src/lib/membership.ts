@@ -3,6 +3,7 @@
  * Keeps routes thin and makes the logic easy to unit-test.
  */
 import { db, membershipPlansTable, userMembershipsTable, listingsTable, usersTable } from "@workspace/db";
+import { SITE_URL } from "./config";
 import { eq, and, desc, count, sql } from "drizzle-orm";
 import { sendEmail } from "./email";
 
@@ -232,7 +233,7 @@ export async function sendTrialExpiryWarnings() {
             <li>Plus — ₹199/month (up to 25 listings)</li>
             <li>Business — ₹1,999/year (up to 500 listings)</li>
           </ul>
-          <p><a href="https://rentnearn.com/pricing">View Plans →</a></p>
+          <p><a href="${SITE_URL}/pricing">View Plans →</a></p>
           <p>— The RentNEarn Team</p>
         `,
       });

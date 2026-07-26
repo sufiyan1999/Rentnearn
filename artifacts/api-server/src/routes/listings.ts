@@ -8,6 +8,7 @@ import { processAndSaveImage, validateImageBuffer } from "../lib/images";
 import QRCode from "qrcode";
 import { getListingLimit, countActiveListings } from "../lib/membership";
 import { checkRestrictedContent } from "../lib/restrictedItems";
+import { SITE_URL } from "../lib/config";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -258,8 +259,7 @@ router.get("/listings/:id", optionalAuth, async (req, res): Promise<void> => {
 
   const [owner] = await db.select({ id: usersTable.id, name: usersTable.name, profilePhoto: usersTable.profilePhoto, userType: usersTable.userType, isVerified: usersTable.isVerified, phone: usersTable.phone, createdAt: usersTable.createdAt }).from(usersTable).where(eq(usersTable.id, row.ownerId)).limit(1);
 
-  const APP_URL = process.env.APP_URL ?? "http://localhost:80";
-  const listingUrl = `${APP_URL}/listings/${id}`;
+  const listingUrl = `${SITE_URL}/listings/${id}`;
   const qrDataUrl = await QRCode.toDataURL(listingUrl);
 
   let isFavourited = false;
@@ -381,8 +381,7 @@ router.get("/listings/:id/qr", async (req, res): Promise<void> => {
   const id = parseInt(raw, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
 
-  const APP_URL = process.env.APP_URL ?? "http://localhost:80";
-  const listingUrl = `${APP_URL}/listings/${id}`;
+  const listingUrl = `${SITE_URL}/listings/${id}`;
   const qrDataUrl = await QRCode.toDataURL(listingUrl);
   res.json({ qrDataUrl, listingUrl });
 });

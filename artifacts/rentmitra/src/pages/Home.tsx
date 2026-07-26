@@ -1,4 +1,5 @@
 import { useGetListings, getGetListingsQueryKey, useGetCategories, getGetCategoriesQueryKey, useGetFeaturedListings, getGetFeaturedListingsQueryKey, useGetNearbyListings, getGetNearbyListingsQueryKey } from "@workspace/api-client-react";
+import { SITE_URL } from "@/lib/siteUrl";
 import { ListingCard } from "@/components/ListingCard";
 import { SeoHead } from "@/components/SeoHead";
 import { Helmet } from "react-helmet-async";
@@ -61,12 +62,12 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "RentNEarn",
-    url: typeof window !== "undefined" ? window.location.origin : "https://rentnearn.com",
+    url: SITE_URL,
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `${typeof window !== "undefined" ? window.location.origin : "https://rentnearn.com"}/search?q={search_term_string}`,
+        urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },

@@ -11,8 +11,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+import { SITE_URL } from "./config";
+
 const FROM = process.env.ZOHO_EMAIL ?? "noreply@rentnearn.com";
-const APP_URL = (process.env.APP_URL ?? "https://www.rentnearn.com").replace(/\/$/, "");
+const APP_URL = SITE_URL; // alias kept for template strings below
 
 /** Wraps email body content in a clean branded HTML shell. */
 function emailHtml(content: string): string {

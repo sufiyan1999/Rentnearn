@@ -1,4 +1,5 @@
 import { useRoute, useLocation } from "wouter";
+import { SITE_URL, toAbsoluteUrl } from "@/lib/siteUrl";
 import { useGetListing, getGetListingQueryKey, useGetListingQr, getGetListingQrQueryKey, useApproveListing, useRejectListing } from "@workspace/api-client-react";
 import { SeoHead } from "@/components/SeoHead";
 import { Helmet } from "react-helmet-async";
@@ -86,12 +87,15 @@ export default function ListingDetails() {
   const images = listing.images?.length ? listing.images : ["https://placehold.co/800x800/f0f0f0/bbb?text=No+Image"];
   const isOwner = user?.id === listing.ownerId;
 
+  // Canonical share URL — always the production domain, never a .replit.dev preview URL
+  const shareUrl = `${SITE_URL}/listings/${listing.id}`;
+
   const handleShare = async () => {
     if (navigator.share) {
-      try { await navigator.share({ title: listing.title, text: `Check out ${listing.title} on RentNEarn`, url: window.location.href }); }
+      try { await navigator.share({ title: listing.title, text: `Check out ${listing.title} on RentNEarn`, url: shareUrl }); }
       catch (e) { /* user cancelled */ }
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(shareUrl);
       toast.success("Link copied!");
     }
   };
@@ -102,13 +106,13 @@ export default function ListingDetails() {
     window.open(`https://wa.me/91${listing.owner.phone}?text=${msg}`, "_blank");
   };
 
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://rentnearn.com";
   const seoTitle = `${listing.title} for Rent in ${listing.city}`;
   const seoDescription =
     listing.description
       ? `${listing.description.slice(0, 140)} · Starting ₹${listing.rentalPrice?.daily ?? "—"}/day on RentNEarn.`
       : `Rent ${listing.title} in ${listing.city}, ${listing.state}. Starting from ₹${listing.rentalPrice?.daily ?? "—"}/day — contact owner directly via WhatsApp on RentNEarn.`;
-  const seoImage = listing.images?.[0];
+  // OG image must be absolute — toAbsoluteUrl handles relative /api/storage/... paths
+  const seoImage = listing.images?.[0] ? toAbsoluteUrl(listing.images[0]) : undefined;
 
   const productSchema = {
     "@context": "https://schema.org",
@@ -142,12 +146,12 @@ export default function ListingDetails() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: `${origin}/` },
+      { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
       {
         "@type": "ListItem",
         position: 2,
         name: listing.category,
-        item: `${origin}/search?category=${encodeURIComponent(listing.category)}`,
+        item: `${SITE_URL}/search?category=${encodeURIComponent(listing.category)}`,
       },
       { "@type": "ListItem", position: 3, name: listing.title },
     ],

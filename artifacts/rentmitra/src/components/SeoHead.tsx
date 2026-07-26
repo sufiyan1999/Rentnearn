@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { SITE_URL, toAbsoluteUrl } from "@/lib/siteUrl";
 
 const SITE_NAME = "RentNEarn";
 const DEFAULT_TITLE = "RentNEarn – India's Rental Marketplace";
@@ -9,9 +10,9 @@ interface SeoHeadProps {
   /** Page title — shown as "{title} · RentNEarn". Omit for the homepage default. */
   title?: string;
   description?: string;
-  /** Absolute URL for the OG image (defaults to the RentNEarn logo card). */
+  /** OG image — absolute URL or root-relative path; resolved to SITE_URL automatically. */
   image?: string;
-  /** Canonical path, e.g. "/listings/42". Resolved against window.location.origin. */
+  /** Canonical path, e.g. "/listings/42". Resolved against SITE_URL. */
   canonical?: string;
   type?: "website" | "product";
   /** Prevent indexing (admin/auth pages). */
@@ -28,11 +29,9 @@ export function SeoHead({
 }: SeoHeadProps) {
   const fullTitle = title ? `${title} · ${SITE_NAME}` : DEFAULT_TITLE;
   const desc = description ?? DEFAULT_DESCRIPTION;
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://rentnearn.com";
-  const ogImage =
-    image ??
-    `${origin}/og-default.png`;
-  const canonicalUrl = canonical ? `${origin}${canonical}` : undefined;
+  // Always resolve against SITE_URL — never window.location.origin
+  const ogImage = toAbsoluteUrl(image ?? "/og-default.png");
+  const canonicalUrl = canonical ? `${SITE_URL}${canonical}` : undefined;
 
   return (
     <Helmet>

@@ -1,4 +1,5 @@
 import { pgTable, text, serial, timestamp, boolean, pgEnum } from "drizzle-orm/pg-core";
+// Note: boolean imported for isSuspended field
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -17,6 +18,7 @@ export const usersTable = pgTable("users", {
   emailVerified: boolean("email_verified").notNull().default(false),
   city: text("city"),
   state: text("state"),
+  isSuspended: boolean("is_suspended").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

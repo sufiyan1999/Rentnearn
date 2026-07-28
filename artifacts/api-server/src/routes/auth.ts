@@ -118,6 +118,11 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
+  if (user.isSuspended) {
+    res.status(403).json({ error: "Account suspended. Please contact support." });
+    return;
+  }
+
   const token = signToken({ userId: user.id, email: user.email, userType: user.userType });
   res.json({ token, user: sanitizeUser(user) });
 });
@@ -155,6 +160,11 @@ router.post("/auth/google", async (req, res): Promise<void> => {
       assignFreeTrial(user.id).catch(err => logger.warn({ err, userId: user.id }, "assignFreeTrial failed"));
     } else if (!user.googleId) {
       await db.update(usersTable).set({ googleId, emailVerified: true }).where(eq(usersTable.id, user.id));
+    }
+
+    if (user.isSuspended) {
+      res.status(403).json({ error: "Account suspended. Please contact support." });
+      return;
     }
 
     const token = signToken({ userId: user.id, email: user.email, userType: user.userType });

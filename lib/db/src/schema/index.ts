@@ -8,3 +8,5 @@ export * from "./tokens";
 export * from "./payments";
 export * from "./memberships";
 export * from "./listing_views";
+export * from "./admin_audit_log";
+export * from "./admin_goals";

@@ -16,7 +16,7 @@ import {
   BarChart2, Tag, Plus, ChevronDown, ChevronRight, Check, X, IndianRupee,
   Eye, MessageCircle, Phone, Share2, QrCode, Activity, Target, Leaf,
   Brain, Sparkles, ArrowUpRight, ArrowDownRight, Minus, Trash2, Search,
-  Filter, History, TrendingDown, Award, Calendar, ChevronLeft, RefreshCw,
+  Filter, History, TrendingDown, Award, Calendar, ChevronLeft, RefreshCw, Download,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,6 +53,23 @@ const TAB_ICONS: Partial<Record<Tab, typeof CreditCard>> = {
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 const inputCls = "w-full h-9 px-3 rounded-xl border border-border bg-background text-sm font-medium placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all";
+
+async function downloadCsv(path: string, filename: string) {
+  try {
+    const BASE = (import.meta.env.BASE_URL ?? "").replace(/\/$/, "");
+    const token = localStorage.getItem("rentnearn_token");
+    const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(`${BASE}${path}`, { headers });
+    if (!res.ok) { toast.error("Export failed — please try again"); return; }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    toast.error("Export failed");
+  }
+}
 
 function PctBadge({ pct }: { pct: number | null | undefined }) {
   if (pct == null) return null;
@@ -772,6 +789,18 @@ function ActivityLogTab() {
           <div className="flex gap-1 overflow-x-auto">
             {modules.map(m => (<button key={m} onClick={() => { setModule(m); setPage(1); }} className={cn("h-7 px-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors capitalize", module === m ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:bg-border")}>{m}</button>))}
           </div>
+          <button
+            onClick={() => {
+              const params = new URLSearchParams();
+              if (module !== "all") params.set("module", module);
+              if (debouncedSearch) params.set("search", debouncedSearch);
+              const qs = params.toString();
+              downloadCsv(`/api/admin/audit-log/export${qs ? `?${qs}` : ""}`, `activity-log-${new Date().toISOString().slice(0,10)}.csv`);
+            }}
+            className="flex items-center gap-1.5 h-8 px-3 rounded-xl border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors shrink-0"
+          >
+            <Download className="w-3.5 h-3.5" /> Export CSV
+          </button>
         </div>
       </div>
 
@@ -824,6 +853,15 @@ function PaymentsTab() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold">Payment Analytics</h2>
+        <button
+          onClick={() => downloadCsv("/api/admin/payment-analytics/export", `payment-analytics-${new Date().toISOString().slice(0,10)}.csv`)}
+          className="flex items-center gap-1.5 h-8 px-3 rounded-xl border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+        >
+          <Download className="w-3.5 h-3.5" /> Export CSV
+        </button>
+      </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {cards.map(c => (
           <div key={c.label} className="bg-card border border-border rounded-2xl p-4">

@@ -654,6 +654,103 @@ router.get("/admin/reports", async (_req, res): Promise<void> => {
   });
 });
 
+// ─── CSV Export: Audit Log ────────────────────────────────────────────────────
+
+router.get("/admin/audit-log/export", async (req, res): Promise<void> => {
+  const { module: mod, search } = req.query as Record<string, string>;
+
+  const conditions: ReturnType<typeof eq>[] = [];
+  if (mod && mod !== "all") conditions.push(eq(adminAuditLogTable.module, mod));
+  if (search) conditions.push(ilike(adminAuditLogTable.action, `%${search}%`));
+
+  const rows = await db.select().from(adminAuditLogTable)
+    .where(conditions.length ? and(...conditions) : undefined)
+    .orderBy(desc(adminAuditLogTable.createdAt));
+
+  const esc = (v: unknown): string => {
+    const s = v == null ? "" : String(v).replace(/"/g, '""');
+    return /[",\n\r]/.test(s) ? `"${s}"` : s;
+  };
+
+  const lines = [
+    ["ID", "Timestamp", "Action", "Module", "Affected Type", "Affected ID", "IP Address", "Status"].join(","),
+    ...rows.map(r => [
+      r.id,
+      new Date(r.createdAt).toISOString(),
+      esc(r.action),
+      esc(r.module),
+      esc(r.affectedType ?? ""),
+      r.affectedId ?? "",
+      esc(r.ipAddress ?? ""),
+      esc(r.status),
+    ].join(",")),
+  ].join("\r\n");
+
+  const filename = `activity-log-${new Date().toISOString().slice(0, 10)}.csv`;
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.send(lines);
+});
+
+// ─── CSV Export: Payment Analytics ───────────────────────────────────────────
+
+router.get("/admin/payment-analytics/export", async (_req, res): Promise<void> => {
+  const [byPlan, recentPayments] = await Promise.all([
+    db.select({
+      planName:   membershipPlansTable.name,
+      totalPaise: sql<number>`coalesce(sum(${userMembershipsTable.amountPaise}),0)::int`,
+      count:      sql<number>`count(*)::int`,
+    })
+      .from(userMembershipsTable)
+      .innerJoin(membershipPlansTable, eq(userMembershipsTable.planId, membershipPlansTable.id))
+      .where(sql`${userMembershipsTable.amountPaise} > 0`)
+      .groupBy(membershipPlansTable.id, membershipPlansTable.name, membershipPlansTable.slug)
+      .orderBy(desc(sql`sum(${userMembershipsTable.amountPaise})`)),
+
+    db.select({
+      id:        userMembershipsTable.id,
+      createdAt: userMembershipsTable.createdAt,
+      userId:    userMembershipsTable.userId,
+      planName:  membershipPlansTable.name,
+      amountPaise: userMembershipsTable.amountPaise,
+      status:    userMembershipsTable.status,
+    })
+      .from(userMembershipsTable)
+      .innerJoin(membershipPlansTable, eq(membershipPlansTable.id, userMembershipsTable.planId))
+      .where(sql`${userMembershipsTable.amountPaise} > 0`)
+      .orderBy(desc(userMembershipsTable.createdAt))
+      .limit(500),
+  ]);
+
+  const esc = (v: unknown): string => {
+    const s = v == null ? "" : String(v).replace(/"/g, '""');
+    return /[",\n\r]/.test(s) ? `"${s}"` : s;
+  };
+
+  // Section 1: revenue by plan
+  const summaryLines = [
+    "## Revenue by Plan",
+    ["Plan", "Subscriptions", "Total Revenue (INR)"].join(","),
+    ...byPlan.map(r => [esc(r.planName), r.count, Math.round(r.totalPaise / 100)].join(",")),
+    "",
+    "## Payment Transactions",
+    ["Transaction ID", "Timestamp", "User ID", "Plan", "Amount (INR)", "Status"].join(","),
+    ...recentPayments.map(r => [
+      r.id,
+      new Date(r.createdAt).toISOString(),
+      r.userId,
+      esc(r.planName),
+      Math.round(r.amountPaise / 100),
+      esc(r.status),
+    ].join(",")),
+  ].join("\r\n");
+
+  const filename = `payment-analytics-${new Date().toISOString().slice(0, 10)}.csv`;
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.send(summaryLines);
+});
+
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
 function formatListing(listing: typeof listingsTable.$inferSelect) {

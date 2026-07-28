@@ -40,19 +40,28 @@ export default function ListingDetails() {
   // Track unique view on mount (skip owner)
   useEffect(() => {
     if (!id || !listing || user?.id === listing.ownerId) return;
+
+    // The server now uses an httpOnly session cookie (rn_sid) as the primary
+    // deduplication key.  We still read the localStorage UUID and send it as
+    // a body fallback for browsers that block cookies — the server prefers the
+    // cookie when present and falls back to the body key otherwise.
     const visitorKey = (() => {
       let k = localStorage.getItem("rn_vid");
       if (!k) {
         k = (typeof crypto !== "undefined" && crypto.randomUUID)
           ? crypto.randomUUID()
           : Math.random().toString(36).slice(2) + Date.now().toString(36);
-        localStorage.setItem("rn_vid", k);
+        try { localStorage.setItem("rn_vid", k); } catch { /* private mode */ }
       }
       return k;
     })();
+
     const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
     fetch(`${BASE}/api/listings/${id}/view`, {
       method: "POST",
+      // credentials: 'include' ensures the rn_sid cookie is sent even if the
+      // request is considered cross-origin by the browser (e.g. dev proxy).
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ visitorKey }),
     }).catch(() => {});

@@ -9,17 +9,68 @@ const AVAILABILITY_VALUES = [
   "available", "reserved", "rented_out", "under_maintenance", "no_longer_available",
 ] as const;
 
+// ── Bot detection ─────────────────────────────────────────────────────────────
+// A lightweight UA denylist covering the most common crawlers and headless
+// browsers.  Not exhaustive, but catches the bulk of automated traffic.
+const BOT_UA_RE = /bot|crawl|spider|slurp|facebookexternalhit|ia_archiver|semrush|ahrefs|mj12bot|rogerbot|dotbot|screaming.?frog|headless|phantomjs|selenium|puppeteer|playwright|wget|curl\/[0-9]/i;
+
+function isBot(ua: string | undefined): boolean {
+  if (!ua) return false;
+  return BOT_UA_RE.test(ua);
+}
+
+// Cookie name used for server-side session token.
+const SESSION_COOKIE = "rn_sid";
+const COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 // ── POST /listings/:id/view ───────────────────────────────────────────────────
 // No auth required — anonymous visitors can trigger this.
 // Deduplication: one count per (listingId, visitorKey) per 30-min bucket.
+//
+// Visitor key resolution order (most to least trustworthy):
+//  1. httpOnly session cookie `rn_sid`  — survives page reloads, not accessible
+//     to JS, set by the server so private-browsing sessions get a fresh key but
+//     can't re-count within the same session.
+//  2. Body `visitorKey`                 — localStorage UUID sent by the client
+//     as a fallback when cookies are blocked.
+//  3. Server-generated UUID             — if neither is present on the first
+//     request; the generated key is immediately set as a cookie.
+//
+// Bot requests are rejected before any DB work.
 router.post("/listings/:id/view", async (req, res): Promise<void> => {
   const id = parseInt(req.params.id as string, 10);
-  const { visitorKey } = req.body as { visitorKey?: string };
+  if (!id) { res.json({ counted: false }); return; }
 
-  if (!id || !visitorKey || typeof visitorKey !== "string" || visitorKey.length > 128) {
+  // 1. Reject known bots
+  if (isBot(req.headers["user-agent"])) {
     res.json({ counted: false }); return;
   }
 
+  // 2. Resolve visitor key
+  let visitorKey: string;
+  const cookieSid = req.cookies?.[SESSION_COOKIE];
+
+  if (typeof cookieSid === "string" && cookieSid.length > 0 && cookieSid.length <= 128) {
+    // Existing session cookie — use it directly (no need to re-set)
+    visitorKey = cookieSid;
+  } else {
+    // Fall back to the localStorage key sent in the request body
+    const bodyKey = (req.body as any)?.visitorKey;
+    visitorKey = (typeof bodyKey === "string" && bodyKey.length > 0 && bodyKey.length <= 128)
+      ? bodyKey
+      : crypto.randomUUID();
+
+    // Promote to server-side cookie so future requests from this browser
+    // session use the stable key even if localStorage is cleared.
+    res.cookie(SESSION_COOKIE, visitorKey, {
+      httpOnly: true,
+      maxAge: COOKIE_MAX_AGE_MS,
+      sameSite: "lax",
+      path: "/",
+    });
+  }
+
+  // 3. Verify listing exists and is approved
   const [listing] = await db
     .select({ id: listingsTable.id, ownerId: listingsTable.ownerId, status: listingsTable.status })
     .from(listingsTable).where(eq(listingsTable.id, id)).limit(1);
@@ -32,7 +83,6 @@ router.post("/listings/:id/view", async (req, res): Promise<void> => {
   const bucketKey = Math.floor(Date.now() / (30 * 60 * 1000)).toString();
 
   try {
-    // Check if view already counted in this window
     const [existing] = await db
       .select({ id: listingViewsTable.id })
       .from(listingViewsTable)
@@ -59,7 +109,7 @@ router.post("/listings/:id/view", async (req, res): Promise<void> => {
     } else {
       res.json({ counted: false });
     }
-  } catch (err) {
+  } catch {
     // Swallow errors silently — analytics should never break UX
     res.json({ counted: false });
   }

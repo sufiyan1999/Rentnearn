@@ -740,6 +740,23 @@ function ReportsTab() {
   const fmtDay = (d: string) => new Date(d).toLocaleDateString("en-IN", { month: "short", day: "numeric" });
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold">Reports</h2>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => downloadCsv("/api/admin/listings/export", `listings-${new Date().toISOString().slice(0,10)}.csv`)}
+            className="flex items-center gap-1.5 h-8 px-3 rounded-xl border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" /> All Listings
+          </button>
+          <button
+            onClick={() => downloadCsv("/api/admin/reports/export", `reports-analytics-${new Date().toISOString().slice(0,10)}.csv`)}
+            className="flex items-center gap-1.5 h-8 px-3 rounded-xl border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" /> Analytics
+          </button>
+        </div>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-card border border-border rounded-3xl p-5 sm:col-span-1"><div className="flex items-center gap-2 mb-2"><IndianRupee className="w-5 h-5 text-primary" /><p className="text-sm font-semibold text-muted-foreground">Total Revenue</p></div><p className="text-4xl font-bold">₹{Math.round(reports.totalRevenuePaise / 100).toLocaleString("en-IN")}</p><p className="text-xs text-muted-foreground mt-1">From paid memberships</p></div>
         <div className="bg-card border border-border rounded-3xl p-5 sm:col-span-2"><p className="text-sm font-bold mb-3">Revenue by Plan</p>{reports.revenueByPlan.length === 0 ? <p className="text-sm text-muted-foreground py-4 text-center">No paid revenue yet</p> : (<ResponsiveContainer width="100%" height={150}><BarChart data={reports.revenueByPlan} margin={{ top: 0, right: 8, left: -16, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" /><XAxis dataKey="planName" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} /><YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={v => `₹${v}`} /><Tooltip formatter={(v: any) => [`₹${Number(v).toLocaleString("en-IN")}`, "Revenue"]} contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} /><Bar dataKey="totalRupees" radius={[4, 4, 0, 0]}>{reports.revenueByPlan.map((_, i) => <Cell key={i} fill={PLAN_COLORS[i % PLAN_COLORS.length]} />)}</Bar></BarChart></ResponsiveContainer>)}</div>

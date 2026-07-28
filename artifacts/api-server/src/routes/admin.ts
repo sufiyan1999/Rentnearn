@@ -654,6 +654,155 @@ router.get("/admin/reports", async (_req, res): Promise<void> => {
   });
 });
 
+// ─── CSV Export: Full Listings ───────────────────────────────────────────────
+// GET /admin/listings/export — one row per listing; all statuses included.
+// Columns match the admin Listings table view plus analytics counters.
+
+router.get("/admin/listings/export", async (_req, res): Promise<void> => {
+  const rows = await db
+    .select({
+      id:                 listingsTable.id,
+      title:              listingsTable.title,
+      category:           listingsTable.category,
+      status:             listingsTable.status,
+      availabilityStatus: listingsTable.availabilityStatus,
+      city:               listingsTable.city,
+      state:              listingsTable.state,
+      dailyPrice:         listingsTable.dailyPrice,
+      weeklyPrice:        listingsTable.weeklyPrice,
+      monthlyPrice:       listingsTable.monthlyPrice,
+      isFeatured:         listingsTable.isFeatured,
+      viewCount:          listingsTable.viewCount,
+      whatsappClicks:     listingsTable.whatsappClicks,
+      phoneClicks:        listingsTable.phoneClicks,
+      shareCount:         listingsTable.shareCount,
+      timesRented:        listingsTable.timesRented,
+      createdAt:          listingsTable.createdAt,
+      expiresAt:          listingsTable.expiresAt,
+      ownerName:          usersTable.name,
+      ownerEmail:         usersTable.email,
+    })
+    .from(listingsTable)
+    .leftJoin(usersTable, eq(usersTable.id, listingsTable.ownerId))
+    .orderBy(desc(listingsTable.createdAt));
+
+  const esc = (v: unknown): string => {
+    const s = v == null ? "" : String(v).replace(/"/g, '""');
+    return /[",\n\r]/.test(s) ? `"${s}"` : s;
+  };
+
+  const lines = [
+    [
+      "ID", "Title", "Category", "Status", "Availability",
+      "City", "State",
+      "Daily Price (INR)", "Weekly Price (INR)", "Monthly Price (INR)",
+      "Featured",
+      "Views", "WhatsApp Clicks", "Phone Clicks", "Shares", "Times Rented",
+      "Owner Name", "Owner Email",
+      "Created At", "Expires At",
+    ].join(","),
+    ...rows.map(r => [
+      r.id,
+      esc(r.title),
+      esc(r.category),
+      esc(r.status),
+      esc(r.availabilityStatus ?? ""),
+      esc(r.city),
+      esc(r.state ?? ""),
+      r.dailyPrice   != null ? Number(r.dailyPrice)   : "",
+      r.weeklyPrice  != null ? Number(r.weeklyPrice)  : "",
+      r.monthlyPrice != null ? Number(r.monthlyPrice) : "",
+      r.isFeatured ? "Yes" : "No",
+      r.viewCount,
+      r.whatsappClicks,
+      r.phoneClicks,
+      r.shareCount,
+      r.timesRented,
+      esc(r.ownerName ?? ""),
+      esc(r.ownerEmail ?? ""),
+      new Date(r.createdAt).toISOString(),
+      r.expiresAt ? new Date(r.expiresAt).toISOString() : "",
+    ].join(",")),
+  ].join("\r\n");
+
+  const filename = `listings-${new Date().toISOString().slice(0, 10)}.csv`;
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.send(lines);
+});
+
+// ─── CSV Export: Reports ─────────────────────────────────────────────────────
+
+router.get("/admin/reports/export", async (_req, res): Promise<void> => {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const [revenueByPlan, listingsPerDay, topCities, userGrowth, membershipBreakdown] = await Promise.all([
+    db.select({ planName: membershipPlansTable.name, totalPaise: sql<number>`coalesce(sum(${userMembershipsTable.amountPaise}), 0)::int`, count: sql<number>`count(*)::int` })
+      .from(userMembershipsTable).innerJoin(membershipPlansTable, eq(userMembershipsTable.planId, membershipPlansTable.id))
+      .where(sql`${userMembershipsTable.amountPaise} > 0`)
+      .groupBy(membershipPlansTable.id, membershipPlansTable.name, membershipPlansTable.slug)
+      .orderBy(desc(sql`sum(${userMembershipsTable.amountPaise})`)),
+
+    db.select({ day: sql<string>`date_trunc('day', ${listingsTable.createdAt})::date::text`, count: sql<number>`count(*)::int` })
+      .from(listingsTable).where(gte(listingsTable.createdAt, thirtyDaysAgo))
+      .groupBy(sql`date_trunc('day', ${listingsTable.createdAt})`).orderBy(sql`date_trunc('day', ${listingsTable.createdAt})`),
+
+    db.select({ city: listingsTable.city, count: sql<number>`count(*)::int` })
+      .from(listingsTable).where(eq(listingsTable.status, "approved"))
+      .groupBy(listingsTable.city).orderBy(desc(sql`count(*)`)).limit(10),
+
+    db.select({ day: sql<string>`date_trunc('day', ${usersTable.createdAt})::date::text`, count: sql<number>`count(*)::int` })
+      .from(usersTable).where(gte(usersTable.createdAt, thirtyDaysAgo))
+      .groupBy(sql`date_trunc('day', ${usersTable.createdAt})`).orderBy(sql`date_trunc('day', ${usersTable.createdAt})`),
+
+    db.select({ planName: membershipPlansTable.name, count: sql<number>`count(*)::int` })
+      .from(userMembershipsTable).innerJoin(membershipPlansTable, eq(userMembershipsTable.planId, membershipPlansTable.id))
+      .where(eq(userMembershipsTable.status, "active"))
+      .groupBy(membershipPlansTable.id, membershipPlansTable.name, membershipPlansTable.slug).orderBy(membershipPlansTable.sortOrder),
+  ]);
+
+  const esc = (v: unknown): string => {
+    const s = v == null ? "" : String(v).replace(/"/g, '""');
+    return /[",\n\r]/.test(s) ? `"${s}"` : s;
+  };
+
+  const sections: string[] = [
+    // 1. Revenue by plan
+    "## Revenue by Plan (all-time paid memberships)",
+    ["Plan", "Subscriptions", "Total Revenue (INR)"].join(","),
+    ...revenueByPlan.map(r => [esc(r.planName), r.count, Math.round(r.totalPaise / 100)].join(",")),
+    "",
+
+    // 2. Active membership breakdown
+    "## Active Memberships by Plan",
+    ["Plan", "Active Subscriptions"].join(","),
+    ...membershipBreakdown.map(r => [esc(r.planName), r.count].join(",")),
+    "",
+
+    // 3. Top cities
+    "## Top 10 Cities by Active Listings",
+    ["City", "Active Listings"].join(","),
+    ...topCities.map(r => [esc(r.city), r.count].join(",")),
+    "",
+
+    // 4. Listings per day (last 30 days)
+    "## New Listings per Day (last 30 days)",
+    ["Date", "New Listings"].join(","),
+    ...listingsPerDay.map(r => [esc(r.day), r.count].join(",")),
+    "",
+
+    // 5. User growth (last 30 days)
+    "## New Users per Day (last 30 days)",
+    ["Date", "New Users"].join(","),
+    ...userGrowth.map(r => [esc(r.day), r.count].join(",")),
+  ];
+
+  const filename = `reports-${new Date().toISOString().slice(0, 10)}.csv`;
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.send(sections.join("\r\n"));
+});
+
 // ─── CSV Export: Audit Log ────────────────────────────────────────────────────
 
 router.get("/admin/audit-log/export", async (req, res): Promise<void> => {

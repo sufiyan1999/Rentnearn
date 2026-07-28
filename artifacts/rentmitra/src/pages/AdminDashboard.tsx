@@ -16,7 +16,7 @@ import {
   BarChart2, Tag, Plus, ChevronDown, ChevronRight, Check, X, IndianRupee,
   Eye, MessageCircle, Phone, Share2, QrCode, Activity, Target, Leaf,
   Brain, Sparkles, ArrowUpRight, ArrowDownRight, Minus, Trash2, Search,
-  Filter, History, TrendingDown, Award, Calendar, ChevronLeft,
+  Filter, History, TrendingDown, Award, Calendar, ChevronLeft, RefreshCw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -353,9 +353,52 @@ function GoalsSection() {
   );
 }
 
+// ─── Live-refresh status bar ──────────────────────────────────────────────────
+function LiveStatusBar({ dataUpdatedAt, isFetching, refetch }: { dataUpdatedAt: number; isFetching: boolean; refetch: () => void }) {
+  const [, tick] = useState(0);
+
+  // Re-render every 15 s so the "X ago" label stays accurate
+  useEffect(() => {
+    const id = setInterval(() => tick(n => n + 1), 15_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const secsAgo = dataUpdatedAt ? Math.round((Date.now() - dataUpdatedAt) / 1000) : null;
+  const label = secsAgo === null ? "—"
+    : secsAgo < 10  ? "just now"
+    : secsAgo < 60  ? `${secsAgo}s ago`
+    : secsAgo < 3600 ? `${Math.floor(secsAgo / 60)}m ago`
+    : `${Math.floor(secsAgo / 3600)}h ago`;
+
+  return (
+    <div className="flex items-center justify-between py-2 px-3 bg-muted/40 border border-border rounded-2xl mb-4">
+      <div className="flex items-center gap-2">
+        {/* Live pulse dot */}
+        <span className="relative flex h-2 w-2">
+          {!isFetching && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />}
+          <span className={cn("relative inline-flex rounded-full h-2 w-2", isFetching ? "bg-amber-400" : "bg-emerald-500")} />
+        </span>
+        <span className="text-xs text-muted-foreground">
+          {isFetching ? "Refreshing…" : `Updated ${label}`}
+        </span>
+        <span className="hidden sm:inline text-[10px] text-muted-foreground/50">· auto-refreshes every 60 s · paused when tab hidden</span>
+      </div>
+      <button
+        onClick={() => refetch()}
+        disabled={isFetching}
+        title="Refresh now"
+        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40 transition-colors"
+      >
+        <RefreshCw className={cn("w-3.5 h-3.5", isFetching && "animate-spin")} />
+        <span className="hidden sm:inline">Refresh</span>
+      </button>
+    </div>
+  );
+}
+
 // ─── Overview tab ─────────────────────────────────────────────────────────────
 function OverviewTab({ pendingData, pendingLoading, usersData, usersLoading }: any) {
-  const { data: stats, isLoading } = useAdminEnhancedStats();
+  const { data: stats, isLoading, isFetching, dataUpdatedAt, refetch } = useAdminEnhancedStats();
 
   const pctUsers = stats ? (stats.prevUsersMonth > 0 ? Math.round(((stats.newUsersMonth - stats.prevUsersMonth) / stats.prevUsersMonth) * 100) : null) : null;
 
@@ -404,6 +447,9 @@ function OverviewTab({ pendingData, pendingLoading, usersData, usersLoading }: a
 
   return (
     <div className="space-y-6">
+      {/* Live status bar */}
+      <LiveStatusBar dataUpdatedAt={dataUpdatedAt} isFetching={isFetching} refetch={refetch} />
+
       {/* KPI Grid */}
       <div className="space-y-4">
         <SectionLabel label="Users" icon={Users} color="text-blue-500" />
@@ -945,7 +991,12 @@ export default function AdminDashboard() {
     { query: { enabled: isAuthenticated && user?.userType === "admin", queryKey: getAdminGetUsersQueryKey({ limit: 8 }) } }
   );
   const { data: bizData } = useAdminBusinessProfiles("false");
-  const { data: statsLegacy } = useAdminGetStats({ query: { enabled: isAuthenticated && user?.userType === "admin", queryKey: getAdminGetStatsQueryKey() } });
+  const { data: statsLegacy } = useAdminGetStats({ query: {
+    enabled: isAuthenticated && user?.userType === "admin",
+    queryKey: getAdminGetStatsQueryKey(),
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
+  } });
   const pendingBizCount = bizData?.length ?? 0;
 
   if (!isAuthenticated || user?.userType !== "admin") return null;

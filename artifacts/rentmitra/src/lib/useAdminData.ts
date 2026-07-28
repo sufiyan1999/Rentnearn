@@ -94,7 +94,10 @@ export function useAdminEnhancedStats() {
       return res.json();
     },
     staleTime: 30 * 1000,
+    // Refresh every 60 s, but only when the tab is visible — pauses automatically
+    // when document.visibilityState === "hidden" to avoid wasted API calls.
     refetchInterval: 60 * 1000,
+    refetchIntervalInBackground: false,
   });
 }
 

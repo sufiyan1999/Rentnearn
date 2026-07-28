@@ -480,19 +480,53 @@ function MyListingsTab() {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {filtered.map((listing: any) => (
-            <div key={listing.id} className="relative">
-              <ListingCard listing={listing} />
-              <div className={cn(
-                "absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-sm",
-                listing.status === "approved" ? "bg-emerald-500 text-white" :
-                listing.status === "pending"  ? "bg-amber-500 text-white" :
-                "bg-red-500 text-white"
-              )}>
-                {listing.status === "approved" ? "Active" : listing.status}
+          {filtered.map((listing: any) => {
+            const views    = listing.analytics?.viewCount ?? 0;
+            const contacts = (listing.analytics?.whatsappClicks ?? 0) + (listing.analytics?.phoneClicks ?? 0);
+            const rentals  = listing.analytics?.timesRented ?? 0;
+            const badge    = listing.interestBadge;
+            return (
+              <div key={listing.id} className="flex flex-col">
+                {/* Card + status overlay */}
+                <div className="relative">
+                  <ListingCard listing={listing} />
+                  <div className={cn(
+                    "absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-sm",
+                    listing.status === "approved" ? "bg-emerald-500 text-white" :
+                    listing.status === "pending"  ? "bg-amber-500 text-white" :
+                    "bg-red-500 text-white"
+                  )}>
+                    {listing.status === "approved" ? "Active" : listing.status}
+                  </div>
+                </div>
+
+                {/* Performance stats row */}
+                <div className="mt-1.5 px-0.5 flex items-center justify-between gap-1 min-w-0">
+                  <div className="flex items-center gap-2.5 text-[11px] text-muted-foreground">
+                    <span className="flex items-center gap-1" title="Views">
+                      <Eye className="w-3 h-3 shrink-0" />
+                      {views.toLocaleString("en-IN")}
+                    </span>
+                    <span className="flex items-center gap-1" title="Contact clicks">
+                      <Phone className="w-3 h-3 shrink-0" />
+                      {contacts.toLocaleString("en-IN")}
+                    </span>
+                    {rentals > 0 && (
+                      <span className="flex items-center gap-1 text-violet-500" title="Times rented">
+                        <Award className="w-3 h-3 shrink-0" />
+                        {rentals}
+                      </span>
+                    )}
+                  </div>
+                  {badge && (
+                    <span className="shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 whitespace-nowrap">
+                      {badge.emoji} {badge.label}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

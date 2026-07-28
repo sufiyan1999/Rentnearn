@@ -16,7 +16,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   User, Package, Clock, CheckCircle2, XCircle, CreditCard, TrendingUp,
   Crown, Gift, Zap, Building2, ArrowRight, AlertTriangle, Heart,
-  Eye, Camera, Lock, Save, ChevronDown, LogOut, Settings
+  Eye, Camera, Lock, Save, ChevronDown, LogOut, Settings,
+  BarChart2, MessageCircle, Phone, Award, Share2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -25,11 +26,12 @@ import { STATES } from "@/lib/constants";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Tab = "profile" | "listings" | "membership" | "recently-viewed" | "favourites";
+type Tab = "profile" | "listings" | "membership" | "recently-viewed" | "favourites" | "analytics";
 
 const TABS: { id: Tab; label: string; icon: typeof User }[] = [
   { id: "profile",         label: "Profile",         icon: User },
   { id: "listings",        label: "My Listings",     icon: Package },
+  { id: "analytics",       label: "Analytics",       icon: BarChart2 },
   { id: "membership",      label: "Membership",      icon: CreditCard },
   { id: "recently-viewed", label: "Recently Viewed", icon: Eye },
   { id: "favourites",      label: "Favourites",      icon: Heart },
@@ -154,6 +156,7 @@ export default function Dashboard() {
         >
           {activeTab === "profile"         && <ProfileTab updateUser={updateUser} />}
           {activeTab === "listings"        && <MyListingsTab />}
+          {activeTab === "analytics"       && <AnalyticsTab />}
           {activeTab === "membership"      && <MembershipTab />}
           {activeTab === "recently-viewed" && <RecentlyViewedTab />}
           {activeTab === "favourites"      && <FavouritesTab />}
@@ -490,6 +493,237 @@ function MyListingsTab() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Analytics Tab ───────────────────────────────────────────────────────────
+
+const AVAIL_OPTS = [
+  { value: "available",            label: "✅ Available" },
+  { value: "reserved",             label: "🕐 Reserved" },
+  { value: "rented_out",           label: "🔴 Rented Out" },
+  { value: "under_maintenance",    label: "🔧 Under Maintenance" },
+  { value: "no_longer_available",  label: "⛔ No Longer Available" },
+];
+
+function AnalyticsTab() {
+  const { data: listings, isLoading } = useGetMyListings(
+    { status: "all" },
+    { query: { queryKey: getGetMyListingsQueryKey({ status: "all" }) } }
+  );
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const [detail, setDetail] = useState<Record<number, any>>({});
+  const [detailLoading, setDetailLoading] = useState<number | null>(null);
+  const [availOverride, setAvailOverride] = useState<Record<number, string>>({});
+
+  const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+
+  const fetchDetail = async (listingId: number) => {
+    if (detail[listingId]) { setExpanded(listingId); return; }
+    setDetailLoading(listingId);
+    try {
+      const token = localStorage.getItem("rentnearn_token") ?? "";
+      const res = await fetch(`${BASE}/api/listings/${listingId}/analytics`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDetail(prev => ({ ...prev, [listingId]: data }));
+        setExpanded(listingId);
+      }
+    } catch { /* swallow */ } finally {
+      setDetailLoading(null);
+    }
+  };
+
+  const handleAvailability = async (listingId: number, status: string) => {
+    setAvailOverride(prev => ({ ...prev, [listingId]: status }));
+    try {
+      const token = localStorage.getItem("rentnearn_token") ?? "";
+      await fetch(`${BASE}/api/listings/${listingId}/availability`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status }),
+      });
+      toast.success("Availability updated");
+    } catch {
+      toast.error("Failed to update");
+    }
+  };
+
+  const handleMarkRented = async (listingId: number) => {
+    try {
+      const token = localStorage.getItem("rentnearn_token") ?? "";
+      const res = await fetch(`${BASE}/api/listings/${listingId}/times-rented`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const { timesRented } = await res.json();
+        setDetail(prev => prev[listingId] ? { ...prev, [listingId]: { ...prev[listingId], timesRented } } : prev);
+        toast.success("Rental logged!");
+      }
+    } catch {
+      toast.error("Could not log rental");
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-5">
+        <h2 className="text-xl font-bold flex-1">Analytics</h2>
+        <p className="text-xs text-muted-foreground">Click a listing to see detailed stats</p>
+      </div>
+
+      {isLoading ? (
+        <div className="flex flex-col gap-3">
+          {[...Array(3)].map((_, i) => <div key={i} className="h-20 bg-secondary rounded-2xl animate-pulse" />)}
+        </div>
+      ) : !(listings as any[])?.length ? (
+        <div className="bg-secondary rounded-3xl p-10 text-center border border-border">
+          <BarChart2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+          <p className="font-semibold text-muted-foreground">No listings yet — analytics will appear here once you create one.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {(listings as any[]).map((listing: any) => {
+            const a = listing.analytics ?? {};
+            const contacts = (a.whatsappClicks ?? 0) + (a.phoneClicks ?? 0);
+            const d = detail[listing.id];
+            const isExpanded = expanded === listing.id;
+            const avail = availOverride[listing.id] ?? listing.availabilityStatus ?? "available";
+
+            return (
+              <div key={listing.id} className="border border-border rounded-2xl overflow-hidden bg-card">
+                {/* Listing row */}
+                <div className="flex items-center gap-3 p-4">
+                  {/* Thumbnail */}
+                  <div className="w-14 h-14 rounded-xl bg-secondary overflow-hidden shrink-0">
+                    {listing.thumbnails?.[0] ? (
+                      <img src={listing.thumbnails[0]} alt={listing.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                        <Package className="w-6 h-6 opacity-40" />
+                      </div>
+                    )}
+                  </div>
+                  {/* Title + status */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-bold text-sm truncate max-w-[160px] sm:max-w-none">{listing.title}</p>
+                      <span className={cn(
+                        "px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0",
+                        listing.status === "approved" ? "bg-emerald-500 text-white" :
+                        listing.status === "pending"  ? "bg-amber-500 text-white" :
+                        "bg-red-500 text-white"
+                      )}>
+                        {listing.status === "approved" ? "Active" : listing.status}
+                      </span>
+                      {listing.interestBadge && (
+                        <span className="text-xs font-bold text-primary shrink-0">
+                          {listing.interestBadge.emoji} {listing.interestBadge.label}
+                        </span>
+                      )}
+                    </div>
+                    {/* Mini stats row */}
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Eye className="w-3 h-3" /> {(a.viewCount ?? 0).toLocaleString("en-IN")} views
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Phone className="w-3 h-3" /> {contacts} contacts
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <MessageCircle className="w-3 h-3" /> {a.whatsappClicks ?? 0} WA
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Award className="w-3 h-3" /> {a.timesRented ?? 0} rented
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Share2 className="w-3 h-3" /> {a.shareCount ?? 0} shares
+                      </span>
+                    </div>
+                  </div>
+                  {/* Expand button */}
+                  <button
+                    onClick={() => isExpanded ? setExpanded(null) : fetchDetail(listing.id)}
+                    disabled={detailLoading === listing.id}
+                    className="shrink-0 w-8 h-8 rounded-xl border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all"
+                  >
+                    {detailLoading === listing.id ? (
+                      <span className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                    ) : (
+                      <ChevronDown className={cn("w-4 h-4 transition-transform", isExpanded && "rotate-180")} />
+                    )}
+                  </button>
+                </div>
+
+                {/* Expanded detail */}
+                {isExpanded && d && (
+                  <div className="border-t border-border px-4 pb-4 pt-3 space-y-4">
+                    {/* Stats grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {[
+                        { label: "Total Views",  value: d.viewCount,      icon: Eye },
+                        { label: "Today",        value: d.viewsToday,     icon: TrendingUp },
+                        { label: "This Week",    value: d.viewsThisWeek,  icon: TrendingUp },
+                        { label: "Favourites",   value: d.favouriteCount, icon: Heart },
+                        { label: "WhatsApp",     value: d.whatsappClicks, icon: MessageCircle },
+                        { label: "Phone Calls",  value: d.phoneClicks,    icon: Phone },
+                        { label: "Shares",       value: d.shareCount,     icon: Share2 },
+                        { label: "QR Scans",     value: d.qrScans,        icon: Eye },
+                      ].map(({ label, value, icon: Icon }) => (
+                        <div key={label} className="bg-secondary rounded-xl p-3 flex flex-col gap-1">
+                          <div className="flex items-center gap-1.5">
+                            <Icon className="w-3.5 h-3.5 text-primary" />
+                            <p className="text-xs text-muted-foreground font-medium">{label}</p>
+                          </div>
+                          <p className="text-xl font-extrabold">{(value ?? 0).toLocaleString("en-IN")}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Times rented + mark rented */}
+                    <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between p-3 rounded-xl border border-border">
+                      <div>
+                        <p className="text-xs text-muted-foreground font-medium">Times Rented</p>
+                        <p className="text-2xl font-extrabold">{d.timesRented ?? 0}</p>
+                      </div>
+                      <button
+                        onClick={() => handleMarkRented(listing.id)}
+                        className="px-4 py-2 rounded-xl border border-border bg-secondary text-sm font-semibold hover:bg-border transition-all active:scale-95"
+                      >
+                        + Log a Rental
+                      </button>
+                    </div>
+                    {/* Availability selector */}
+                    <div>
+                      <p className="text-xs font-semibold text-muted-foreground mb-1.5">Availability Status</p>
+                      <div className="relative max-w-xs">
+                        <select
+                          value={avail}
+                          onChange={e => handleAvailability(listing.id, e.target.value)}
+                          className="w-full h-10 pl-3 pr-8 rounded-xl border border-border bg-background text-sm font-semibold appearance-none focus:outline-none focus:border-primary transition-all"
+                        >
+                          {AVAIL_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                        </select>
+                        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+                      </div>
+                    </div>
+                    {/* Expiry */}
+                    {d.expiresAt && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" />
+                        Listing expires: <span className="font-semibold text-foreground">{new Date(d.expiresAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

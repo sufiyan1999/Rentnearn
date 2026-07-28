@@ -4,9 +4,9 @@ import { useGetListing, getGetListingQueryKey, useGetListingQr, getGetListingQrQ
 import { SeoHead } from "@/components/SeoHead";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/ui-core";
-import { ArrowLeft, MapPin, Share2, MessageCircle, AlertTriangle, ShieldCheck, QrCode, Star, Calendar, Tag, Check, X, Clock, Copy, Link2 } from "lucide-react";
+import { ArrowLeft, MapPin, Share2, MessageCircle, AlertTriangle, ShieldCheck, QrCode, Star, Calendar, Tag, Check, X, Clock, Copy, Link2, Phone, Eye, Award, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,9 @@ export default function ListingDetails() {
   const [showQr, setShowQr] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [availabilityOverride, setAvailabilityOverride] = useState<string | null>(null);
+  const [timesRentedExtra, setTimesRentedExtra] = useState(0);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
 
   const { data: listing, isLoading, error } = useGetListing(id, {
     query: { enabled: !!id, queryKey: getGetListingQueryKey(id) },
@@ -33,6 +36,27 @@ export default function ListingDetails() {
 
   const approveMutation = useApproveListing();
   const rejectMutation = useRejectListing();
+
+  // Track unique view on mount (skip owner)
+  useEffect(() => {
+    if (!id || !listing || user?.id === listing.ownerId) return;
+    const visitorKey = (() => {
+      let k = localStorage.getItem("rn_vid");
+      if (!k) {
+        k = (typeof crypto !== "undefined" && crypto.randomUUID)
+          ? crypto.randomUUID()
+          : Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem("rn_vid", k);
+      }
+      return k;
+    })();
+    const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+    fetch(`${BASE}/api/listings/${id}/view`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ visitorKey }),
+    }).catch(() => {});
+  }, [id, listing?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAdminApprove = () => {
     approveMutation.mutate({ id }, {
@@ -94,19 +118,39 @@ export default function ListingDetails() {
   const shareText = `Check out "${listing.title}" for rent in ${listing.city} on RentNEarn!\n${shareUrl}`;
   const shareTweet = `Check out "${listing.title}" for rent in ${listing.city} on RentNEarn!`;
 
+  const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
+  const trackInteract = (type: string) => {
+    fetch(`${BASE_URL}/api/listings/${id}/interact`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type }),
+    }).catch(() => {});
+  };
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
+    trackInteract("share");
     toast.success("Link copied!");
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const openSharePlatform = (url: string) => window.open(url, "_blank", "noopener,noreferrer");
+  const openSharePlatform = (url: string) => {
+    trackInteract("share");
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   const handleWhatsApp = () => {
     if (!listing.owner?.phone) { toast.error("Owner phone number not available"); return; }
+    trackInteract("whatsapp");
     const msg = encodeURIComponent(`Hi, I saw your listing for "${listing.title}" on RentNEarn. Is it available?`);
     window.open(`https://wa.me/91${listing.owner.phone}?text=${msg}`, "_blank");
+  };
+
+  const handlePhoneCall = () => {
+    if (!listing.owner?.phone) { toast.error("Owner phone number not available"); return; }
+    trackInteract("phone");
+    window.open(`tel:+91${listing.owner.phone}`, "_self");
   };
 
   const seoTitle = `${listing.title} for Rent in ${listing.city}`;
@@ -323,6 +367,24 @@ export default function ListingDetails() {
                     {listing.condition.replace("_", " ")}
                   </span>
                 )}
+                {/* Availability badge — hidden when "available" */}
+                {(() => {
+                  const avail = availabilityOverride ?? (listing as any).availabilityStatus ?? "available";
+                  const MAP: Record<string, { label: string; cls: string }> = {
+                    reserved:            { label: "Reserved",           cls: "bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300" },
+                    rented_out:          { label: "Rented Out",         cls: "bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-300" },
+                    under_maintenance:   { label: "Under Maintenance",  cls: "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-300" },
+                    no_longer_available: { label: "No Longer Available",cls: "bg-zinc-100 text-zinc-600 border-zinc-300 dark:bg-zinc-800 dark:text-zinc-400" },
+                  };
+                  const m = MAP[avail];
+                  return m ? <span className={cn("px-2.5 py-1 border rounded-full text-xs font-bold", m.cls)}>{m.label}</span> : null;
+                })()}
+                {/* Interest score badge */}
+                {(listing as any).interestBadge && (
+                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+                    {(listing as any).interestBadge.emoji} {(listing as any).interestBadge.label}
+                  </span>
+                )}
                 <div className="ml-auto hidden md:flex gap-2">
                   {isOwner && (
                     <Button variant="outline" size="sm" onClick={() => setLocation(`/listings/${listing.id}/edit`)}>Edit</Button>
@@ -337,6 +399,34 @@ export default function ListingDetails() {
                 <MapPin className="w-4 h-4 text-primary" />
                 {listing.city}, {listing.state}
               </div>
+              {/* Public stats bar */}
+              {((listing as any).analytics?.viewCount > 0 || (listing as any).analytics?.timesRented > 0) && (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2.5 pt-2.5 border-t border-border/60">
+                  {(listing as any).analytics?.viewCount > 0 && (
+                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Eye className="w-3.5 h-3.5" />
+                      {((listing as any).analytics.viewCount as number).toLocaleString("en-IN")} views
+                    </span>
+                  )}
+                  {((listing as any).analytics?.whatsappClicks ?? 0) + ((listing as any).analytics?.phoneClicks ?? 0) > 0 && (
+                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Phone className="w-3.5 h-3.5" />
+                      {((listing as any).analytics.whatsappClicks + (listing as any).analytics.phoneClicks)} contacts
+                    </span>
+                  )}
+                  {((listing as any).analytics?.timesRented ?? 0) + timesRentedExtra > 0 && (
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      <Award className="w-3.5 h-3.5" />
+                      Rented {(listing as any).analytics.timesRented + timesRentedExtra} times
+                    </span>
+                  )}
+                  {(listing as any).interestBadge && (
+                    <span className="text-xs text-muted-foreground">
+                      {(listing as any).interestBadge.detail}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Pricing */}
@@ -384,6 +474,79 @@ export default function ListingDetails() {
               </p>
             </div>
 
+            {/* Owner controls — availability + rental counter */}
+            {isOwner && (
+              <div className="rounded-2xl border border-border bg-card p-4 flex flex-col gap-3">
+                <h3 className="text-sm font-bold flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-primary" /> Owner Controls
+                </h3>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Availability selector */}
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">Availability Status</p>
+                    <div className="relative">
+                      <select
+                        disabled={availabilityLoading}
+                        value={availabilityOverride ?? (listing as any).availabilityStatus ?? "available"}
+                        onChange={async (e) => {
+                          const newStatus = e.target.value;
+                          setAvailabilityOverride(newStatus);
+                          setAvailabilityLoading(true);
+                          try {
+                            const token = localStorage.getItem("rentnearn_token") ?? "";
+                            await fetch(`${BASE_URL}/api/listings/${id}/availability`, {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                              body: JSON.stringify({ status: newStatus }),
+                            });
+                            toast.success("Availability updated");
+                          } catch {
+                            toast.error("Failed to update availability");
+                          } finally {
+                            setAvailabilityLoading(false);
+                          }
+                        }}
+                        className="w-full h-10 pl-3 pr-8 rounded-xl border border-border bg-background text-sm font-semibold appearance-none focus:outline-none focus:border-primary transition-all disabled:opacity-60"
+                      >
+                        <option value="available">✅ Available</option>
+                        <option value="reserved">🕐 Reserved</option>
+                        <option value="rented_out">🔴 Rented Out</option>
+                        <option value="under_maintenance">🔧 Under Maintenance</option>
+                        <option value="no_longer_available">⛔ No Longer Available</option>
+                      </select>
+                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+                    </div>
+                  </div>
+                  {/* Log a rental */}
+                  <div className="sm:w-44">
+                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">
+                      Times Rented: <span className="text-foreground">{((listing as any).analytics?.timesRented ?? 0) + timesRentedExtra}</span>
+                    </p>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const token = localStorage.getItem("rentnearn_token") ?? "";
+                          const res = await fetch(`${BASE_URL}/api/listings/${id}/times-rented`, {
+                            method: "POST",
+                            headers: { Authorization: `Bearer ${token}` },
+                          });
+                          if (res.ok) {
+                            setTimesRentedExtra(n => n + 1);
+                            toast.success("Rental logged! +1");
+                          }
+                        } catch {
+                          toast.error("Could not log rental");
+                        }
+                      }}
+                      className="w-full h-10 px-4 rounded-xl border border-border bg-secondary text-sm font-semibold hover:bg-border transition-all active:scale-95"
+                    >
+                      + Log a Rental
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Owner */}
             {listing.owner && (
               <div className="flex items-center gap-4 p-4 border border-border rounded-2xl bg-card hover:border-primary/30 transition-all duration-200">
@@ -403,7 +566,7 @@ export default function ListingDetails() {
                   </h4>
                   <p className="text-xs text-muted-foreground mt-0.5">Member since {new Date(listing.owner.createdAt).getFullYear()}</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setShowQr(true)} className="shrink-0">
+                <Button variant="outline" size="sm" onClick={() => { setShowQr(true); trackInteract("qr"); }} className="shrink-0">
                   <QrCode className="w-4 h-4 mr-1.5" /> QR
                 </Button>
               </div>
@@ -433,14 +596,25 @@ export default function ListingDetails() {
               </div>
 
               {!isOwner ? (
-                <button
-                  onClick={handleWhatsApp}
-                  className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl text-white font-bold text-sm shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 hover:-translate-y-0.5 transition-all duration-200 active:scale-95"
-                  style={{ background: "linear-gradient(135deg,#25D366,#1eb85a)" }}
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  Contact on WhatsApp
-                </button>
+                <>
+                  <button
+                    onClick={handleWhatsApp}
+                    className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl text-white font-bold text-sm shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30 hover:-translate-y-0.5 transition-all duration-200 active:scale-95"
+                    style={{ background: "linear-gradient(135deg,#25D366,#1eb85a)" }}
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    Contact on WhatsApp
+                  </button>
+                  {listing.owner?.phone && (
+                    <button
+                      onClick={handlePhoneCall}
+                      className="w-full flex items-center justify-center gap-2.5 py-3 rounded-2xl border border-border bg-secondary text-foreground font-bold text-sm hover:bg-border transition-all duration-200 active:scale-95"
+                    >
+                      <Phone className="w-4 h-4" />
+                      Call Owner
+                    </button>
+                  )}
+                </>
               ) : (
                 <Button className="w-full" onClick={() => setLocation(`/listings/${listing.id}/edit`)}>
                   Edit Listing
@@ -483,14 +657,25 @@ export default function ListingDetails() {
           {isOwner ? (
             <Button className="flex-1" onClick={() => setLocation(`/listings/${listing.id}/edit`)}>Edit Listing</Button>
           ) : (
-            <button
-              onClick={handleWhatsApp}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95"
-              style={{ background: "linear-gradient(135deg,#25D366,#1eb85a)" }}
-            >
-              <MessageCircle className="w-4 h-4" />
-              WhatsApp
-            </button>
+            <div className="flex gap-2 flex-1">
+              <button
+                onClick={handleWhatsApp}
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95"
+                style={{ background: "linear-gradient(135deg,#25D366,#1eb85a)" }}
+              >
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp
+              </button>
+              {listing.owner?.phone && (
+                <button
+                  onClick={handlePhoneCall}
+                  className="w-12 h-12 flex items-center justify-center rounded-xl border border-border bg-card text-foreground shadow transition-all active:scale-95"
+                  aria-label="Call owner"
+                >
+                  <Phone className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>

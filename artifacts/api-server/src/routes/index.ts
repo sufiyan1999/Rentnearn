@@ -13,6 +13,7 @@ import dashboardRouter from "./dashboard";
 import paymentsRouter from "./payments";
 import membershipsRouter from "./memberships";
 import seoRouter from "./seo";
+import analyticsRouter from "./analytics";
 
 const router: IRouter = Router();
 
@@ -30,6 +31,7 @@ router.use(businessRouter);
 router.use(dashboardRouter);
 router.use(paymentsRouter);
 router.use(membershipsRouter);
+router.use(analyticsRouter);
 // Admin router must come after public routes — it applies requireAuth to all requests
 router.use(adminRouter);
 

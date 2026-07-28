@@ -40,9 +40,12 @@ router.get("/listings", optionalAuth, async (req, res): Promise<void> => {
 
   let orderBy;
   switch (sortBy) {
-    case "price_asc": orderBy = asc(listingsTable.dailyPrice); break;
-    case "price_desc": orderBy = desc(listingsTable.dailyPrice); break;
-    default: orderBy = desc(listingsTable.createdAt);
+    case "price_asc":        orderBy = asc(listingsTable.dailyPrice); break;
+    case "price_desc":       orderBy = desc(listingsTable.dailyPrice); break;
+    case "most_viewed":      orderBy = desc(listingsTable.viewCount); break;
+    case "most_favorited":   orderBy = sql`(SELECT COUNT(*) FROM favourites WHERE listing_id = listings.id) DESC`; break;
+    case "recently_updated": orderBy = desc(listingsTable.updatedAt); break;
+    default:                 orderBy = desc(listingsTable.createdAt);
   }
 
   if (businessOnly === "true") {
@@ -403,6 +406,21 @@ function toRelativeUrl(url: string): string {
   }
 }
 
+function computeInterestBadge(listing: typeof listingsTable.$inferSelect) {
+  const contactClicks = (listing.whatsappClicks ?? 0) + (listing.phoneClicks ?? 0);
+  const score = (listing.viewCount ?? 0) + contactClicks * 5;
+  if (contactClicks >= 10) {
+    return { emoji: "🔥", label: "High Demand", detail: `${(listing.viewCount ?? 0).toLocaleString("en-IN")} views · ${contactClicks} contacts` };
+  }
+  if ((listing.viewCount ?? 0) >= 50) {
+    return { emoji: "📈", label: "Trending", detail: `${(listing.viewCount ?? 0).toLocaleString("en-IN")} views` };
+  }
+  if (score >= 30) {
+    return { emoji: "⭐", label: "Popular", detail: `${(listing.viewCount ?? 0).toLocaleString("en-IN")} views · ${contactClicks} contacts` };
+  }
+  return null;
+}
+
 function formatListing(listing: typeof listingsTable.$inferSelect, owner?: { id: number; name: string; profilePhoto: string | null; userType: string; isVerified: boolean; phone: string | null; createdAt: Date } | undefined) {
   return {
     id: listing.id,
@@ -432,6 +450,18 @@ function formatListing(listing: typeof listingsTable.$inferSelect, owner?: { id:
     expiresAt: listing.expiresAt,
     createdAt: listing.createdAt,
     owner: owner ? { ...owner, listingCount: 0 } : null,
+    availabilityStatus: listing.availabilityStatus ?? "available",
+    analytics: {
+      viewCount:      listing.viewCount      ?? 0,
+      whatsappClicks: listing.whatsappClicks  ?? 0,
+      phoneClicks:    listing.phoneClicks     ?? 0,
+      phoneCopyClicks:listing.phoneCopyClicks ?? 0,
+      shareCount:     listing.shareCount      ?? 0,
+      qrScans:        listing.qrScans         ?? 0,
+      timesRented:    listing.timesRented     ?? 0,
+    },
+    interestBadge: computeInterestBadge(listing),
+    updatedAt: listing.updatedAt,
   };
 }
 

@@ -76,9 +76,12 @@ const BLANK: SearchFilters = {
 };
 
 const SORT_OPTS = [
-  { value: "newest",    label: "Newest first" },
-  { value: "price_asc", label: "Price: Low → High" },
-  { value: "price_desc",label: "Price: High → Low" },
+  { value: "newest",          label: "Newest first" },
+  { value: "recently_updated",label: "Recently Updated" },
+  { value: "most_viewed",     label: "Most Viewed" },
+  { value: "most_favorited",  label: "Most Favorited" },
+  { value: "price_asc",       label: "Price: Low → High" },
+  { value: "price_desc",      label: "Price: High → Low" },
 ];
 
 const CONDITIONS = [

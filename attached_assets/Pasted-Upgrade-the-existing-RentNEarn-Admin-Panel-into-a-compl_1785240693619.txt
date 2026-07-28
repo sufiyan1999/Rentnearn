@@ -1,0 +1,920 @@
+Upgrade the existing RentNEarn Admin Panel into a complete Enterprise Administration Portal.
+
+DO NOT modify any existing user functionality.
+
+DO NOT change UI branding.
+
+Maintain the existing RentNEarn design language.
+
+The Admin Portal must be mobile responsive and desktop optimized.
+
+The Admin Portal must work seamlessly on Desktop, Tablet, Mobile, Progressive Web App (PWA), Android and iOS (Capacitor).
+
+The Admin Panel should be extremely fast, professional, scalable and future-ready.
+
+Only ONE Admin account exists.
+
+Do NOT create Super Admin, Moderator or additional admin roles.
+
+The Admin has unrestricted access to every function.
+
+The Admin Dashboard should become the landing page immediately after login.
+
+===========================================================
+ADMIN EXECUTIVE DASHBOARD
+===========================================================
+
+Design a premium executive dashboard with beautiful KPI cards, charts and analytics.
+
+Dashboard cards must display:
+
+• Total Registered Users
+• Active Users
+• New Users Today
+• New Users This Week
+• New Users This Month
+
+• Total Business Accounts
+• Verified Business Accounts
+
+• Total Listings
+• Active Listings
+• Pending Approval
+• Rejected Listings
+• Expired Listings
+• Featured Listings
+• Draft Listings
+
+• Total Listing Views
+• Views Today
+• Views This Week
+• Views This Month
+
+• Favourite Saves
+• WhatsApp Clicks
+• Phone Calls
+• QR Code Scans
+• Share Count
+
+• Owner Reported Rentals
+
+• Membership Revenue Today
+• Weekly Revenue
+• Monthly Revenue
+• Annual Revenue
+
+• Membership Renewals
+
+• Failed Payments
+
+• Payment Success Rate
+
+Display percentage increase/decrease compared with previous period.
+
+===========================================================
+BUSINESS HEALTH SCORE
+===========================================================
+
+Automatically calculate an overall Business Health Score.
+
+Use:
+
+User Growth
+
+Listing Growth
+
+Revenue Growth
+
+Membership Growth
+
+Traffic Growth
+
+Contact Clicks
+
+Pending Approvals
+
+Payment Success Rate
+
+Display:
+
+Excellent
+
+Good
+
+Average
+
+Needs Attention
+
+Use a beautiful animated circular progress indicator.
+
+===========================================================
+FOUNDER COMMAND CENTER
+===========================================================
+
+Create a Founder Command Center inside the Admin Dashboard.
+
+Display:
+
+Platform Status
+
+Users Online
+
+Today's Revenue
+
+Today's New Users
+
+Today's Listings
+
+Today's Membership Sales
+
+Today's Featured Listings Sold
+
+Pending Listing Approvals
+
+Pending Business Verification
+
+Memberships Expiring
+
+Failed Payments
+
+Storage Usage
+
+Database Health
+
+API Health
+
+Image Storage
+
+Average Response Time
+
+Display Today's Action Items.
+
+Examples:
+
+Approve Listings
+
+Approve Businesses
+
+Review Reported Listings
+
+Membership Renewals
+
+Support Tickets
+
+Payment Failures
+
+Display quick action buttons.
+
+===========================================================
+LIVE PLATFORM ACTIVITY
+===========================================================
+
+Display live activity.
+
+Examples:
+
+New User Registered
+
+Business Registered
+
+Listing Submitted
+
+Listing Approved
+
+Listing Renewed
+
+Listing Expired
+
+Membership Purchased
+
+Featured Listing Purchased
+
+Payment Received
+
+Payment Failed
+
+===========================================================
+USER MANAGEMENT
+===========================================================
+
+Allow Admin to:
+
+View Users
+
+Search Users
+
+Edit Users
+
+Suspend Users
+
+Activate Users
+
+Delete Users
+
+Reset Password
+
+Change Membership
+
+View Login History
+
+View Activity
+
+View Listings
+
+View Payments
+
+Display:
+
+Photo
+
+Name
+
+Email
+
+Phone
+
+City
+
+Registration Date
+
+Membership
+
+Last Login
+
+Listings
+
+Views
+
+Favourite Saves
+
+Contact Clicks
+
+Owner Reported Rentals
+
+Payments
+
+Status
+
+===========================================================
+BUSINESS MANAGEMENT
+===========================================================
+
+Display:
+
+Business Name
+
+Owner
+
+Membership
+
+Listings
+
+Views
+
+Revenue
+
+Verification Status
+
+Actions:
+
+Approve
+
+Reject
+
+Suspend
+
+Activate
+
+Edit
+
+===========================================================
+LISTING MANAGEMENT
+===========================================================
+
+Display:
+
+Listing Image
+
+Listing ID
+
+Title
+
+Owner
+
+Business / Individual
+
+Category
+
+Subcategory
+
+City
+
+State
+
+Price
+
+Views
+
+Unique Visitors
+
+Favourite Saves
+
+WhatsApp Clicks
+
+Phone Calls
+
+QR Code Scans
+
+Share Count
+
+Owner Reported Rentals
+
+Availability
+
+Status
+
+Approval Status
+
+Expiry Date
+
+Featured Status
+
+Admin Actions:
+
+Approve
+
+Reject
+
+Edit
+
+Delete
+
+Feature
+
+Unfeature
+
+Extend Expiry
+
+===========================================================
+OWNER ANALYTICS
+===========================================================
+
+Each listing owner should have analytics.
+
+Display:
+
+Views
+
+Today's Views
+
+Weekly Views
+
+Monthly Views
+
+Unique Visitors
+
+Favourite Saves
+
+WhatsApp Clicks
+
+Phone Calls
+
+Share Count
+
+QR Code Scans
+
+Owner Reported Rentals
+
+Listing Performance
+
+Best Performing Listing
+
+Membership Status
+
+Expiry Date
+
+===========================================================
+CATEGORY ANALYTICS
+===========================================================
+
+Display:
+
+Category
+
+Listings
+
+Views
+
+Contacts
+
+Favourite Saves
+
+Growth %
+
+Average Views
+
+Top Performing Category
+
+===========================================================
+CITY ANALYTICS
+===========================================================
+
+Display:
+
+City
+
+Users
+
+Listings
+
+Revenue
+
+Growth %
+
+Most Popular Category
+
+Display heat maps using OpenStreetMap.
+
+===========================================================
+MARKETING INSIGHTS
+===========================================================
+
+Display:
+
+Top Categories
+
+Least Popular Categories
+
+Top Cities
+
+Most Viewed Listings
+
+Most Contacted Listings
+
+Most Shared Listings
+
+Most Saved Listings
+
+Top Businesses
+
+Top Individual Users
+
+Most Active Time
+
+Most Active Day
+
+Traffic Sources
+
+Organic
+
+Google
+
+Facebook
+
+Instagram
+
+WhatsApp
+
+Referral
+
+Direct
+
+===========================================================
+SEARCH ANALYTICS
+===========================================================
+
+Track:
+
+Most Searched Keywords
+
+Most Searched Categories
+
+Most Searched Cities
+
+Popular Filters
+
+Searches With No Results
+
+Trending Searches
+
+===========================================================
+PAYMENT DASHBOARD
+===========================================================
+
+Display:
+
+Revenue Today
+
+Revenue Weekly
+
+Revenue Monthly
+
+Revenue Yearly
+
+Successful Payments
+
+Failed Payments
+
+Pending Payments
+
+Refunds
+
+Average Payment Value
+
+Most Purchased Membership
+
+===========================================================
+REPORTS
+===========================================================
+
+Generate reports.
+
+Export:
+
+CSV
+
+Excel
+
+PDF
+
+Reports:
+
+Users
+
+Businesses
+
+Listings
+
+Revenue
+
+Memberships
+
+Payments
+
+Categories
+
+Cities
+
+Search Analytics
+
+Listing Performance
+
+===========================================================
+ENVIRONMENTAL IMPACT DASHBOARD
+===========================================================
+
+Automatically estimate and display:
+
+Estimated Products Reused
+
+Estimated Purchases Avoided
+
+Estimated Waste Reduced
+
+Estimated CO₂ Reduction
+
+Estimated Community Savings
+
+Estimated Owner Earnings
+
+Display animated counters.
+
+===========================================================
+AI BUSINESS INSIGHTS
+===========================================================
+
+Generate intelligent recommendations based on platform analytics.
+
+Examples:
+
+Books are highly searched but have low supply.
+
+Camera rentals generate the highest contact rate.
+
+Furniture listings are trending.
+
+Mumbai has the fastest growth.
+
+20 memberships expire within 7 days.
+
+Listings with 5+ photos receive significantly more enquiries.
+
+Medical Equipment demand exceeds supply.
+
+Show these insights in an attractive dashboard.
+
+===========================================================
+TRENDING ENGINE
+===========================================================
+
+Automatically calculate:
+
+Trending Listings
+
+Popular Listings
+
+High Demand Listings
+
+Fast Growing Categories
+
+Fast Growing Cities
+
+Editor's Choice
+
+Use badges:
+
+🔥 Trending
+
+⭐ Popular
+
+🚀 High Demand
+
+💎 Featured
+
+===========================================================
+NOTIFICATION CENTER
+===========================================================
+
+Notify Admin for:
+
+New Business Registration
+
+Membership Purchase
+
+Listing Pending Approval
+
+Reported Listing
+
+Payment Failure
+
+Membership Expiry
+
+Storage Above 90%
+
+Server Errors
+
+Database Errors
+
+===========================================================
+SYSTEM HEALTH CENTER
+===========================================================
+
+Display:
+
+Server Status
+
+Database Status
+
+API Status
+
+Image Storage Usage
+
+Cache Health
+
+Average Response Time
+
+Database Size
+
+System Errors
+
+===========================================================
+IMAGE STORAGE MONITOR
+===========================================================
+
+Display:
+
+Total Images
+
+Storage Used
+
+Average Image Size
+
+Largest Images
+
+Unused Images
+
+Orphan Images
+
+Image Upload Trend
+
+===========================================================
+SECURITY CENTER
+===========================================================
+
+Display:
+
+Failed Login Attempts
+
+Blocked IPs
+
+Spam Listings
+
+Duplicate Listings
+
+Duplicate Accounts
+
+Suspicious Activity
+
+Large Traffic Spikes
+
+===========================================================
+ACTIVITY LOG & AUDIT TRAIL
+===========================================================
+
+Automatically record every Admin action.
+
+Log:
+
+Login
+
+Logout
+
+Password Change
+
+User Changes
+
+Business Changes
+
+Listing Changes
+
+Category Changes
+
+Membership Changes
+
+Pricing Changes
+
+Payment Events
+
+Email Events
+
+Website Settings
+
+SEO Changes
+
+Banner Updates
+
+Homepage Updates
+
+Footer Updates
+
+Zoho Mail Settings
+
+Razorpay Settings
+
+Generate Reports
+
+Each log must contain:
+
+Log ID
+
+Date
+
+Time
+
+Action
+
+Module
+
+Affected Record
+
+Previous Value
+
+New Value
+
+Browser
+
+Operating System
+
+IP Address
+
+Status
+
+Allow searching, filtering and exporting.
+
+===========================================================
+SYSTEM LOGS
+===========================================================
+
+Maintain logs for:
+
+Database Errors
+
+API Errors
+
+Email Errors
+
+Payment Errors
+
+Image Upload Errors
+
+404 Errors
+
+500 Errors
+
+Slow Requests
+
+Security Warnings
+
+===========================================================
+BACKUP CENTER
+===========================================================
+
+Display:
+
+Database Backup Status
+
+Image Backup Status
+
+Settings Backup
+
+Backup History
+
+Allow:
+
+Manual Backup
+
+Download Backup
+
+Restore Backup
+
+===========================================================
+GOALS & TARGETS
+===========================================================
+
+Allow Admin to define business goals.
+
+Examples:
+
+100 New Users
+
+50 Listings
+
+10 Business Accounts
+
+₹10,000 Revenue
+
+Track progress using animated progress bars.
+
+===========================================================
+PERFORMANCE
+===========================================================
+
+Use:
+
+Caching
+
+Pagination
+
+Lazy Loading
+
+Optimized SQL Queries
+
+Background Jobs
+
+Dashboard load time should remain under 2 seconds.
+
+===========================================================
+FUTURE READY
+===========================================================
+
+The architecture must support future features without database redesign.
+
+Future features include:
+
+In-App Chat
+
+Online Booking
+
+Rental Payments
+
+Escrow
+
+Delivery Tracking
+
+Insurance
+
+Coupons
+
+Referral Program
+
+Reward Points
+
+Advertising Platform
+
+Push Notifications
+
+AI Recommendations
+
+Native Android App
+
+Native iOS App
+
+Analytics API
+
+Public API
+
+Maintain backward compatibility with the existing RentNEarn platform.
+
+Do not remove or break any existing functionality.
+
+All new modules must integrate cleanly into the existing codebase.

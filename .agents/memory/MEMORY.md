@@ -1,1 +1,2 @@
 - [GCS image storage](gcs-image-storage.md) — listing images stored in Replit Object Storage (GCS), served at /api/storage/public-objects/*; local disk was ephemeral across dev/prod.
+- [Analytics system](analytics-system.md) — full analytics stack: DB columns on listings, listing_views table, analytics route, formatListing includes stats; frontend tracks views/interactions.

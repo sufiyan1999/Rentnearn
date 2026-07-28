@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { eq, desc, and, sql } from "drizzle-orm";
+import Razorpay from "razorpay";
+import crypto from "crypto";
 import { db, membershipPlansTable, userMembershipsTable, usersTable } from "@workspace/db";
 import { requireAuth, requireAdmin } from "../middlewares/authMiddleware";
 import {
@@ -8,7 +10,15 @@ import {
   activateMembership,
   backfillFreeTrials,
   countActiveListings,
+  getPlanBySlug,
 } from "../lib/membership";
+
+function getRazorpay(): Razorpay | null {
+  const key_id = process.env.RAZORPAY_KEY_ID;
+  const key_secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!key_id || !key_secret) return null;
+  return new Razorpay({ key_id, key_secret });
+}
 
 const router = Router();
 
@@ -41,6 +51,135 @@ router.get("/memberships/me", requireAuth, async (req, res): Promise<void> => {
     listingLimit: active.plan.maxListings,
     daysRemaining,
   });
+});
+
+// ── Razorpay checkout ──────────────────────────────────────────────────────
+
+// POST /memberships/create-order — create a Razorpay order for a paid plan
+router.post("/memberships/create-order", requireAuth, async (req, res): Promise<void> => {
+  const rzp = getRazorpay();
+  if (!rzp) {
+    res.status(503).json({ error: "Payment gateway not configured." });
+    return;
+  }
+
+  const { planSlug } = req.body as { planSlug: string };
+  const PAID_PLANS = ["basic", "plus", "business"];
+  if (!planSlug || !PAID_PLANS.includes(planSlug)) {
+    res.status(400).json({ error: "Invalid plan. Choose basic, plus, or business." });
+    return;
+  }
+
+  const plan = await getPlanBySlug(planSlug);
+  if (!plan) {
+    res.status(404).json({ error: "Plan not found." });
+    return;
+  }
+
+  try {
+    const order = await rzp.orders.create({
+      amount: plan.pricePaise,
+      currency: "INR",
+      receipt: `mem_${req.user!.id}_${Date.now()}`,
+      notes: { planSlug, userId: String(req.user!.id) },
+    });
+
+    // Store a pending membership row so we can look up planId on verify
+    await db.insert(userMembershipsTable).values({
+      userId: req.user!.id,
+      planId: plan.id,
+      status: "pending",
+      startedAt: new Date(),
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1-hr TTL placeholder
+      razorpayOrderId: order.id,
+      amountPaise: plan.pricePaise,
+    });
+
+    res.json({
+      orderId: order.id,
+      keyId: process.env.RAZORPAY_KEY_ID,
+      amount: plan.pricePaise,
+      currency: "INR",
+    });
+  } catch (err: any) {
+    console.error("Razorpay create-order error:", err);
+    res.status(500).json({ error: "Failed to create payment order." });
+  }
+});
+
+// POST /memberships/verify — verify Razorpay signature and activate plan
+router.post("/memberships/verify", requireAuth, async (req, res): Promise<void> => {
+  const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body as {
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+  };
+
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!secret) {
+    res.status(503).json({ error: "Payment gateway not configured." });
+    return;
+  }
+
+  // Verify HMAC signature
+  const expectedSig = crypto
+    .createHmac("sha256", secret)
+    .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+    .digest("hex");
+
+  if (expectedSig !== razorpaySignature) {
+    res.status(400).json({ error: "Payment signature verification failed." });
+    return;
+  }
+
+  // Find the pending row created during create-order (owned by this user)
+  const [pending] = await db
+    .select({
+      id: userMembershipsTable.id,
+      planId: userMembershipsTable.planId,
+      amountPaise: userMembershipsTable.amountPaise,
+    })
+    .from(userMembershipsTable)
+    .where(
+      and(
+        eq(userMembershipsTable.userId, req.user!.id),
+        eq(userMembershipsTable.razorpayOrderId, razorpayOrderId),
+        eq(userMembershipsTable.status, "pending")
+      )
+    )
+    .limit(1);
+
+  if (!pending) {
+    res.status(404).json({ error: "Payment order not found or already processed." });
+    return;
+  }
+
+  // Look up plan slug from planId
+  const [planRow] = await db
+    .select({ slug: membershipPlansTable.slug, name: membershipPlansTable.name })
+    .from(membershipPlansTable)
+    .where(eq(membershipPlansTable.id, pending.planId))
+    .limit(1);
+
+  if (!planRow) {
+    res.status(500).json({ error: "Plan not found." });
+    return;
+  }
+
+  // Activate: cancel old active membership, insert new active one with Razorpay IDs
+  await activateMembership(req.user!.id, planRow.slug, {
+    razorpayOrderId,
+    razorpayPaymentId,
+    amountPaise: pending.amountPaise,
+  });
+
+  // Clean up the pending placeholder row
+  await db
+    .update(userMembershipsTable)
+    .set({ status: "cancelled", updatedAt: new Date() })
+    .where(eq(userMembershipsTable.id, pending.id));
+
+  res.json({ success: true, planSlug: planRow.slug, planName: planRow.name });
 });
 
 // ── Admin endpoints ────────────────────────────────────────────────────────

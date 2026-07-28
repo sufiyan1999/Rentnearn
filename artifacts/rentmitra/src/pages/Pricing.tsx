@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { SeoHead } from "@/components/SeoHead";
 import { motion } from "framer-motion";
 import {
   Check, X, Star, Zap, Building2, Gift, Crown, ChevronDown, ChevronUp,
-  Rocket, Shield, TrendingUp
+  Rocket, Shield, TrendingUp, Loader2
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyMembership } from "@/lib/useMembership";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 // ─── Plan definitions ────────────────────────────────────────────────────────
 const PLANS = [
@@ -17,6 +21,7 @@ const PLANS = [
     name: "Free Trial",
     badge: null,
     price: 0,
+    pricePaise: 0,
     priceLabel: "Free",
     period: "3 months",
     billingNote: "No credit card required",
@@ -25,7 +30,6 @@ const PLANS = [
     border: "border-emerald-200 dark:border-emerald-800",
     bg: "bg-emerald-50 dark:bg-emerald-950/30",
     ctaLabel: "Start Free Trial",
-    ctaHref: "/register",
     highlight: false,
     features: [
       "3 months free access",
@@ -43,6 +47,7 @@ const PLANS = [
     name: "Basic",
     badge: null,
     price: 49,
+    pricePaise: 4900,
     priceLabel: "₹49",
     period: "/month",
     billingNote: "Billed monthly",
@@ -51,7 +56,6 @@ const PLANS = [
     border: "border-blue-200 dark:border-blue-800",
     bg: "bg-blue-50 dark:bg-blue-950/30",
     ctaLabel: "Get Basic",
-    ctaHref: "/contact",
     highlight: false,
     features: [
       "Up to 5 active listings",
@@ -67,6 +71,7 @@ const PLANS = [
     name: "Plus",
     badge: "Most Popular",
     price: 199,
+    pricePaise: 19900,
     priceLabel: "₹199",
     period: "/month",
     billingNote: "Billed monthly",
@@ -75,7 +80,6 @@ const PLANS = [
     border: "border-primary",
     bg: "bg-primary/5",
     ctaLabel: "Get Plus",
-    ctaHref: "/contact",
     highlight: true,
     features: [
       "Up to 25 active listings",
@@ -93,6 +97,7 @@ const PLANS = [
     name: "Business",
     badge: "Best Value",
     price: 1999,
+    pricePaise: 199900,
     priceLabel: "₹1,999",
     period: "/year",
     billingNote: "Billed annually · Save 58%",
@@ -101,7 +106,6 @@ const PLANS = [
     border: "border-zinc-300 dark:border-zinc-700",
     bg: "bg-zinc-950 text-white",
     ctaLabel: "Get Business",
-    ctaHref: "/contact",
     highlight: false,
     dark: true,
     features: [
@@ -155,13 +159,107 @@ function Cell({ value }: { value: boolean | string }) {
   return <span className="text-xs font-semibold text-primary">{value}</span>;
 }
 
+// ─── Razorpay loader ─────────────────────────────────────────────────────────
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise(resolve => {
+    if ((window as any).Razorpay) { resolve(true); return; }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function Pricing() {
-  const { isAuthenticated } = useAuth();
-  const { data: membershipInfo } = useMyMembership();
+  const [, setLocation] = useLocation();
+  const { isAuthenticated, user } = useAuth();
+  const { data: membershipInfo, refetch: refetchMembership } = useMyMembership();
+  const qc = useQueryClient();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [paying, setPaying] = useState<string | null>(null); // slug of plan being paid
 
   const activePlanSlug = membershipInfo?.plan?.slug;
+
+  async function handleCheckout(plan: typeof PLANS[number]) {
+    if (!isAuthenticated) { setLocation("/register"); return; }
+
+    setPaying(plan.slug);
+    try {
+      // 1. Load Razorpay SDK
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        toast.error("Could not load payment gateway. Please try again.");
+        return;
+      }
+
+      // 2. Create Razorpay order on the server
+      const token = localStorage.getItem("rentnearn_token");
+      const orderRes = await fetch(`${BASE}/api/memberships/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ planSlug: plan.slug }),
+      });
+      if (!orderRes.ok) {
+        const err = await orderRes.json().catch(() => ({}));
+        toast.error(err.error || "Failed to create payment order.");
+        return;
+      }
+      const { orderId, keyId, amount, currency } = await orderRes.json();
+
+      // 3. Open Razorpay modal
+      await new Promise<void>((resolve, reject) => {
+        const rzp = new (window as any).Razorpay({
+          key: keyId,
+          amount,
+          currency,
+          name: "RentNEarn",
+          description: `${plan.name} Plan`,
+          order_id: orderId,
+          prefill: {
+            name: (user as any)?.name ?? "",
+            email: (user as any)?.email ?? "",
+          },
+          theme: { color: "#f97316" },
+          modal: { ondismiss: () => resolve() },
+          handler: async (response: any) => {
+            try {
+              // 4. Verify payment on the server
+              const verifyRes = await fetch(`${BASE}/api/memberships/verify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature,
+                }),
+              });
+              if (!verifyRes.ok) {
+                const err = await verifyRes.json().catch(() => ({}));
+                toast.error(err.error || "Payment verification failed. Contact support.");
+                resolve();
+                return;
+              }
+              // 5. Success — refresh membership state
+              await qc.invalidateQueries({ queryKey: ["memberships", "me"] });
+              toast.success(`🎉 ${plan.name} plan activated! Enjoy your upgraded account.`);
+              resolve();
+            } catch {
+              toast.error("Something went wrong after payment. Contact support@rentnearn.com.");
+              resolve();
+            }
+          },
+        });
+        rzp.open();
+      });
+    } catch (err) {
+      console.error("Checkout error:", err);
+      toast.error("Payment could not be started. Please try again.");
+    } finally {
+      setPaying(null);
+    }
+  }
 
   return (
     <div className="pb-24 md:pb-0">
@@ -213,6 +311,9 @@ export default function Pricing() {
             {PLANS.map((plan, i) => {
               const Icon = plan.icon;
               const isCurrent = activePlanSlug === plan.slug;
+              const isFree = plan.slug === "free_trial";
+              const isLoading = paying === plan.slug;
+
               return (
                 <motion.div
                   key={plan.slug}
@@ -222,7 +323,7 @@ export default function Pricing() {
                   className={cn(
                     "relative rounded-3xl border-2 flex flex-col overflow-hidden",
                     plan.highlight ? "border-primary shadow-xl shadow-primary/15 scale-[1.02]" : plan.border,
-                    plan.dark ? "bg-zinc-950 text-white" : "bg-card"
+                    (plan as any).dark ? "bg-zinc-950 text-white" : "bg-card"
                   )}
                 >
                   {/* Badge */}
@@ -245,20 +346,20 @@ export default function Pricing() {
                     <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-4", `bg-gradient-to-br ${plan.gradient}`)}>
                       <Icon className="w-5 h-5 text-white" />
                     </div>
-                    <h3 className={cn("font-bold text-xl mb-1", plan.dark ? "text-white" : "")}>{plan.name}</h3>
+                    <h3 className={cn("font-bold text-xl mb-1", (plan as any).dark ? "text-white" : "")}>{plan.name}</h3>
 
                     {/* Price */}
                     <div className="mb-1">
-                      <span className={cn("text-4xl font-extrabold tracking-tight", plan.dark ? "text-white" : "")}>{plan.priceLabel}</span>
-                      <span className={cn("text-sm ml-1", plan.dark ? "text-white/60" : "text-muted-foreground")}>{plan.period}</span>
+                      <span className={cn("text-4xl font-extrabold tracking-tight", (plan as any).dark ? "text-white" : "")}>{plan.priceLabel}</span>
+                      <span className={cn("text-sm ml-1", (plan as any).dark ? "text-white/60" : "text-muted-foreground")}>{plan.period}</span>
                     </div>
-                    <p className={cn("text-xs mb-5", plan.dark ? "text-white/50" : "text-muted-foreground")}>{plan.billingNote}</p>
+                    <p className={cn("text-xs mb-5", (plan as any).dark ? "text-white/50" : "text-muted-foreground")}>{plan.billingNote}</p>
 
                     {/* Features */}
                     <ul className="space-y-2.5 flex-1 mb-6">
                       {plan.features.map(f => (
-                        <li key={f} className={cn("flex items-start gap-2 text-sm", plan.dark ? "text-white/80" : "text-foreground/80")}>
-                          <Check className={cn("w-4 h-4 shrink-0 mt-0.5", plan.highlight ? "text-primary" : plan.dark ? "text-emerald-400" : "text-emerald-500")} />
+                        <li key={f} className={cn("flex items-start gap-2 text-sm", (plan as any).dark ? "text-white/80" : "text-foreground/80")}>
+                          <Check className={cn("w-4 h-4 shrink-0 mt-0.5", plan.highlight ? "text-primary" : (plan as any).dark ? "text-emerald-400" : "text-emerald-500")} />
                           {f}
                         </li>
                       ))}
@@ -269,26 +370,47 @@ export default function Pricing() {
                       <div className="text-center py-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600 text-sm font-semibold border border-emerald-200 dark:border-emerald-800">
                         ✓ Active Plan
                       </div>
-                    ) : (
+                    ) : isFree ? (
                       <Link
-                        href={isAuthenticated ? plan.ctaHref : "/register"}
+                        href={isAuthenticated ? "/dashboard" : "/register"}
                         className={cn(
                           "block text-center py-2.5 rounded-2xl text-sm font-bold transition-all duration-200",
+                          "bg-secondary hover:bg-primary hover:text-white border border-border"
+                        )}
+                      >
+                        {isAuthenticated ? "Go to Dashboard" : plan.ctaLabel}
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => handleCheckout(plan)}
+                        disabled={isLoading || paying !== null}
+                        className={cn(
+                          "w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed",
                           plan.highlight
                             ? "bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25"
-                            : plan.dark
+                            : (plan as any).dark
                             ? "bg-white text-zinc-950 hover:bg-white/90"
                             : "bg-secondary hover:bg-primary hover:text-white border border-border"
                         )}
                       >
-                        {plan.ctaLabel}
-                      </Link>
+                        {isLoading ? (
+                          <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
+                        ) : (
+                          plan.ctaLabel
+                        )}
+                      </button>
                     )}
                   </div>
                 </motion.div>
               );
             })}
           </div>
+
+          {/* Secure payment note */}
+          <p className="text-center text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1.5">
+            <Shield className="w-3.5 h-3.5" />
+            Payments are processed securely via Razorpay. Your card details are never stored on our servers.
+          </p>
         </section>
 
         {/* ── Featured boosts ── */}

@@ -1,0 +1,48 @@
+# RentNEarn Privacy Policy
+
+## 1. Introduction
+RentNEarn ("we", "our", "us") respects your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and mobile application. By using RentNEarn, you consent to the practices described in this policy.
+
+## 2. Information We Collect
+
+**Account Information**
+When you register, we collect your name, email address, phone number, and password (stored as a bcrypt hash). If you sign in with Google on our website, we receive your name, email, and profile photo from Google.
+
+**Listing Information**
+When you create a listing, we collect the item details, photos, price, and your city/state. This information is shared publicly on the platform.
+
+**Payment Information**
+When you pay a listing fee, payment is processed by our payment partner, Razorpay. We share your name, contact details, and transaction amount with Razorpay to process the payment. We do not collect or store your full card, UPI, or bank account details — these are handled directly by Razorpay in accordance with their own privacy policy and applicable payment security standards.
+
+**Cookies**
+We use essential cookies to maintain your session and remember your login. With your consent, we may use functional and analytics cookies to personalise your experience and understand usage patterns.
+
+**Analytics**
+We may collect usage data including pages visited, search terms, and app interactions to improve the platform. This data may be linked to your account or device where necessary for functionality and analytics purposes.
+
+**Third-Party Services**
+We integrate with Zoho Mail for transactional emails, Razorpay for payment processing, and an image CDN to process uploaded photos. Google OAuth is used for social login on our website. These services have their own privacy policies.
+
+## 3. How We Use Your Information
+We use your information to: operate and improve the platform; process listing fee payments; send transactional emails (welcome, listing approval, password reset); enable contact between owners and renters via WhatsApp; enforce our Terms of Service; and comply with legal obligations.
+
+## 4. Data Sharing
+We do not sell your personal data. We share information only: with service providers (including Razorpay, Zoho Mail, and our image CDN provider) who operate under strict data-processing agreements; when required by Indian law or a valid legal order; or with your explicit consent. Public listing data (item name, photos, city, price) is visible to all users.
+
+## 5. Data Security
+We use industry-standard measures including HTTPS, password hashing (bcrypt), and restricted database access. Payment transactions are processed through Razorpay's secure, PCI-DSS compliant infrastructure. However, no transmission over the internet is 100% secure. Please use a strong, unique password for your account.
+
+## 6. Data Retention
+We retain your account data while your account is active. Deleted account data is removed within 30 days except where we are required to retain it for legal compliance. Listings are kept for 30 days after expiry before deletion. Transaction records with Razorpay may be retained longer where required for accounting, tax, or legal purposes.
+
+## 7. Your Rights
+You have the right to: access the personal data we hold about you; correct inaccurate data; request deletion of your account and data; withdraw consent for non-essential cookies at any time. To exercise these rights, email support@rentnearn.com.
+
+## 8. Children's Privacy
+RentNEarn is not intended for users under 18. We do not knowingly collect personal information from minors. If you believe a minor has provided us with personal information, please contact us immediately.
+
+## 9. Changes to This Policy
+We may update this policy from time to time. We will notify you of significant changes by email or by displaying a prominent notice on the platform. Continued use of RentNEarn after changes constitutes acceptance.
+
+## 10. Contact Us
+For privacy-related queries: support@rentnearn.com — AlliedReach, 11 Granada, LBS Marg, Opp. Phoenix Mall, Kurla West, Mumbai – 400070

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-const LAST_UPDATED = "22 July 2026";
+const LAST_UPDATED = "29 July 2026";
 
 export default function PrivacyPolicy() {
   return (
@@ -25,11 +25,15 @@ export default function PrivacyPolicy() {
             subsections: [
               {
                 sub: "Account Information",
-                body: "When you register, we collect your name, email address, phone number, and password (stored as a bcrypt hash). If you sign in with Google, we receive your name, email, and profile photo from Google.",
+                body: "When you register, we collect your name, email address, phone number, and password (stored as a bcrypt hash). If you sign in with Google on our website, we receive your name, email, and profile photo from Google.",
               },
               {
                 sub: "Listing Information",
                 body: "When you create a listing, we collect the item details, photos, price, and your city/state. This information is shared publicly on the platform.",
+              },
+              {
+                sub: "Payment Information",
+                body: "When you pay a listing fee, payment is processed by our payment partner, Razorpay. We share your name, contact details, and transaction amount with Razorpay to process the payment. We do not collect or store your full card, UPI, or bank account details — these are handled directly by Razorpay in accordance with their own privacy policy and applicable payment security standards.",
               },
               {
                 sub: "Cookies",
@@ -37,29 +41,29 @@ export default function PrivacyPolicy() {
               },
               {
                 sub: "Analytics",
-                body: "We may collect anonymised usage data including pages visited, search terms, and app interactions to improve the platform. This data cannot identify you individually.",
+                body: "We may collect usage data including pages visited, search terms, and app interactions to improve the platform. This data may be linked to your account or device where necessary for functionality and analytics purposes.",
               },
               {
                 sub: "Third-Party Services",
-                body: "We integrate with Zoho Mail for transactional emails. Our image CDN processes uploaded photos. Google OAuth is used for social login. These services have their own privacy policies.",
+                body: "We integrate with Zoho Mail for transactional emails, Razorpay for payment processing, and an image CDN to process uploaded photos. Google OAuth is used for social login on our website. These services have their own privacy policies.",
               },
             ],
           },
           {
             title: "3. How We Use Your Information",
-            body: `We use your information to: operate and improve the platform; send transactional emails (welcome, listing approval, password reset); enable contact between owners and renters via WhatsApp; enforce our Terms of Service; and comply with legal obligations.`,
+            body: `We use your information to: operate and improve the platform; process listing fee payments; send transactional emails (welcome, listing approval, password reset); enable contact between owners and renters via WhatsApp; enforce our Terms of Service; and comply with legal obligations.`,
           },
           {
             title: "4. Data Sharing",
-            body: `We do not sell your personal data. We share information only: with service providers who operate under strict data-processing agreements; when required by Indian law or a valid legal order; or with your explicit consent. Public listing data (item name, photos, city, price) is visible to all users.`,
+            body: `We do not sell your personal data. We share information only: with service providers (including Razorpay, Zoho Mail, and our image CDN provider) who operate under strict data-processing agreements; when required by Indian law or a valid legal order; or with your explicit consent. Public listing data (item name, photos, city, price) is visible to all users.`,
           },
           {
             title: "5. Data Security",
-            body: `We use industry-standard measures including HTTPS, password hashing (bcrypt), and restricted database access. However, no transmission over the internet is 100% secure. Please use a strong, unique password for your account.`,
+            body: `We use industry-standard measures including HTTPS, password hashing (bcrypt), and restricted database access. Payment transactions are processed through Razorpay's secure, PCI-DSS compliant infrastructure. However, no transmission over the internet is 100% secure. Please use a strong, unique password for your account.`,
           },
           {
             title: "6. Data Retention",
-            body: `We retain your account data while your account is active. Deleted account data is removed within 30 days except where we are required to retain it for legal compliance. Listings are kept for 30 days after expiry before deletion.`,
+            body: `We retain your account data while your account is active. Deleted account data is removed within 30 days except where we are required to retain it for legal compliance. Listings are kept for 30 days after expiry before deletion. Transaction records with Razorpay may be retained longer where required for accounting, tax, or legal purposes.`,
           },
           {
             title: "7. Your Rights",

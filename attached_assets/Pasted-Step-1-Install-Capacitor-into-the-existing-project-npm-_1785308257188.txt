@@ -1,0 +1,42 @@
+Step 1: Install Capacitor into the existing project
+npm install @capacitor/core @capacitor/cli
+npx cap init
+
+When prompted:
+
+App name: RentNEarn
+Package ID: com.rentnearn.app (must exactly match what's already registered in App Store Connect — this is critical, don't let it auto-generate something different)
+Step 2: Add the iOS platform
+npm install @capacitor/ios
+npx cap add ios
+
+This generates a new ios/ folder in your project containing the actual native Xcode project — this is what didn't exist before.
+
+Step 3: Point Capacitor at your build output
+
+Capacitor needs to know where your Vite build output lives. Open capacitor.config.json (or .ts) and confirm:
+
+json
+{
+  "appId": "com.rentnearn.app",
+  "appName": "RentNEarn",
+  "webDir": "dist"
+}
+
+dist is Vite's default build output folder — confirm that matches your actual vite.config output, it usually does by default.
+
+Step 4: Build the web app
+npm run build
+
+This produces the production dist/ folder Capacitor will wrap.
+
+Step 5: Sync into the native project
+npx cap sync ios
+Step 6: Open in Xcode
+npx cap open ios
+
+From here, everything I walked you through earlier (Signing & Capabilities, Version/Build numbers, Archive, Distribute) applies exactly as described.
+
+One important thing about how RentNEarn will behave as a wrapped app: since your whole product is a responsive web app, Capacitor will essentially show your website inside a native shell with access to native APIs if you need them (camera, geolocation, etc. — useful since you mentioned coarse location for listings). Make sure the deployed web app you're pointing to is fully mobile-responsive and doesn't rely on hover states or desktop-only interactions, since it'll be the entire visual experience of the "app."
+
+Also worth checking with Replit: does your app currently call any browser-only APIs (like navigator.geolocation directly) that might need a Capacitor plugin equivalent (@capacitor/geolocation) to work reliably inside the native wrapper, rather than the raw browser API? Worth asking them to confirm before you archive, since this is a common thing that silently breaks in a wrapped app even though it works fine in a browser.

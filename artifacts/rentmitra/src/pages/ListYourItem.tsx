@@ -24,22 +24,6 @@ function trackEvent(eventType: string, meta?: Record<string, unknown>) {
   } catch { /* analytics must never break UX */ }
 }
 
-// ─── Animated counter ─────────────────────────────────────────────────────────
-function useCountUp(target: number, duration = 2200, enabled = false) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!enabled) return;
-    let current = 0;
-    const increment = target / (duration / 16);
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= target) { setCount(target); clearInterval(timer); }
-      else setCount(Math.round(current));
-    }, 16);
-    return () => clearInterval(timer);
-  }, [enabled, target, duration]);
-  return count;
-}
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 const SHOW_CAT_SLUGS = [
@@ -70,10 +54,10 @@ const PLANS = [
   { name: "Business", price: "₹1,999", period: "/year",  popular: false, badge: "Best Value",   features: ["Up to 10 active listings", "Business profile badge", "Priority review", "Annual billing"] },
 ];
 
-const COUNTERS = [
-  { icon: Recycle,     label: "Items Listed",              value: 12000, prefix: "",  suffix: "+",    note: "and counting" },
-  { icon: IndianRupee, label: "Community Savings",         value: 45,    prefix: "₹", suffix: "L+",   note: "estimated value" },
-  { icon: TrendingDown,label: "Estimated Waste Reduced",   value: 8500,  prefix: "",  suffix: " kg+", note: "by reusing, not buying" },
+const ECO_POINTS = [
+  { icon: Recycle,      title: "Extends Product Life",      body: "Every rented item is one fewer thing manufactured. Keeping products in active use is the simplest form of recycling." },
+  { icon: IndianRupee,  title: "Saves the Community Money", body: "Renters pay a fraction of the purchase price. Owners earn from items that would otherwise sit idle." },
+  { icon: TrendingDown, title: "Reduces Waste & Landfill",  body: "Items that get rented get maintained, repaired, and reused — not discarded after a single use." },
 ];
 
 const FAQ_ITEMS = [
@@ -143,11 +127,6 @@ export default function ListYourItem() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const impactRef  = useRef<HTMLDivElement>(null);
   const impactView = useInView(impactRef, { once: true, margin: "-100px" });
-
-  const c0 = useCountUp(COUNTERS[0].value, 2200, impactView);
-  const c1 = useCountUp(COUNTERS[1].value, 2000, impactView);
-  const c2 = useCountUp(COUNTERS[2].value, 2400, impactView);
-  const counts = [c0, c1, c2];
 
   // Track page view once on mount
   useEffect(() => { trackEvent("page_view"); }, []);
@@ -513,23 +492,20 @@ export default function ListYourItem() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-10 mb-14">
-            {COUNTERS.map(({ icon: Icon, label, value, prefix, suffix, note }, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-14">
+            {ECO_POINTS.map(({ icon: Icon, title, body }, i) => (
               <motion.div
-                key={label}
+                key={title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={impactView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.1 + i * 0.12 }}
-                className="flex flex-col items-center"
+                className="bg-white/5 border border-white/10 rounded-3xl p-6 text-left"
               >
-                <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center mb-4">
-                  <Icon className="w-6 h-6 text-emerald-400" />
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center mb-4">
+                  <Icon className="w-5 h-5 text-emerald-400" />
                 </div>
-                <p className="text-4xl md:text-5xl font-extrabold tracking-tight text-white tabular-nums">
-                  {prefix}{counts[i].toLocaleString("en-IN")}{suffix}
-                </p>
-                <p className="text-white/70 font-semibold text-sm mt-1">{label}</p>
-                <p className="text-white/35 text-xs mt-0.5">{note}</p>
+                <h3 className="font-bold text-white text-sm mb-2">{title}</h3>
+                <p className="text-white/55 text-xs leading-relaxed">{body}</p>
               </motion.div>
             ))}
           </div>

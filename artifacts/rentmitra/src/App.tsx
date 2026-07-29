@@ -33,6 +33,7 @@ import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
 import Safety from "./pages/Safety";
 import HowItWorks from "./pages/HowItWorks";
+import ListYourItem from "./pages/ListYourItem";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,7 @@ function Router() {
         <Route path="/faq" component={FAQ} />
         <Route path="/safety" component={Safety} />
         <Route path="/how-it-works" component={HowItWorks} />
+        <Route path="/list-your-item" component={ListYourItem} />
         {/* Legal pages */}
         <Route path="/privacy" component={PrivacyPolicy} />
         <Route path="/terms" component={TermsOfService} />

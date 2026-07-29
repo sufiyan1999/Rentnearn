@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { eq, and, sql } from "drizzle-orm";
-import { db, listingsTable, listingViewsTable, favouritesTable } from "@workspace/db";
+import { db, listingsTable, listingViewsTable, favouritesTable, pageEventsTable } from "@workspace/db";
 import { requireAuth } from "../middlewares/authMiddleware";
 
 const router = Router();
@@ -232,6 +232,40 @@ router.get("/listings/:id/analytics", requireAuth, async (req, res): Promise<voi
     availabilityStatus: listing.availabilityStatus,
     expiresAt:       listing.expiresAt,
   });
+});
+
+// ── POST /analytics/event ─────────────────────────────────────────────────────
+// Records a page-level analytics event (page_view, cta_click, …).
+// No auth required. Bots are silently dropped. Errors are swallowed so
+// analytics can never break the user experience.
+router.post("/analytics/event", async (req, res): Promise<void> => {
+  res.json({ ok: true }); // respond immediately — don't block the client
+
+  const { eventType, page, meta, visitorKey: bodyKey } = req.body as {
+    eventType?: unknown;
+    page?: unknown;
+    meta?: unknown;
+    visitorKey?: unknown;
+  };
+
+  if (typeof eventType !== "string" || !eventType || typeof page !== "string" || !page) return;
+  if (isBot(req.headers["user-agent"])) return;
+
+  const resolvedKey: string | null =
+    (typeof req.cookies?.[SESSION_COOKIE] === "string" && (req.cookies[SESSION_COOKIE] as string).length > 0)
+      ? (req.cookies[SESSION_COOKIE] as string).slice(0, 128)
+      : typeof bodyKey === "string" && bodyKey.length > 0
+        ? bodyKey.slice(0, 128)
+        : null;
+
+  try {
+    await db.insert(pageEventsTable).values({
+      eventType: eventType.slice(0, 64),
+      page:      page.slice(0, 255),
+      meta:      (meta && typeof meta === "object") ? meta : null,
+      visitorKey: resolvedKey,
+    });
+  } catch { /* swallow — analytics must not affect UX */ }
 });
 
 export default router;

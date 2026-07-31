@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation, useRoute } from "wouter";
+import { trackLead } from "@/lib/metaPixel";
 import { useCreateListing, useGetListing, getGetListingQueryKey, useUpdateListing, ListingInput, ListingInputCondition } from "@workspace/api-client-react";
 import { Button, Input, Label, Textarea } from "@/components/ui/ui-core";
 import { CATEGORIES, STATES, CITIES_BY_STATE } from "@/lib/constants";
@@ -152,6 +153,7 @@ export default function CreateListing() {
             await uploadImages(data.id);
           }
           toast.success("Listing created successfully!");
+          trackLead({ content_name: (formData as any).title, content_category: (formData as any).category });
           setLocation(`/profile`); 
         },
         onError: (err: any) => {

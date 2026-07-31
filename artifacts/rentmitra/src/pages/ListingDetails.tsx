@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/ui-core";
 import { ArrowLeft, MapPin, Share2, MessageCircle, AlertTriangle, ShieldCheck, QrCode, Star, Calendar, Tag, Check, X, Clock, Copy, Link2, Phone, Eye, Award, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
+import { trackViewContent, trackContact } from "@/lib/metaPixel";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -65,6 +66,14 @@ export default function ListingDetails() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ visitorKey }),
     }).catch(() => {});
+
+    // Meta Pixel: ViewContent
+    trackViewContent({
+      content_name: listing.title,
+      content_ids: [String(id)],
+      content_type: "product",
+      ...(listing.rentalPrice?.daily && { value: Number(listing.rentalPrice.daily), currency: "INR" }),
+    });
   }, [id, listing?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAdminApprove = () => {
@@ -152,6 +161,7 @@ export default function ListingDetails() {
   const handleWhatsApp = () => {
     if (!listing.owner?.phone) { toast.error("Owner phone number not available"); return; }
     trackInteract("whatsapp");
+    trackContact();
     const msg = encodeURIComponent(`Hi, I saw your listing for "${listing.title}" on RentNEarn. Is it available?`);
     window.open(`https://wa.me/91${listing.owner.phone}?text=${msg}`, "_blank");
   };
@@ -159,6 +169,7 @@ export default function ListingDetails() {
   const handlePhoneCall = () => {
     if (!listing.owner?.phone) { toast.error("Owner phone number not available"); return; }
     trackInteract("phone");
+    trackContact();
     window.open(`tel:+91${listing.owner.phone}`, "_self");
   };
 

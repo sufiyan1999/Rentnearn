@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import { trackSearch } from "@/lib/metaPixel";
 import { useLocation } from "wouter";
 import { SeoHead } from "@/components/SeoHead";
 import {
@@ -112,6 +113,14 @@ export default function Search() {
     const newUrl = `/search${qs ? `?${qs}` : ""}`;
     window.history.replaceState(null, "", newUrl);
   }, [filters, distanceActive]);
+
+  // ── Meta Pixel: Search ────────────────────────────────────────────────────
+  // Debounced so we fire once after the user stops typing, not on every key.
+  useEffect(() => {
+    if (!filters.q) return;
+    const t = setTimeout(() => trackSearch({ search_string: filters.q }), 800);
+    return () => clearTimeout(t);
+  }, [filters.q]);
 
   // ── Price debounce ────────────────────────────────────────────────────────
   useEffect(() => {

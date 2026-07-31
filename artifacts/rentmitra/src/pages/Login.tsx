@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackCustom } from "@/lib/metaPixel";
 import { useLocation, Link } from "wouter";
 import { useLogin } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,7 +19,7 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     loginMutation.mutate({ data: { email, password } }, {
-      onSuccess: (data) => { login(data.token, data.user); toast.success("Welcome back!"); setLocation("/"); },
+      onSuccess: (data) => { login(data.token, data.user); trackCustom("Login"); toast.success("Welcome back!"); setLocation("/"); },
       onError: (err: any) => toast.error(err?.response?.data?.error || "Failed to sign in"),
     });
   };

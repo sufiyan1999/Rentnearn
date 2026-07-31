@@ -34,6 +34,7 @@ import FAQ from "./pages/FAQ";
 import Safety from "./pages/Safety";
 import HowItWorks from "./pages/HowItWorks";
 import ListYourItem from "./pages/ListYourItem";
+import { MetaPixel } from "./components/MetaPixel";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ function NotFound() {
 function Router() {
   return (
     <AppLayout>
+      <MetaPixel />
       <Switch>
         {/* Core */}
         <Route path="/" component={Home} />

@@ -26,3 +26,4 @@ channel = "stable-25_05"
 
 [userenv.shared]
 APP_URL = "https://www.rentnearn.com"
+VITE_META_PIXEL_ID = "4570778229865331"

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackRegistration } from "@/lib/metaPixel";
 import { useLocation, Link } from "wouter";
 import { useRegister, useSendOtp, RegisterInputUserType } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -71,6 +72,7 @@ export default function Register() {
       {
         onSuccess: (data) => {
           login(data.token, data.user);
+          trackRegistration({ content_name: "RentNEarn Account", status: true });
           toast.success("Account created! Welcome aboard 🎉");
           setLocation("/");
         },

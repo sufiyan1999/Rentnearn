@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { trackInitiateCheckout, trackPurchase } from "@/lib/metaPixel";
 import { SeoHead } from "@/components/SeoHead";
 import { motion } from "framer-motion";
 import {
@@ -185,6 +186,7 @@ export default function Pricing() {
   async function handleCheckout(plan: typeof PLANS[number]) {
     if (!isAuthenticated) { setLocation("/register"); return; }
 
+    trackInitiateCheckout({ currency: "INR", content_ids: [plan.slug], num_items: 1 });
     setPaying(plan.slug);
     try {
       // 1. Load Razorpay SDK
@@ -243,6 +245,7 @@ export default function Pricing() {
               }
               // 5. Success — refresh membership state
               await qc.invalidateQueries({ queryKey: ["memberships", "me"] });
+              trackPurchase({ value: amount / 100, currency: "INR", content_ids: [plan.slug], content_name: plan.name });
               toast.success(`🎉 ${plan.name} plan activated! Enjoy your upgraded account.`);
               resolve();
             } catch {

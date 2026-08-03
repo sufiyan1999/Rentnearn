@@ -229,14 +229,14 @@ export default function ListYourItem() {
           >
             <Link
               href="/register"
-              onClick={() => trackEvent("cta_click", { label: "hero_start_earning" })}
+              onClick={() => trackEvent("cta_click", { cta: "hero_start_earning" })}
               className="bg-white text-primary font-bold px-8 py-4 rounded-full hover:bg-white/92 transition-all duration-200 active:scale-95 shadow-xl shadow-black/20 text-base md:text-lg whitespace-nowrap"
             >
               Start Earning — It's Free
             </Link>
             <Link
               href="/categories"
-              onClick={() => trackEvent("cta_click", { label: "hero_browse_categories" })}
+              onClick={() => trackEvent("cta_click", { cta: "hero_browse_categories" })}
               className="bg-white/15 border border-white/30 text-white font-semibold px-8 py-4 rounded-full hover:bg-white/25 transition-all duration-200 active:scale-95 backdrop-blur-sm text-sm md:text-base whitespace-nowrap flex items-center gap-2"
             >
               Browse Categories <ArrowRight className="w-4 h-4" />

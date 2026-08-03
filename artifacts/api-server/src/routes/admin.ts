@@ -654,64 +654,6 @@ router.get("/admin/reports", async (_req, res): Promise<void> => {
   });
 });
 
-// ─── Landing Page Analytics ───────────────────────────────────────────────────
-// GET /admin/landing-page-analytics
-// Returns visit counts, unique visitors, daily trend, and CTA breakdown
-// from the page_events table (populated by POST /api/analytics/event).
-
-router.get("/admin/landing-page-analytics", async (_req, res): Promise<void> => {
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-
-  const [totalVisits, uniqueVisitors, visitsPerDay, ctaBreakdown] = await Promise.all([
-    // Total page-view events for /list-your-item
-    db.select({ count: sql<number>`count(*)::int` })
-      .from(pageEventsTable)
-      .where(and(
-        eq(pageEventsTable.eventType, "page_view"),
-        eq(pageEventsTable.page, "/list-your-item"),
-      )),
-
-    // Unique visitors (distinct visitor_key) for the page
-    db.select({ count: sql<number>`count(distinct ${pageEventsTable.visitorKey})::int` })
-      .from(pageEventsTable)
-      .where(and(
-        eq(pageEventsTable.eventType, "page_view"),
-        eq(pageEventsTable.page, "/list-your-item"),
-      )),
-
-    // Page-view events per day for the last 30 days
-    db.select({
-      day: sql<string>`date_trunc('day', ${pageEventsTable.createdAt})::date::text`,
-      count: sql<number>`count(*)::int`,
-    })
-      .from(pageEventsTable)
-      .where(and(
-        eq(pageEventsTable.eventType, "page_view"),
-        eq(pageEventsTable.page, "/list-your-item"),
-        gte(pageEventsTable.createdAt, thirtyDaysAgo),
-      ))
-      .groupBy(sql`date_trunc('day', ${pageEventsTable.createdAt})`)
-      .orderBy(sql`date_trunc('day', ${pageEventsTable.createdAt})`),
-
-    // CTA click breakdown — group by the "label" key stored in meta jsonb
-    db.select({
-      label: sql<string>`coalesce(${pageEventsTable.meta}->>'label', 'unknown')`,
-      count: sql<number>`count(*)::int`,
-    })
-      .from(pageEventsTable)
-      .where(eq(pageEventsTable.eventType, "cta_click"))
-      .groupBy(sql`${pageEventsTable.meta}->>'label'`)
-      .orderBy(desc(sql`count(*)`)),
-  ]);
-
-  res.json({
-    totalVisits: totalVisits[0]?.count ?? 0,
-    uniqueVisitors: uniqueVisitors[0]?.count ?? 0,
-    visitsPerDay,
-    ctaBreakdown,
-  });
-});
-
 // ─── CSV Export: Full Listings ───────────────────────────────────────────────
 // GET /admin/listings/export — one row per listing; all statuses included.
 // Columns match the admin Listings table view plus analytics counters.
@@ -956,6 +898,152 @@ router.get("/admin/payment-analytics/export", async (_req, res): Promise<void> =
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
   res.send(summaryLines);
+});
+
+// ─── Landing Page Analytics ───────────────────────────────────────────────────
+
+router.get("/admin/landing-page-analytics", async (_req, res): Promise<void> => {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const landingPage = "/list-your-item";
+
+  const [
+    [totalVisits],
+    [uniqueVisitors],
+    [totalCtaClicks],
+    visitsPerDay,
+    ctaBreakdown,
+    recentEvents,
+  ] = await Promise.all([
+    // Total page views for the landing page
+    db.select({ count: sql<number>`count(*)::int` })
+      .from(pageEventsTable)
+      .where(and(eq(pageEventsTable.eventType, "page_view"), eq(pageEventsTable.page, landingPage))),
+
+    // Unique visitors (by visitor_key) for the landing page
+    db.select({ count: sql<number>`count(distinct ${pageEventsTable.visitorKey})::int` })
+      .from(pageEventsTable)
+      .where(and(
+        eq(pageEventsTable.eventType, "page_view"),
+        eq(pageEventsTable.page, landingPage),
+        sql`${pageEventsTable.visitorKey} is not null`,
+      )),
+
+    // Total CTA clicks originating from the landing page
+    db.select({ count: sql<number>`count(*)::int` })
+      .from(pageEventsTable)
+      .where(and(eq(pageEventsTable.eventType, "cta_click"), eq(pageEventsTable.page, landingPage))),
+
+    // Visits per day for the landing page (last 30 days)
+    db.select({
+      day: sql<string>`date_trunc('day', ${pageEventsTable.createdAt})::date::text`,
+      count: sql<number>`count(*)::int`,
+    })
+      .from(pageEventsTable)
+      .where(and(
+        eq(pageEventsTable.eventType, "page_view"),
+        eq(pageEventsTable.page, landingPage),
+        gte(pageEventsTable.createdAt, thirtyDaysAgo),
+      ))
+      .groupBy(sql`date_trunc('day', ${pageEventsTable.createdAt})`)
+      .orderBy(sql`date_trunc('day', ${pageEventsTable.createdAt})`),
+
+    // CTA breakdown by button (meta->>'cta') for the landing page
+    db.select({
+      cta: sql<string>`${pageEventsTable.meta}->>'cta'`,
+      count: sql<number>`count(*)::int`,
+    })
+      .from(pageEventsTable)
+      .where(and(
+        eq(pageEventsTable.eventType, "cta_click"),
+        eq(pageEventsTable.page, landingPage),
+        sql`${pageEventsTable.meta}->>'cta' is not null`,
+      ))
+      .groupBy(sql`${pageEventsTable.meta}->>'cta'`)
+      .orderBy(desc(sql`count(*)`)),
+
+    // Most recent 20 landing page events
+    db.select()
+      .from(pageEventsTable)
+      .where(eq(pageEventsTable.page, landingPage))
+      .orderBy(desc(pageEventsTable.createdAt))
+      .limit(20),
+  ]);
+
+  res.json({
+    totalVisits: totalVisits.count,
+    uniqueVisitors: uniqueVisitors.count,
+    totalCtaClicks: totalCtaClicks.count,
+    visitsPerDay,
+    ctaBreakdown: ctaBreakdown.map(r => ({ cta: r.cta ?? "unknown", count: r.count })),
+    recentEvents,
+  });
+});
+
+// ─── CSV Export: Landing Page Analytics ──────────────────────────────────────
+
+router.get("/admin/landing-page-analytics/export", async (_req, res): Promise<void> => {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const landingPage = "/list-your-item";
+
+  const [visitsPerDay, ctaBreakdown] = await Promise.all([
+    db.select({
+      day: sql<string>`date_trunc('day', ${pageEventsTable.createdAt})::date::text`,
+      count: sql<number>`count(*)::int`,
+    })
+      .from(pageEventsTable)
+      .where(and(
+        eq(pageEventsTable.eventType, "page_view"),
+        eq(pageEventsTable.page, landingPage),
+        gte(pageEventsTable.createdAt, thirtyDaysAgo),
+      ))
+      .groupBy(sql`date_trunc('day', ${pageEventsTable.createdAt})`)
+      .orderBy(sql`date_trunc('day', ${pageEventsTable.createdAt})`),
+
+    db.select({
+      cta: sql<string>`${pageEventsTable.meta}->>'cta'`,
+      count: sql<number>`count(*)::int`,
+    })
+      .from(pageEventsTable)
+      .where(and(
+        eq(pageEventsTable.eventType, "cta_click"),
+        eq(pageEventsTable.page, landingPage),
+        sql`${pageEventsTable.meta}->>'cta' is not null`,
+      ))
+      .groupBy(sql`${pageEventsTable.meta}->>'cta'`)
+      .orderBy(desc(sql`count(*)`)),
+  ]);
+
+  const [[totalVisits], [uniqueVisitors], [totalCtaClicks]] = await Promise.all([
+    db.select({ count: sql<number>`count(*)::int` }).from(pageEventsTable).where(and(eq(pageEventsTable.eventType, "page_view"), eq(pageEventsTable.page, landingPage))),
+    db.select({ count: sql<number>`count(distinct ${pageEventsTable.visitorKey})::int` }).from(pageEventsTable).where(and(eq(pageEventsTable.eventType, "page_view"), eq(pageEventsTable.page, landingPage), sql`${pageEventsTable.visitorKey} is not null`)),
+    db.select({ count: sql<number>`count(*)::int` }).from(pageEventsTable).where(and(eq(pageEventsTable.eventType, "cta_click"), eq(pageEventsTable.page, landingPage))),
+  ]);
+
+  const esc = (v: unknown): string => {
+    const s = v == null ? "" : String(v).replace(/"/g, '""');
+    return /[",\n\r]/.test(s) ? `"${s}"` : s;
+  };
+
+  const sections = [
+    "## Landing Page Summary",
+    ["Metric", "Value"].join(","),
+    ["Total Visits", totalVisits.count].join(","),
+    ["Unique Visitors", uniqueVisitors.count].join(","),
+    ["Total CTA Clicks", totalCtaClicks.count].join(","),
+    "",
+    "## CTA Button Breakdown",
+    ["CTA Button", "Clicks"].join(","),
+    ...ctaBreakdown.map(r => [esc(r.cta ?? "unknown"), r.count].join(",")),
+    "",
+    "## Daily Visits (last 30 days)",
+    ["Date", "Visits"].join(","),
+    ...visitsPerDay.map(r => [esc(r.day), r.count].join(",")),
+  ].join("\r\n");
+
+  const filename = `landing-page-analytics-${new Date().toISOString().slice(0, 10)}.csv`;
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  res.send(sections);
 });
 
 // ─── Formatters ───────────────────────────────────────────────────────────────

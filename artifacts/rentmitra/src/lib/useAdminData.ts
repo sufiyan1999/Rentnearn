@@ -261,27 +261,6 @@ export function useDeleteGoal() {
   });
 }
 
-// ─── Landing Page Analytics ───────────────────────────────────────────────────
-
-export interface LandingPageAnalytics {
-  totalVisits: number;
-  uniqueVisitors: number;
-  visitsPerDay: Array<{ day: string; count: number }>;
-  ctaBreakdown: Array<{ label: string; count: number }>;
-}
-
-export function useAdminLandingPageAnalytics() {
-  return useQuery<LandingPageAnalytics>({
-    queryKey: ["admin", "landing-page-analytics"],
-    queryFn: async () => {
-      const res = await fetch(`${BASE}/api/admin/landing-page-analytics`, { headers: authHeaders() });
-      if (!res.ok) throw new Error("Failed to fetch landing page analytics");
-      return res.json();
-    },
-    staleTime: 5 * 60 * 1000,
-  });
-}
-
 // ─── Trending ─────────────────────────────────────────────────────────────────
 
 export function useAdminTrending(limit = 20) {
@@ -336,6 +315,31 @@ export function useUserDetail(id: number | null) {
     },
     enabled: id !== null,
     staleTime: 30 * 1000,
+  });
+}
+
+// ─── Landing Page Analytics ───────────────────────────────────────────────────
+
+export interface LandingPageAnalytics {
+  totalVisits: number;
+  uniqueVisitors: number;
+  totalCtaClicks: number;
+  visitsPerDay: Array<{ day: string; count: number }>;
+  ctaBreakdown: Array<{ cta: string; count: number }>;
+  recentEvents: Array<{ id: number; eventType: string; page: string; meta: unknown; visitorKey: string | null; createdAt: string }>;
+}
+
+export function useLandingPageAnalytics() {
+  return useQuery<LandingPageAnalytics>({
+    queryKey: ["admin", "landing-page-analytics"],
+    queryFn: async () => {
+      const res = await fetch(`${BASE}/api/admin/landing-page-analytics`, { headers: authHeaders() });
+      if (!res.ok) throw new Error("Failed to fetch landing page analytics");
+      return res.json();
+    },
+    staleTime: 60 * 1000,
+    refetchInterval: 120 * 1000,
+    refetchIntervalInBackground: false,
   });
 }
 

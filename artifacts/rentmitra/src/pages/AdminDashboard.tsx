@@ -6,9 +6,9 @@ import { useAdminSubscriptions, useAdminPlans, useCancelSubscription, useToggleP
 import {
   useAdminBusinessProfiles, useApproveBusinessProfile, useRejectBusinessProfile,
   useAdminCategories, useAddCategory, useUpdateCategory,
-  useAdminReports, useAdminEnhancedStats, useAdminAuditLog, useAdminLandingPageAnalytics,
+  useAdminReports, useAdminEnhancedStats, useAdminAuditLog,
   useAdminPaymentAnalytics, useAdminGoals, useCreateGoal, useDeleteGoal,
-  useAdminTrending, useFeatureListingAdmin,
+  useAdminTrending, useFeatureListingAdmin, useLandingPageAnalytics,
 } from "@/lib/useAdminData";
 import {
   Users, Package, Clock, Heart, CheckCircle, Star, ShieldCheck, TrendingUp,
@@ -43,12 +43,13 @@ const PLAN_ICONS: Record<string, typeof Gift> = {
 
 const PLAN_COLORS = ["#f97316", "#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444"];
 
-const TABS = ["Overview", "Memberships", "Businesses", "Categories", "Reports", "Activity Log", "Payments", "Trending"] as const;
+const TABS = ["Overview", "Memberships", "Businesses", "Categories", "Reports", "Activity Log", "Payments", "Trending", "Landing Page"] as const;
 type Tab = typeof TABS[number];
 
 const TAB_ICONS: Partial<Record<Tab, typeof CreditCard>> = {
   Memberships: CreditCard, Businesses: Building2, Categories: Tag,
   Reports: BarChart2, "Activity Log": History, Payments: IndianRupee, Trending: TrendingUp,
+  "Landing Page": BarChart2,
 };
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
@@ -735,7 +736,7 @@ function CategoriesTab() {
 // ─── Reports tab ──────────────────────────────────────────────────────────────
 function ReportsTab() {
   const { data: reports, isLoading } = useAdminReports();
-  const { data: lp } = useAdminLandingPageAnalytics();
+  const { data: lp } = useLandingPageAnalytics();
   if (isLoading) return <div className="space-y-6">{[...Array(4)].map((_, i) => <div key={i} className="h-48 bg-secondary rounded-3xl animate-pulse" />)}</div>;
   if (!reports) return <div className="bg-secondary rounded-3xl p-10 text-center border border-border"><BarChart2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" /><p className="text-muted-foreground font-semibold">No report data available yet</p></div>;
   const fmtDay = (d: string) => new Date(d).toLocaleDateString("en-IN", { month: "short", day: "numeric" });
@@ -835,7 +836,7 @@ function ReportsTab() {
                       <BarChart data={lp.ctaBreakdown} layout="vertical" margin={{ top: 0, right: 8, left: 4, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
                         <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
-                        <YAxis type="category" dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} width={96} />
+                        <YAxis type="category" dataKey="cta" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} width={96} />
                         <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
                         <Bar dataKey="count" radius={[0, 4, 4, 0]} name="Clicks">
                           {lp.ctaBreakdown.map((_, i) => <Cell key={i} fill={PLAN_COLORS[i % PLAN_COLORS.length]} />)}
@@ -1107,7 +1108,15 @@ function TrendingTab() {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+const CTA_LABEL_MAP: Record<string, string> = {
+  list_free:          "Hero — List Free",
+  hero_list_free:     "Hero — List Free",
+  list_free_basic:    "Basic Plan",
+  list_free_plus:     "Plus Plan",
+  list_free_business: "Business Plan",
+  how_it_works:       "How It Works",
+  final_cta:          "Final CTA",
+};
 export default function AdminDashboard() {
   const { user, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
@@ -1179,8 +1188,197 @@ export default function AdminDashboard() {
           {activeTab === "Activity Log"  && <ActivityLogTab />}
           {activeTab === "Payments"      && <PaymentsTab />}
           {activeTab === "Trending"      && <TrendingTab />}
+          {activeTab === "Landing Page"  && <LandingPageTab />}
         </motion.div>
       </AnimatePresence>
+    </div>
+  );
+}
+
+function LandingPageTab() {
+  const { data, isLoading } = useLandingPageAnalytics();
+
+  const kpiCards = [
+    { label: "Total Visits", value: data?.totalVisits?.toLocaleString("en-IN"), icon: Eye, iconColor: "text-blue-500" },
+    { label: "Unique Visitors", value: data?.uniqueVisitors?.toLocaleString("en-IN"), icon: Users, iconColor: "text-violet-500" },
+    { label: "CTA Clicks", value: data?.totalCtaClicks?.toLocaleString("en-IN"), icon: BarChart2, iconColor: "text-emerald-500" },
+    {
+      label: "Click-Through Rate",
+      value: (data && data.totalVisits > 0)
+        ? `${Math.round((data.totalCtaClicks / data.totalVisits) * 100)}%`
+        : "0%",
+      icon: TrendingUp, iconColor: "text-orange-500",
+    },
+  ];
+
+  const ctaData = (data?.ctaBreakdown ?? []).map(r => ({
+    name: CTA_LABEL_MAP[r.cta] ?? r.cta,
+    clicks: r.count,
+  }));
+
+  return (
+    <div className="space-y-6">
+      {/* Header + Export */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-xl font-bold">Landing Page Analytics</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Visits and CTA engagement on <span className="font-mono">/list-your-item</span>
+          </p>
+        </div>
+        <button
+          onClick={() => downloadCsv("/api/admin/landing-page-analytics/export", `landing-page-analytics-${new Date().toISOString().slice(0, 10)}.csv`)}
+          className="flex items-center gap-1.5 text-xs font-bold bg-secondary hover:bg-border text-foreground px-3 py-2 rounded-xl transition-colors"
+        >
+          <Download className="w-3.5 h-3.5" /> Export CSV
+        </button>
+      </div>
+
+      {/* KPI cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {kpiCards.map(c => (
+          <KpiCard key={c.label} label={c.label} value={c.value} icon={c.icon} iconColor={c.iconColor} loading={isLoading} />
+        ))}
+      </div>
+
+      {/* Visits over time */}
+      <section className="bg-card border border-border rounded-3xl p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <Eye className="w-4 h-4 text-blue-500" />
+          <h3 className="font-bold">Visits — Last 30 Days</h3>
+        </div>
+        {isLoading ? (
+          <div className="h-48 bg-muted rounded-2xl animate-pulse" />
+        ) : !data?.visitsPerDay?.length ? (
+          <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">No visit data yet</div>
+        ) : (
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={data.visitsPerDay} margin={{ top: 4, right: 8, left: -18, bottom: 4 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="day" tick={{ fontSize: 10 }} tickFormatter={d => d.slice(5)} />
+              <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+              <Tooltip
+                labelFormatter={d => String(d)}
+                formatter={(v: any) => [v, "Visits"]}
+                contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+              />
+              <Line type="monotone" dataKey="count" name="Visits" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
+      </section>
+
+      {/* CTA breakdown */}
+      <section className="bg-card border border-border rounded-3xl p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart2 className="w-4 h-4 text-emerald-500" />
+          <h3 className="font-bold">CTA Button Clicks</h3>
+        </div>
+        {isLoading ? (
+          <div className="h-48 bg-muted rounded-2xl animate-pulse" />
+        ) : !ctaData.length ? (
+          <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">No CTA click data yet</div>
+        ) : (
+          <div className="space-y-4">
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={ctaData} layout="vertical" margin={{ top: 0, right: 16, left: 8, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={130} />
+                <Tooltip
+                  formatter={(v: any) => [v, "Clicks"]}
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }}
+                />
+                <Bar dataKey="clicks" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]}>
+                  {ctaData.map((_, i) => <Cell key={i} fill={PLAN_COLORS[i % PLAN_COLORS.length]} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+
+            {/* Table summary */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-muted-foreground text-xs border-b border-border">
+                    <th className="pb-2 pr-4 font-semibold">CTA Button</th>
+                    <th className="pb-2 pr-4 font-semibold text-right">Clicks</th>
+                    <th className="pb-2 font-semibold text-right">Share</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {ctaData.map(row => {
+                    const total = ctaData.reduce((s, r) => s + r.clicks, 0);
+                    const pct = total > 0 ? Math.round((row.clicks / total) * 100) : 0;
+                    return (
+                      <tr key={row.name} className="hover:bg-muted/40 transition-colors">
+                        <td className="py-2.5 pr-4 font-medium">{row.name}</td>
+                        <td className="py-2.5 pr-4 text-right font-bold tabular-nums">{row.clicks.toLocaleString("en-IN")}</td>
+                        <td className="py-2.5 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden hidden sm:block">
+                              <div className="h-1.5 bg-primary rounded-full" style={{ width: `${pct}%` }} />
+                            </div>
+                            <span className="text-xs text-muted-foreground tabular-nums">{pct}%</span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Recent events */}
+      {(data?.recentEvents?.length ?? 0) > 0 && (
+        <section className="bg-card border border-border rounded-3xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <History className="w-4 h-4 text-muted-foreground" />
+            <h3 className="font-bold">Recent Events</h3>
+            <span className="ml-auto text-xs text-muted-foreground">Last 20</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-muted-foreground text-xs border-b border-border">
+                  <th className="pb-2 pr-4 font-semibold">Type</th>
+                  <th className="pb-2 pr-4 font-semibold hidden sm:table-cell">CTA / Meta</th>
+                  <th className="pb-2 pr-4 font-semibold hidden md:table-cell">Visitor Key</th>
+                  <th className="pb-2 font-semibold">Time</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/50">
+                {data!.recentEvents.map(ev => {
+                  const meta = ev.meta as Record<string, string> | null;
+                  const ctaRaw = meta?.cta ?? null;
+                  return (
+                    <tr key={ev.id} className="hover:bg-muted/40 transition-colors">
+                      <td className="py-2 pr-4">
+                        <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium",
+                          ev.eventType === "page_view" ? "bg-blue-100 text-blue-700" : "bg-emerald-100 text-emerald-700"
+                        )}>
+                          {ev.eventType === "page_view" ? "Visit" : "CTA"}
+                        </span>
+                      </td>
+                      <td className="py-2 pr-4 hidden sm:table-cell text-xs text-muted-foreground font-mono">
+                        {ctaRaw ? (CTA_LABEL_MAP[ctaRaw] ?? ctaRaw) : "—"}
+                      </td>
+                      <td className="py-2 pr-4 hidden md:table-cell text-xs text-muted-foreground font-mono max-w-[120px] truncate">
+                        {ev.visitorKey ? ev.visitorKey.slice(0, 12) + "…" : "—"}
+                      </td>
+                      <td className="py-2 text-xs text-muted-foreground">
+                        {new Date(ev.createdAt).toLocaleString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

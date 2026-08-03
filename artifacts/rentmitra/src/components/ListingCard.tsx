@@ -86,6 +86,23 @@ export function ListingCard({ listing, className }: ListingCardProps) {
             </div>
           )}
 
+          {/* Availability badge */}
+          {(() => {
+            const avail = listing.availabilityStatus ?? "available";
+            const MAP: Record<string, { label: string; cls: string }> = {
+              reserved:            { label: "Reserved",            cls: "bg-amber-100 text-amber-700 border border-amber-300" },
+              rented_out:          { label: "Rented Out",          cls: "bg-red-100 text-red-700 border border-red-300" },
+              under_maintenance:   { label: "Maintenance",         cls: "bg-orange-100 text-orange-700 border border-orange-300" },
+              no_longer_available: { label: "Unavailable",         cls: "bg-zinc-200 text-zinc-600 border border-zinc-300" },
+            };
+            const m = MAP[avail];
+            return m ? (
+              <div className={cn("absolute bottom-2.5 right-3 px-2 py-0.5 rounded-full text-[10px] font-bold", m.cls)}>
+                {m.label}
+              </div>
+            ) : null;
+          })()}
+
           {/* Heart button */}
           {isAuthenticated && (
             <motion.button

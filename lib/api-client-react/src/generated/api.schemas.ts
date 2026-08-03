@@ -227,6 +227,7 @@ export interface Listing {
   expiresAt?: string | null;
   createdAt: string;
   owner?: PublicUser | null;
+  availabilityStatus?: string;
 }
 
 export type ListingDetail = Listing & ({

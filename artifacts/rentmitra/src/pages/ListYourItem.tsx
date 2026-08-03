@@ -192,38 +192,52 @@ export default function ListYourItem() {
             transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.07 }}
             className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.07] mb-5 text-balance"
           >
-            Turn Your Unused Items<br />
-            <span className="opacity-85">into Extra Income</span>
+            💰 Earn Money From Things<br />
+            <span className="opacity-85">You Already Own</span>
           </motion.h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
+          {/* Item list — visible immediately, no scrolling needed */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.18 }}
-            className="text-white/72 text-lg md:text-xl mb-9 max-w-2xl leading-relaxed"
+            transition={{ duration: 0.4, delay: 0.16 }}
+            className="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-6 text-white/90 text-sm md:text-base font-semibold"
           >
-            That camera gathering dust, the power drill used twice, the camping gear from last year —
-            someone near you wants to rent it. List it on RentNEarn and start earning today.
+            {["Cameras", "Bikes", "Wheelchairs", "Laptops", "Power Tools", "Baby Gear", "Camping Gear"].map(item => (
+              <span key={item} className="flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-white/80" /> {item}
+              </span>
+            ))}
+          </motion.div>
+
+          {/* Speed promise */}
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.24 }}
+            className="text-white/70 text-base md:text-lg mb-8 font-medium"
+          >
+            List your first item in under 2 minutes. Zero commission on rentals.
           </motion.p>
 
           {/* CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.28 }}
+            transition={{ delay: 0.32 }}
             className="flex flex-col sm:flex-row items-center gap-3"
           >
             <Link
               href="/register"
-              onClick={() => trackEvent("cta_click", { cta: "hero_list_free" })}
-              className="bg-white text-primary font-bold px-8 py-3.5 rounded-full hover:bg-white/92 transition-all duration-200 active:scale-95 shadow-xl shadow-black/20 text-sm md:text-base whitespace-nowrap"
+              onClick={() => trackEvent("cta_click", { label: "hero_start_earning" })}
+              className="bg-white text-primary font-bold px-8 py-4 rounded-full hover:bg-white/92 transition-all duration-200 active:scale-95 shadow-xl shadow-black/20 text-base md:text-lg whitespace-nowrap"
             >
-              List Your First Item FREE
+              Start Earning — It's Free
             </Link>
             <Link
               href="/categories"
-              onClick={() => trackEvent("cta_click", { cta: "hero_browse_categories" })}
-              className="bg-white/15 border border-white/30 text-white font-semibold px-8 py-3.5 rounded-full hover:bg-white/25 transition-all duration-200 active:scale-95 backdrop-blur-sm text-sm md:text-base whitespace-nowrap flex items-center gap-2"
+              onClick={() => trackEvent("cta_click", { label: "hero_browse_categories" })}
+              className="bg-white/15 border border-white/30 text-white font-semibold px-8 py-4 rounded-full hover:bg-white/25 transition-all duration-200 active:scale-95 backdrop-blur-sm text-sm md:text-base whitespace-nowrap flex items-center gap-2"
             >
               Browse Categories <ArrowRight className="w-4 h-4" />
             </Link>
@@ -233,12 +247,12 @@ export default function ListYourItem() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.42 }}
-            className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-white/65 text-xs font-semibold"
+            transition={{ delay: 0.44 }}
+            className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-2 text-white/60 text-xs font-semibold"
           >
-            {["Zero Commission on Rentals", "Admin-Reviewed Listings", "Pan India Coverage", "Free to Get Started"].map(t => (
+            {["Zero Commission", "Admin-Reviewed", "Pan India", "Free to Start"].map(t => (
               <span key={t} className="flex items-center gap-1.5">
-                <Check className="w-3 h-3 text-white/80" /> {t}
+                <Check className="w-3 h-3 text-white/75" /> {t}
               </span>
             ))}
           </motion.div>

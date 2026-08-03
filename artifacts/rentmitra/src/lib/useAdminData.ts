@@ -261,6 +261,27 @@ export function useDeleteGoal() {
   });
 }
 
+// ─── Landing Page Analytics ───────────────────────────────────────────────────
+
+export interface LandingPageAnalytics {
+  totalVisits: number;
+  uniqueVisitors: number;
+  visitsPerDay: Array<{ day: string; count: number }>;
+  ctaBreakdown: Array<{ label: string; count: number }>;
+}
+
+export function useAdminLandingPageAnalytics() {
+  return useQuery<LandingPageAnalytics>({
+    queryKey: ["admin", "landing-page-analytics"],
+    queryFn: async () => {
+      const res = await fetch(`${BASE}/api/admin/landing-page-analytics`, { headers: authHeaders() });
+      if (!res.ok) throw new Error("Failed to fetch landing page analytics");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 // ─── Trending ─────────────────────────────────────────────────────────────────
 
 export function useAdminTrending(limit = 20) {

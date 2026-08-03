@@ -6,7 +6,7 @@ import { useAdminSubscriptions, useAdminPlans, useCancelSubscription, useToggleP
 import {
   useAdminBusinessProfiles, useApproveBusinessProfile, useRejectBusinessProfile,
   useAdminCategories, useAddCategory, useUpdateCategory,
-  useAdminReports, useAdminEnhancedStats, useAdminAuditLog,
+  useAdminReports, useAdminEnhancedStats, useAdminAuditLog, useAdminLandingPageAnalytics,
   useAdminPaymentAnalytics, useAdminGoals, useCreateGoal, useDeleteGoal,
   useAdminTrending, useFeatureListingAdmin,
 } from "@/lib/useAdminData";
@@ -735,6 +735,7 @@ function CategoriesTab() {
 // ─── Reports tab ──────────────────────────────────────────────────────────────
 function ReportsTab() {
   const { data: reports, isLoading } = useAdminReports();
+  const { data: lp } = useAdminLandingPageAnalytics();
   if (isLoading) return <div className="space-y-6">{[...Array(4)].map((_, i) => <div key={i} className="h-48 bg-secondary rounded-3xl animate-pulse" />)}</div>;
   if (!reports) return <div className="bg-secondary rounded-3xl p-10 text-center border border-border"><BarChart2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" /><p className="text-muted-foreground font-semibold">No report data available yet</p></div>;
   const fmtDay = (d: string) => new Date(d).toLocaleDateString("en-IN", { month: "short", day: "numeric" });
@@ -768,6 +769,85 @@ function ReportsTab() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-card border border-border rounded-3xl p-5"><p className="text-sm font-bold mb-4">Top 10 Cities by Listings</p>{reports.topCities.length === 0 ? <p className="text-sm text-muted-foreground py-8 text-center">No city data available</p> : (<ResponsiveContainer width="100%" height={220}><BarChart data={reports.topCities} layout="vertical" margin={{ top: 0, right: 8, left: 4, bottom: 0 }}><CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} /><XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} /><YAxis type="category" dataKey="city" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} width={72} /><Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} /><Bar dataKey="count" radius={[0, 4, 4, 0]} name="Listings">{reports.topCities.map((_, i) => <Cell key={i} fill={PLAN_COLORS[i % PLAN_COLORS.length]} />)}</Bar></BarChart></ResponsiveContainer>)}</div>
         <div className="bg-card border border-border rounded-3xl p-5"><p className="text-sm font-bold mb-4">Active Memberships by Plan</p>{reports.membershipBreakdown.length === 0 ? <p className="text-sm text-muted-foreground py-8 text-center">No active memberships</p> : (<div className="flex flex-col items-center"><ResponsiveContainer width="100%" height={180}><PieChart><Pie data={reports.membershipBreakdown} dataKey="count" nameKey="planName" cx="50%" cy="50%" innerRadius={48} outerRadius={78} paddingAngle={3}>{reports.membershipBreakdown.map((_, i) => <Cell key={i} fill={PLAN_COLORS[i % PLAN_COLORS.length]} />)}</Pie><Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} /></PieChart></ResponsiveContainer><div className="flex flex-wrap justify-center gap-3 mt-1">{reports.membershipBreakdown.map((item, i) => (<div key={item.planName} className="flex items-center gap-1.5 text-xs"><div className="w-2.5 h-2.5 rounded-full" style={{ background: PLAN_COLORS[i % PLAN_COLORS.length] }} /><span className="text-muted-foreground">{item.planName}</span><span className="font-bold">{item.count}</span></div>))}</div></div>)}</div>
+      </div>
+
+      {/* ── Landing Page Analytics ─────────────────────────────────────────── */}
+      <div className="border-t border-border pt-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Activity className="w-5 h-5 text-primary" />
+          <h3 className="text-base font-bold">List Your Item — Landing Page</h3>
+          <span className="text-xs text-muted-foreground font-medium">(last 30 days)</span>
+        </div>
+        {!lp ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="h-24 bg-secondary rounded-2xl animate-pulse" />
+            <div className="h-24 bg-secondary rounded-2xl animate-pulse" />
+          </div>
+        ) : (
+          <>
+            {/* KPI row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              <div className="bg-card border border-border rounded-2xl p-4">
+                <p className="text-xs font-semibold text-muted-foreground mb-1">Total Visits</p>
+                <p className="text-3xl font-bold">{lp.totalVisits.toLocaleString("en-IN")}</p>
+              </div>
+              <div className="bg-card border border-border rounded-2xl p-4">
+                <p className="text-xs font-semibold text-muted-foreground mb-1">Unique Visitors</p>
+                <p className="text-3xl font-bold">{lp.uniqueVisitors.toLocaleString("en-IN")}</p>
+              </div>
+              <div className="bg-card border border-border rounded-2xl p-4">
+                <p className="text-xs font-semibold text-muted-foreground mb-1">CTA Clicks</p>
+                <p className="text-3xl font-bold">{lp.ctaBreakdown.reduce((s, r) => s + r.count, 0).toLocaleString("en-IN")}</p>
+              </div>
+              <div className="bg-card border border-border rounded-2xl p-4">
+                <p className="text-xs font-semibold text-muted-foreground mb-1">Click Rate</p>
+                <p className="text-3xl font-bold">
+                  {lp.totalVisits === 0 ? "—" : `${Math.round((lp.ctaBreakdown.reduce((s, r) => s + r.count, 0) / lp.totalVisits) * 100)}%`}
+                </p>
+              </div>
+            </div>
+
+            {/* Charts row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="bg-card border border-border rounded-2xl p-5">
+                <p className="text-sm font-bold mb-4">Visits per Day</p>
+                {lp.visitsPerDay.length === 0
+                  ? <p className="text-sm text-muted-foreground py-8 text-center">No visit data yet — share the landing page to start collecting traffic.</p>
+                  : (
+                    <ResponsiveContainer width="100%" height={180}>
+                      <LineChart data={lp.visitsPerDay.map(d => ({ ...d, day: fmtDay(d.day) }))} margin={{ top: 0, right: 8, left: -16, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="day" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval="preserveStartEnd" />
+                        <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
+                        <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+                        <Line type="monotone" dataKey="count" stroke="#8b5cf6" strokeWidth={2} dot={false} name="Visits" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )
+                }
+              </div>
+              <div className="bg-card border border-border rounded-2xl p-5">
+                <p className="text-sm font-bold mb-4">CTA Button Clicks</p>
+                {lp.ctaBreakdown.length === 0
+                  ? <p className="text-sm text-muted-foreground py-8 text-center">No CTA clicks recorded yet.</p>
+                  : (
+                    <ResponsiveContainer width="100%" height={180}>
+                      <BarChart data={lp.ctaBreakdown} layout="vertical" margin={{ top: 0, right: 8, left: 4, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                        <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
+                        <YAxis type="category" dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} width={96} />
+                        <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, fontSize: 12 }} />
+                        <Bar dataKey="count" radius={[0, 4, 4, 0]} name="Clicks">
+                          {lp.ctaBreakdown.map((_, i) => <Cell key={i} fill={PLAN_COLORS[i % PLAN_COLORS.length]} />)}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )
+                }
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

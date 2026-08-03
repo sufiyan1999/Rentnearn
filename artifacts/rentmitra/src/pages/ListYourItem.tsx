@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { motion, useInView } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { SeoHead } from "@/components/SeoHead";
@@ -8,7 +8,7 @@ import { CATEGORIES } from "@/lib/constants";
 import {
   ArrowRight, Check, Zap, Shield, Smartphone, IndianRupee,
   MessageCircle, Building2, BadgeCheck, Leaf, Recycle, TrendingDown,
-  UserPlus, ImageIcon, Phone, Wallet, ChevronDown, Star,
+  UserPlus, ImageIcon, Phone, Wallet, ChevronDown, Star, MapPin,
 } from "lucide-react";
 
 // ─── Analytics ────────────────────────────────────────────────────────────────
@@ -125,6 +125,7 @@ function FaqItem({ q, a, open, onToggle }: { q: string; a: string; open: boolean
 // ─── Page ──────────────────────────────────────────────────────────────────────
 export default function ListYourItem() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [city, setCity] = useState("");
   const impactRef  = useRef<HTMLDivElement>(null);
   const impactView = useInView(impactRef, { once: true, margin: "-100px" });
 
@@ -233,19 +234,33 @@ export default function ListYourItem() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.32 }}
-            className="flex flex-col sm:flex-row items-center gap-3"
+            className="flex flex-col items-center gap-3 w-full"
           >
-            <Link
-              href="/register"
-              onClick={() => trackEvent("cta_click", { cta: "hero_start_earning" })}
-              className="bg-white text-primary font-bold px-8 py-4 rounded-full hover:bg-white/92 transition-all duration-200 active:scale-95 shadow-xl shadow-black/20 text-base md:text-lg whitespace-nowrap"
-            >
-              Start Earning — It's Free
-            </Link>
+            {/* City + Start Earning pill */}
+            <div className="flex items-center bg-white rounded-full shadow-xl shadow-black/20 overflow-hidden w-full max-w-md">
+              <div className="flex items-center gap-2 px-4 flex-1 min-w-0">
+                <MapPin className="w-4 h-4 text-primary shrink-0" />
+                <input
+                  type="text"
+                  value={city}
+                  onChange={e => setCity(e.target.value)}
+                  placeholder="Your city (e.g. Mumbai)"
+                  className="flex-1 py-4 text-sm font-medium text-gray-700 placeholder:text-gray-400 bg-transparent outline-none min-w-0"
+                />
+              </div>
+              <Link
+                href={city.trim() ? `/register?city=${encodeURIComponent(city.trim())}` : "/register"}
+                onClick={() => trackEvent("cta_click", { cta: "hero_start_earning", city: city.trim() || undefined })}
+                className="bg-primary text-white font-bold px-6 py-4 rounded-full hover:bg-primary/90 transition-all duration-200 active:scale-95 text-sm md:text-base whitespace-nowrap shrink-0 m-1"
+              >
+                Start Earning — It's Free
+              </Link>
+            </div>
+
             <Link
               href="/categories"
               onClick={() => trackEvent("cta_click", { cta: "hero_browse_categories" })}
-              className="bg-white/15 border border-white/30 text-white font-semibold px-8 py-4 rounded-full hover:bg-white/25 transition-all duration-200 active:scale-95 backdrop-blur-sm text-sm md:text-base whitespace-nowrap flex items-center gap-2"
+              className="bg-white/15 border border-white/30 text-white font-semibold px-8 py-3.5 rounded-full hover:bg-white/25 transition-all duration-200 active:scale-95 backdrop-blur-sm text-sm whitespace-nowrap flex items-center gap-2"
             >
               Browse Categories <ArrowRight className="w-4 h-4" />
             </Link>

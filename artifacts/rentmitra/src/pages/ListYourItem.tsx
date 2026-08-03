@@ -203,9 +203,17 @@ export default function ListYourItem() {
             transition={{ duration: 0.4, delay: 0.16 }}
             className="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-6 text-white/90 text-sm md:text-base font-semibold"
           >
-            {["Cameras", "Bikes", "Wheelchairs", "Laptops", "Power Tools", "Baby Gear", "Camping Gear"].map(item => (
-              <span key={item} className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-white/80" /> {item}
+            {[
+              { emoji: "📷", label: "Cameras" },
+              { emoji: "🚲", label: "Bikes" },
+              { emoji: "♿", label: "Wheelchairs" },
+              { emoji: "💻", label: "Laptops" },
+              { emoji: "🔧", label: "Power Tools" },
+              { emoji: "👶", label: "Baby Gear" },
+              { emoji: "⛺", label: "Camping Gear" },
+            ].map(({ emoji, label }) => (
+              <span key={label} className="flex items-center gap-1.5">
+                <span className="text-base leading-none">{emoji}</span> {label}
               </span>
             ))}
           </motion.div>

@@ -133,3 +133,20 @@ export function useCancelSubscription() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "subscriptions"] }),
   });
 }
+
+/** Admin: extend a free trial by N days and notify the member by email */
+export function useExtendTrial() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, days }: { id: number; days: number }) => {
+      const res = await fetch(`${BASE}/api/memberships/admin/subscriptions/${id}/extend-trial`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify({ days }),
+      });
+      if (!res.ok) throw new Error("Failed to extend trial");
+      return res.json();
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "subscriptions"] }),
+  });
+}

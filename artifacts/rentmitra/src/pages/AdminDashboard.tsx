@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLocation, Link } from "wouter";
 import { useEffect, useState, useRef } from "react";
 import { useAdminGetStats, getAdminGetStatsQueryKey, useAdminGetListings, getAdminGetListingsQueryKey, useAdminGetUsers, getAdminGetUsersQueryKey } from "@workspace/api-client-react";
-import { useAdminSubscriptions, useAdminPlans, useCancelSubscription, useTogglePlan } from "@/lib/useMembership";
+import { useAdminSubscriptions, useAdminPlans, useCancelSubscription, useTogglePlan, useExtendTrial } from "@/lib/useMembership";
 import {
   useAdminBusinessProfiles, useApproveBusinessProfile, useRejectBusinessProfile,
   useAdminCategories, useAddCategory, useUpdateCategory,
@@ -574,6 +574,11 @@ function MembershipTab() {
   const { data: subs, isLoading: subsLoading } = useAdminSubscriptions(subPage);
   const cancelSub = useCancelSubscription();
   const togglePlan = useTogglePlan();
+  const extendTrial = useExtendTrial();
+
+  // Inline extend-trial form state
+  const [extendTarget, setExtendTarget] = useState<number | null>(null);
+  const [extendDays, setExtendDays] = useState(30);
 
   return (
     <div className="space-y-8">
@@ -622,7 +627,60 @@ function MembershipTab() {
                       <td className="py-2.5 pr-4"><Badge variant="outline" className="capitalize text-xs">{row.plan.name}</Badge></td>
                       <td className="py-2.5 pr-4"><span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", STATUS_COLORS[row.membership?.status ?? "expired"] ?? "bg-secondary text-muted-foreground")}>{row.membership?.status ?? "—"}</span></td>
                       <td className="py-2.5 pr-4 text-muted-foreground hidden md:table-cell text-xs">{row.membership?.expiresAt ? new Date(row.membership.expiresAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}</td>
-                      <td className="py-2.5">{row.membership?.status === "active" && (<button onClick={async () => { if (!confirm("Cancel this subscription?")) return; await cancelSub.mutateAsync(row.membership!.id); toast.success("Subscription cancelled"); }} className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 font-semibold"><XCircle className="w-3.5 h-3.5" /> Cancel</button>)}</td>
+                      <td className="py-2.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {/* Extend Trial — available for any membership */}
+                          {extendTarget === row.membership?.id ? (
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="number"
+                                min={1} max={365}
+                                value={extendDays}
+                                onChange={e => setExtendDays(Math.max(1, Math.min(365, Number(e.target.value))))}
+                                className="w-16 text-xs border border-border rounded-lg px-2 py-1 bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+                              />
+                              <span className="text-xs text-muted-foreground">days</span>
+                              <button
+                                onClick={async () => {
+                                  await extendTrial.mutateAsync({ id: row.membership!.id, days: extendDays });
+                                  toast.success(`Trial extended by ${extendDays} days — email sent`);
+                                  setExtendTarget(null);
+                                  setExtendDays(30);
+                                }}
+                                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full"
+                              >
+                                Confirm
+                              </button>
+                              <button
+                                onClick={() => { setExtendTarget(null); setExtendDays(30); }}
+                                className="text-xs text-muted-foreground hover:text-foreground"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => { setExtendTarget(row.membership!.id); setExtendDays(30); }}
+                              className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-semibold"
+                            >
+                              <Calendar className="w-3.5 h-3.5" /> Extend
+                            </button>
+                          )}
+                          {/* Cancel — only for active */}
+                          {row.membership?.status === "active" && extendTarget !== row.membership?.id && (
+                            <button
+                              onClick={async () => {
+                                if (!confirm("Cancel this subscription?")) return;
+                                await cancelSub.mutateAsync(row.membership!.id);
+                                toast.success("Subscription cancelled");
+                              }}
+                              className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 font-semibold"
+                            >
+                              <XCircle className="w-3.5 h-3.5" /> Cancel
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

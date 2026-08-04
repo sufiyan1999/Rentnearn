@@ -1,27 +1,28 @@
 kind = "web"
-previewPath = "/"
-title = "RentMitra"
-version = "1.0.0"
-id = "artifacts/rentmitra"
-router = "path"
+    previewPath = "/"
+    title = "RentNEarn"
+    version = "1.0.0"
+    id = "artifacts/rentmitra"
+    router = "path"
 
-[[services]]
-name = "web"
-paths = [ "/" ]
-localPort = 23308
+    [[services]]
+    name = "web"
+    paths = [ "/" ]
+    localPort = 23308
 
-[services.development]
-run = "pnpm --filter @workspace/rentmitra run dev"
+    [services.development]
+    run = "pnpm --filter @workspace/rentmitra run dev"
 
-[services.production]
-build = [ "pnpm", "--filter", "@workspace/rentmitra", "run", "build" ]
-serve = "static"
-publicDir = "artifacts/rentmitra/dist/public"
+    [services.production]
+    build = [ "pnpm", "--filter", "@workspace/rentmitra", "run", "build" ]
+    serve = "static"
+    publicDir = "artifacts/rentmitra/dist/public"
 
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
+    [[services.production.rewrites]]
+    from = "/*"
+    to = "/index.html"
 
-[services.env]
-PORT = "23308"
-BASE_PATH = "/"
+    [services.env]
+    PORT = "23308"
+    BASE_PATH = "/"
+    

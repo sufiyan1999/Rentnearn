@@ -4,6 +4,7 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import { db, membershipPlansTable, userMembershipsTable, usersTable } from "@workspace/db";
 import { requireAuth, requireAdmin } from "../middlewares/authMiddleware";
+import { sendTrialExtendedEmail } from "../lib/email";
 import {
   getAllPlans,
   getActiveMembership,
@@ -267,6 +268,41 @@ router.patch("/memberships/admin/subscriptions/:id/cancel", requireAuth, require
 
   if (!updated) { res.status(404).json({ error: "Membership not found" }); return; }
   res.json(updated);
+});
+
+// PATCH /memberships/admin/subscriptions/:id/extend-trial
+router.patch("/memberships/admin/subscriptions/:id/extend-trial", requireAuth, requireAdmin, async (req, res): Promise<void> => {
+  const id = parseInt(String(req.params.id), 10);
+  const days = parseInt(String(req.body.days ?? "30"), 10);
+
+  if (isNaN(id) || isNaN(days) || days < 1 || days > 365) {
+    res.status(400).json({ error: "days must be between 1 and 365" });
+    return;
+  }
+
+  const [membership] = await db
+    .select({ m: userMembershipsTable, u: usersTable })
+    .from(userMembershipsTable)
+    .innerJoin(usersTable, eq(userMembershipsTable.userId, usersTable.id))
+    .where(eq(userMembershipsTable.id, id))
+    .limit(1);
+
+  if (!membership) { res.status(404).json({ error: "Membership not found" }); return; }
+
+  // Extend from current expiresAt (or now if already expired)
+  const base = membership.m.expiresAt > new Date() ? membership.m.expiresAt : new Date();
+  const newExpiry = new Date(base.getTime() + days * 24 * 60 * 60 * 1000);
+
+  const [updated] = await db
+    .update(userMembershipsTable)
+    .set({ expiresAt: newExpiry, status: "active", updatedAt: new Date() })
+    .where(eq(userMembershipsTable.id, id))
+    .returning();
+
+  // Send notification email (fire-and-forget)
+  sendTrialExtendedEmail(membership.u.email, membership.u.name, days, newExpiry).catch(() => {});
+
+  res.json({ success: true, membership: updated, newExpiryDate: newExpiry });
 });
 
 // POST /memberships/admin/backfill — back-fill free trials for legacy users

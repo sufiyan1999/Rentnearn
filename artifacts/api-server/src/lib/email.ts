@@ -160,3 +160,19 @@ export async function sendListingExpiryEmail(to: string, name: string, title: st
     <a href="${link}" class="btn">Renew Listing</a>
   `));
 }
+
+export async function sendTrialExtendedEmail(
+  to: string,
+  name: string,
+  daysAdded: number,
+  newExpiryDate: Date,
+): Promise<void> {
+  const expiry = newExpiryDate.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  await sendMail(to, "🎁 Your Free Trial Has Been Extended!", emailHtml(`
+    <h2>Great news, ${name}! 🎉</h2>
+    <p>Your <strong>RentNEarn Free Trial</strong> has been extended by <strong>${daysAdded} day${daysAdded === 1 ? "" : "s"}</strong> by our team.</p>
+    <p>Your trial is now active until <strong>${expiry}</strong>. Keep listing your items and earning from things you already own — completely free.</p>
+    <a href="${APP_URL}/dashboard" class="btn">Go to My Dashboard</a>
+    <p style="font-size:13px;color:#6B7280;">Questions? Reply to this email or reach us at <a href="mailto:support@rentnearn.com" style="color:#FF6B00;">support@rentnearn.com</a>.</p>
+  `));
+}

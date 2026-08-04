@@ -9,6 +9,7 @@ import QRCode from "qrcode";
 import { getListingLimit, countActiveListings } from "../lib/membership";
 import { checkRestrictedContent } from "../lib/restrictedItems";
 import { SITE_URL } from "../lib/config";
+import { geocodeAddress } from "../lib/geocode";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
@@ -138,6 +139,14 @@ router.post("/listings", requireAuth, async (req, res): Promise<void> => {
 
   const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
+  // Auto-geocode from area+city+state if no coords provided
+  let resolvedLat = latitude ? String(latitude) : null;
+  let resolvedLng = longitude ? String(longitude) : null;
+  if (!resolvedLat || !resolvedLng) {
+    const coords = await geocodeAddress(area, city, state);
+    if (coords) { resolvedLat = coords.latitude; resolvedLng = coords.longitude; }
+  }
+
   const [listing] = await db.insert(listingsTable).values({
     ownerId: req.user!.id,
     title, description: description ?? null,
@@ -149,8 +158,8 @@ router.post("/listings", requireAuth, async (req, res): Promise<void> => {
     monthlyPrice: monthlyPrice ? String(monthlyPrice) : null,
     securityDeposit: securityDeposit ? String(securityDeposit) : null,
     city, state, area: area, pincode: pincode ?? null,
-    latitude: latitude ? String(latitude) : null,
-    longitude: longitude ? String(longitude) : null,
+    latitude: resolvedLat,
+    longitude: resolvedLng,
     expiresAt,
   }).returning();
 
@@ -316,6 +325,17 @@ router.patch("/listings/:id", requireAuth, async (req, res): Promise<void> => {
   if (pincode !== undefined) updates.pincode = pincode;
   if (latitude !== undefined) updates.latitude = latitude ? String(latitude) : null;
   if (longitude !== undefined) updates.longitude = longitude ? String(longitude) : null;
+
+  // Re-geocode if location fields changed but no explicit coords supplied
+  const locationChanged = area !== undefined || city !== undefined || state !== undefined;
+  const coordsExplicit  = latitude !== undefined || longitude !== undefined;
+  if (locationChanged && !coordsExplicit) {
+    const effectiveArea  = area  ?? existing.area  ?? "";
+    const effectiveCity  = city  ?? existing.city;
+    const effectiveState = state ?? existing.state;
+    const coords = await geocodeAddress(effectiveArea, effectiveCity, effectiveState);
+    if (coords) { updates.latitude = coords.latitude; updates.longitude = coords.longitude; }
+  }
 
   // Reset to pending when edited
   updates.status = "pending";

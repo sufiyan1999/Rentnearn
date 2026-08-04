@@ -1,17 +1,22 @@
 import { useRoute, useLocation } from "wouter";
 import { SITE_URL, toAbsoluteUrl } from "@/lib/siteUrl";
-import { useGetListing, getGetListingQueryKey, useGetListingQr, getGetListingQrQueryKey, useApproveListing, useRejectListing } from "@workspace/api-client-react";
+import { useGetListing, getGetListingQueryKey, useGetListingQr, getGetListingQrQueryKey, useApproveListing, useRejectListing, useGetNearbyListings, getGetNearbyListingsQueryKey } from "@workspace/api-client-react";
 import { SeoHead } from "@/components/SeoHead";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/ui-core";
-import { ArrowLeft, MapPin, Share2, MessageCircle, AlertTriangle, ShieldCheck, QrCode, Star, Calendar, Tag, Check, X, Clock, Copy, Link2, Phone, Eye, Award, ChevronDown } from "lucide-react";
+import { ArrowLeft, MapPin, Share2, MessageCircle, AlertTriangle, ShieldCheck, QrCode, Star, Calendar, Tag, Check, X, Clock, Copy, Link2, Phone, Eye, Award, ChevronDown, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { trackViewContent, trackContact } from "@/lib/metaPixel";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import { ListingCard } from "@/components/ListingCard";
+
+const ListingMap = lazy(() =>
+  import("@/components/ListingMap").then(m => ({ default: m.ListingMap }))
+);
 
 export default function ListingDetails() {
   const [, params] = useRoute("/listings/:id");
@@ -37,6 +42,15 @@ export default function ListingDetails() {
 
   const approveMutation = useApproveListing();
   const rejectMutation = useRejectListing();
+
+  // Nearby listings — only fetch when this listing has coordinates
+  const nearbyEnabled = !!listing?.latitude && !!listing?.longitude;
+  const { data: nearbyListings } = useGetNearbyListings(
+    { lat: listing?.latitude ?? 0, lng: listing?.longitude ?? 0, radiusKm: 10, limit: 4 },
+    { query: { enabled: nearbyEnabled, queryKey: getGetNearbyListingsQueryKey({ lat: listing?.latitude ?? 0, lng: listing?.longitude ?? 0, radiusKm: 10, limit: 4 }) } }
+  );
+  // Exclude the current listing from nearby results
+  const otherNearby = nearbyListings?.filter(l => l.id !== id) ?? [];
 
   // Track unique view on mount (skip owner)
   useEffect(() => {
@@ -592,20 +606,46 @@ export default function ListingDetails() {
               </div>
             )}
 
-            {/* Location */}
-            <div className="rounded-2xl overflow-hidden border border-border bg-gradient-to-br from-secondary to-muted h-40 flex items-center justify-center">
-              <div className="text-center px-4">
-                <div className="w-10 h-10 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-2 shadow-md shadow-primary/25">
-                  <MapPin className="w-5 h-5 text-white" />
+            {/* Location — real map when coords exist, text card as fallback */}
+            {listing.latitude && listing.longitude ? (
+              <div className="rounded-2xl overflow-hidden border border-border">
+                <Suspense fallback={
+                  <div className="h-[220px] bg-secondary flex items-center justify-center rounded-2xl">
+                    <MapPin className="w-6 h-6 text-muted-foreground animate-pulse" />
+                  </div>
+                }>
+                  <ListingMap
+                    lat={listing.latitude}
+                    lng={listing.longitude}
+                    title={listing.title}
+                    area={listing.area}
+                    city={listing.city}
+                    state={listing.state}
+                  />
+                </Suspense>
+                <div className="px-3 py-2 bg-secondary/50 flex items-center gap-2">
+                  <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {[listing.area, listing.city, listing.state].filter(Boolean).join(", ")}
+                    {listing.pincode ? ` · PIN ${listing.pincode}` : ""}
+                  </span>
                 </div>
-                <p className="font-bold text-sm">
-                  {[listing.area, listing.city, listing.state].filter(Boolean).join(", ")}
-                </p>
-                {listing.pincode && (
-                  <p className="text-xs text-muted-foreground mt-0.5">PIN: {listing.pincode}</p>
-                )}
               </div>
-            </div>
+            ) : (
+              <div className="rounded-2xl overflow-hidden border border-border bg-gradient-to-br from-secondary to-muted h-40 flex items-center justify-center">
+                <div className="text-center px-4">
+                  <div className="w-10 h-10 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-2 shadow-md shadow-primary/25">
+                    <MapPin className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="font-bold text-sm">
+                    {[listing.area, listing.city, listing.state].filter(Boolean).join(", ")}
+                  </p>
+                  {listing.pincode && (
+                    <p className="text-xs text-muted-foreground mt-0.5">PIN: {listing.pincode}</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right: Sticky CTA (desktop) */}
@@ -670,6 +710,27 @@ export default function ListingDetails() {
           </div>
         </div>
       </div>
+
+      {/* ── Nearby listings ── */}
+      {otherNearby.length > 0 && (
+        <div className="container mx-auto max-w-5xl px-4 py-8">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-extrabold tracking-tight flex items-center gap-2">
+              <span className="w-1.5 h-5 rounded-full gradient-primary inline-block" />
+              More items nearby
+            </h2>
+            <a
+              href={`/search?city=${encodeURIComponent(listing?.city ?? "")}`}
+              className="text-primary text-sm font-semibold flex items-center gap-0.5 hover:gap-2 transition-all duration-200"
+            >
+              See all <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {otherNearby.map(l => <ListingCard key={l.id} listing={l} />)}
+          </div>
+        </div>
+      )}
 
       {/* Mobile floating CTA */}
       <div className="md:hidden fixed bottom-0 inset-x-0 z-40 pb-[env(safe-area-inset-bottom)]">

@@ -10,6 +10,7 @@ import * as Icons from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/ui-core";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 const HOME_CATS = CATEGORIES.slice(0, 12);
 
@@ -32,25 +33,30 @@ const fadeUp = {
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
+  // Only request location when logged in
   useEffect(() => {
+    if (!user) return;
     navigator.geolocation?.getCurrentPosition(
       pos => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       () => console.warn("Geolocation denied or failed")
     );
-  }, []);
+  }, [user]);
 
   const { data: featured } = useGetFeaturedListings({ limit: 4 }, {
     query: { queryKey: getGetFeaturedListingsQueryKey({ limit: 4 }) },
   });
   const { data: nearby } = useGetNearbyListings(
-    coords ? { lat: coords.lat, lng: coords.lng, limit: 4 } : { lat: 0, lng: 0, limit: 4 },
-    { query: { enabled: !!coords, queryKey: getGetNearbyListingsQueryKey({ lat: coords?.lat ?? 0, lng: coords?.lng ?? 0, limit: 4 }) } }
+    coords ? { lat: coords.lat, lng: coords.lng, limit: 8 } : { lat: 0, lng: 0, limit: 8 },
+    { query: { enabled: !!coords, queryKey: getGetNearbyListingsQueryKey({ lat: coords?.lat ?? 0, lng: coords?.lng ?? 0, limit: 8 }) } }
   );
   const { data: recentListings } = useGetListings({ limit: 6 }, {
     query: { queryKey: getGetListingsQueryKey({ limit: 6 }) },
   });
+
+  const hasNearby = !!coords && !!nearby && nearby.length > 0;
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -221,6 +227,21 @@ export default function Home() {
       {/* ══════════ MAIN CONTENT ══════════ */}
       <div className="container mx-auto max-w-5xl px-4 py-10 flex flex-col gap-12">
 
+        {/* ── Nearby (logged-in users see this FIRST) ── */}
+        {hasNearby && (
+          <section>
+            <div className="flex items-center justify-between mb-5">
+              <SectionHeader icon={<MapPin className="w-4 h-4 text-primary" />} title="Near You" noMargin />
+              <Link href="/search" className="text-primary text-sm font-semibold flex items-center gap-0.5 hover:gap-2 transition-all duration-200">
+                See all <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {nearby!.map(l => <ListingCard key={l.id} listing={l} />)}
+            </div>
+          </section>
+        )}
+
         {/* ── Categories ── */}
         <section>
           <div className="flex items-center justify-between mb-5">
@@ -277,16 +298,6 @@ export default function Home() {
             ))}
           </div>
         </section>
-
-        {/* ── Nearby ── */}
-        {coords && nearby && nearby.length > 0 && (
-          <section>
-            <SectionHeader icon={<MapPin className="w-4 h-4 text-primary" />} title="Near You" />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {nearby.map(l => <ListingCard key={l.id} listing={l} />)}
-            </div>
-          </section>
-        )}
 
         {/* ── Featured ── */}
         {featured && featured.length > 0 && (

@@ -592,14 +592,18 @@ export default function ListingDetails() {
               </div>
             )}
 
-            {/* Location placeholder */}
+            {/* Location */}
             <div className="rounded-2xl overflow-hidden border border-border bg-gradient-to-br from-secondary to-muted h-40 flex items-center justify-center">
-              <div className="text-center">
+              <div className="text-center px-4">
                 <div className="w-10 h-10 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-2 shadow-md shadow-primary/25">
                   <MapPin className="w-5 h-5 text-white" />
                 </div>
-                <p className="font-bold text-sm">{listing.city}, {listing.state}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Exact location after contact</p>
+                <p className="font-bold text-sm">
+                  {[listing.area, listing.city, listing.state].filter(Boolean).join(", ")}
+                </p>
+                {listing.pincode && (
+                  <p className="text-xs text-muted-foreground mt-0.5">PIN: {listing.pincode}</p>
+                )}
               </div>
             </div>
           </div>

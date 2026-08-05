@@ -11,6 +11,16 @@ export async function geocodeAddress(
   city: string,
   state: string,
 ): Promise<{ latitude: string; longitude: string } | null> {
+  // Input validation to mitigate SSRF: only accept simple ASCII address components
+  const isSafeComponent = (s: string) =>
+    typeof s === "string" &&
+    s.trim().length > 0 &&
+    /^[a-zA-Z0-9\s,'-.]+$/.test(s);
+
+  if (![area, city, state].every(isSafeComponent)) {
+    return null;
+  }
+
   const q = [area, city, state, "India"].filter(Boolean).join(", ");
   try {
     const res = await fetch(

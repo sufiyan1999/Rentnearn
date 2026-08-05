@@ -71,10 +71,19 @@ export function ListingCard({ listing, className }: ListingCardProps) {
 
           {/* Price badge in image */}
           <div className="absolute bottom-2.5 left-3 text-white">
-            <span className="font-bold text-sm drop-shadow-sm">
-              ₹{listing.rentalPrice?.daily || 0}
-            </span>
-            <span className="text-[10px] text-white/75 ml-0.5">/day</span>
+            {(() => {
+              const p = listing.rentalPrice;
+              const val = p?.daily || p?.weekly || p?.monthly;
+              const unit = p?.daily ? "/day" : p?.weekly ? "/wk" : p?.monthly ? "/mo" : "";
+              return val ? (
+                <>
+                  <span className="font-bold text-sm drop-shadow-sm">₹{val}</span>
+                  <span className="text-[10px] text-white/75 ml-0.5">{unit}</span>
+                </>
+              ) : (
+                <span className="text-[10px] text-white/75">Contact for price</span>
+              );
+            })()}
           </div>
 
           {/* Featured badge */}

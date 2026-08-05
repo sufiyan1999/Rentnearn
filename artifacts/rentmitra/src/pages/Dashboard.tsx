@@ -928,11 +928,16 @@ function RecentlyViewedTab() {
                 <p className="text-xs text-muted-foreground">{listing.city} · {listing.category}</p>
               </div>
               <div className="text-right shrink-0">
-                {listing.rentalPrice?.daily ? (
-                  <p className="text-sm font-bold">₹{listing.rentalPrice.daily.toLocaleString("en-IN")}<span className="text-xs font-normal text-muted-foreground">/day</span></p>
-                ) : (
-                  <p className="text-xs text-muted-foreground">Contact for price</p>
-                )}
+                {(() => {
+                  const p = listing.rentalPrice;
+                  const val = p?.daily || p?.weekly || p?.monthly;
+                  const unit = p?.daily ? "/day" : p?.weekly ? "/wk" : p?.monthly ? "/mo" : "";
+                  return val ? (
+                    <p className="text-sm font-bold">₹{val.toLocaleString("en-IN")}<span className="text-xs font-normal text-muted-foreground">{unit}</span></p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">Contact for price</p>
+                  );
+                })()}
               </div>
             </div>
           </Link>

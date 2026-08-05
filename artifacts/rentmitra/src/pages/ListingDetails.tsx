@@ -653,10 +653,16 @@ export default function ListingDetails() {
             <div className="sticky top-24 bg-card border border-border rounded-3xl p-6 shadow-lg shadow-black/5 flex flex-col gap-5">
               <div>
                 <p className="text-muted-foreground text-sm font-medium mb-1">Starting from</p>
-                <p className="text-4xl font-extrabold tracking-tight">
-                  ₹{listing.rentalPrice?.daily || "—"}
-                  <span className="text-base font-normal text-muted-foreground ml-1">/ day</span>
-                </p>
+                {(() => {
+                  const p = listing.rentalPrice;
+                  const val = p?.daily || p?.weekly || p?.monthly;
+                  const unit = p?.daily ? "/ day" : p?.weekly ? "/ week" : p?.monthly ? "/ month" : "";
+                  return (
+                    <p className="text-4xl font-extrabold tracking-tight">
+                      {val ? <>₹{val}<span className="text-base font-normal text-muted-foreground ml-1">{unit}</span></> : <span className="text-2xl">Contact for price</span>}
+                    </p>
+                  );
+                })()}
               </div>
 
               {!isOwner ? (
@@ -736,8 +742,19 @@ export default function ListingDetails() {
       <div className="md:hidden fixed bottom-0 inset-x-0 z-40 pb-[env(safe-area-inset-bottom)]">
         <div className="glass border-t mx-3 mb-3 rounded-2xl px-4 py-3 flex items-center justify-between gap-3 shadow-2xl shadow-black/20">
           <div>
-            <p className="text-xs text-muted-foreground font-medium">per day</p>
-            <p className="font-extrabold text-lg leading-none">₹{listing.rentalPrice?.daily || "—"}</p>
+            {(() => {
+              const p = listing.rentalPrice;
+              const val = p?.daily || p?.weekly || p?.monthly;
+              const unit = p?.daily ? "per day" : p?.weekly ? "per week" : p?.monthly ? "per month" : "";
+              return val ? (
+                <>
+                  <p className="text-xs text-muted-foreground font-medium">{unit}</p>
+                  <p className="font-extrabold text-lg leading-none">₹{val}</p>
+                </>
+              ) : (
+                <p className="font-semibold text-sm leading-none">Contact for price</p>
+              );
+            })()}
           </div>
           {isOwner ? (
             <Button className="flex-1" onClick={() => setLocation(`/listings/${listing.id}/edit`)}>Edit Listing</Button>

@@ -27,7 +27,22 @@ app.use(
   }),
 );
 
-app.use(cors({ origin: "*", methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"], credentials: true }));
+const allowedOrigins = [
+  'https://yourdomain.com',
+  'https://app.yourdomain.com'
+];
+
+app.use(cors({
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ["GET","POST","PATCH","PUT","DELETE","OPTIONS"],
+  credentials: true
+}));
 app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));

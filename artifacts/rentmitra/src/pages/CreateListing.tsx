@@ -8,6 +8,7 @@ import { checkRestrictedContent, PROHIBITED_CATEGORIES } from "@/lib/restrictedI
 import { toast } from "sonner";
 import { ImagePlus, X, MapPin, ShieldAlert, ChevronDown, ChevronUp } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { PricingTip } from "@/components/PricingTip";
 
 export default function CreateListing() {
   const [, setLocation] = useLocation();
@@ -324,8 +325,16 @@ export default function CreateListing() {
               <p className="text-xs text-muted-foreground">This amount is collected from the renter as a refundable deposit and returned after the rental period ends in good condition.</p>
             </div>
 
+            {/* Pricing tip — category-matched benchmark + price indicator */}
+            <PricingTip
+              category={formData.category}
+              dailyPrice={formData.dailyPrice}
+              weeklyPrice={formData.weeklyPrice}
+              monthlyPrice={formData.monthlyPrice}
+            />
+
             <div className="space-y-2">
-              <Label>Photos</Label>
+              <Label>Photos <span className="text-destructive">*</span></Label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                 {imagePreviews.map((src, i) => (
                   <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-secondary border border-border">

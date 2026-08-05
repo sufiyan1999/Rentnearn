@@ -41,8 +41,28 @@ router.get("/recently-viewed", requireAuth, async (req, res): Promise<void> => {
 
 // POST /recently-viewed
 router.post("/recently-viewed", requireAuth, async (req, res): Promise<void> => {
+  const ALLOWED = ["listingId"]; 
+  const extraKeys = Object.keys(req.body).filter(k => !ALLOWED.includes(k));
+  if (extraKeys.length > 0) {
+    console.warn("POST /recently-viewed: Unknown fields", extraKeys);
+  }
+
   const { listingId } = req.body;
   if (!listingId) { res.status(400).json({ error: "listingId is required" }); return; }
+
+  // Validate that the user is authorized to reference this listing
+  const listingRows = await db.select().from(listingsTable).where(eq(listingsTable.id, listingId)).limit(1);
+  if (listingRows.length === 0) {
+    res.status(400).json({ error: "Invalid listingId" });
+    return;
+  }
+  const listing = listingRows[0];
+  const userId = req.user!.id;
+  const authorized = (listing.ownerId === userId) || (listing.status === "approved");
+  if (!authorized) {
+    res.status(403).json({ error: "Unauthorized access to this listing." });
+    return;
+  }
 
   // Upsert: insert new view (keep last 50 per user)
   await db.insert(recentlyViewedTable).values({ userId: req.user!.id, listingId });
@@ -58,20 +78,4 @@ router.post("/recently-viewed", requireAuth, async (req, res): Promise<void> => 
     }
   }
 
-  res.json({ message: "View tracked" });
 });
-
-function formatListing(listing: typeof listingsTable.$inferSelect, owner?: { id: number; name: string; profilePhoto: string | null; userType: string; isVerified: boolean; phone: string | null; createdAt: Date } | undefined) {
-  return {
-    id: listing.id, ownerId: listing.ownerId, title: listing.title, description: listing.description,
-    category: listing.category, brand: listing.brand, condition: listing.condition,
-    rentalPrice: { daily: listing.dailyPrice ? Number(listing.dailyPrice) : null, weekly: listing.weeklyPrice ? Number(listing.weeklyPrice) : null, monthly: listing.monthlyPrice ? Number(listing.monthlyPrice) : null },
-    city: listing.city, state: listing.state, pincode: listing.pincode,
-    latitude: listing.latitude ? Number(listing.latitude) : null, longitude: listing.longitude ? Number(listing.longitude) : null,
-    images: listing.images ?? [], thumbnails: listing.thumbnails ?? [],
-    status: listing.status, isFeatured: listing.isFeatured, rejectionReason: listing.rejectionReason,
-    expiresAt: listing.expiresAt, createdAt: listing.createdAt, owner: owner ? { ...owner, listingCount: 0 } : null,
-  };
-}
-
-export default router;

@@ -161,6 +161,43 @@ export async function sendListingExpiryEmail(to: string, name: string, title: st
   `));
 }
 
+const ADMIN_EMAIL = "admin@rentnearn.com";
+
+export async function sendAdminNewUserEmail(userName: string, userEmail: string, userType: string): Promise<void> {
+  await sendMail(ADMIN_EMAIL, `🆕 New member signed up — ${userName}`, emailHtml(`
+    <h2>New member just joined RentNEarn</h2>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+      <tr><td style="padding:6px 0;color:#6B7280;width:120px;">Name</td><td style="padding:6px 0;font-weight:600;">${userName}</td></tr>
+      <tr><td style="padding:6px 0;color:#6B7280;">Email</td><td style="padding:6px 0;">${userEmail}</td></tr>
+      <tr><td style="padding:6px 0;color:#6B7280;">Account type</td><td style="padding:6px 0;text-transform:capitalize;">${userType}</td></tr>
+    </table>
+    <a href="${APP_URL}/admin" class="btn">View in Admin Dashboard</a>
+  `));
+}
+
+export async function sendAdminNewListingEmail(
+  ownerName: string,
+  ownerEmail: string,
+  listingTitle: string,
+  listingId: number,
+  city: string,
+  category: string,
+): Promise<void> {
+  const link = `${APP_URL}/listings/${listingId}`;
+  await sendMail(ADMIN_EMAIL, `📦 New listing submitted — ${listingTitle}`, emailHtml(`
+    <h2>A new listing is waiting for review</h2>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+      <tr><td style="padding:6px 0;color:#6B7280;width:120px;">Title</td><td style="padding:6px 0;font-weight:600;">${listingTitle}</td></tr>
+      <tr><td style="padding:6px 0;color:#6B7280;">Category</td><td style="padding:6px 0;text-transform:capitalize;">${category}</td></tr>
+      <tr><td style="padding:6px 0;color:#6B7280;">City</td><td style="padding:6px 0;">${city}</td></tr>
+      <tr><td style="padding:6px 0;color:#6B7280;">Owner</td><td style="padding:6px 0;">${ownerName} (${ownerEmail})</td></tr>
+    </table>
+    <a href="${link}" class="btn">View Listing</a>
+    &nbsp;&nbsp;
+    <a href="${APP_URL}/admin" style="display:inline-block;padding:12px 24px;border:2px solid #FF6B00;color:#FF6B00;border-radius:8px;font-weight:600;text-decoration:none;">Open Admin Dashboard</a>
+  `));
+}
+
 export async function sendTrialExtendedEmail(
   to: string,
   name: string,

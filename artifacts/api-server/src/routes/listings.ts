@@ -2,7 +2,7 @@ import { Router } from "express";
 import { eq, and, ilike, gte, lte, desc, asc, sql, inArray } from "drizzle-orm";
 import { db, listingsTable, usersTable, favouritesTable } from "@workspace/db";
 import { requireAuth, optionalAuth } from "../middlewares/authMiddleware";
-import { sendListingSubmittedEmail } from "../lib/email";
+import { sendListingSubmittedEmail, sendAdminNewListingEmail } from "../lib/email";
 import multer from "multer";
 import { processAndSaveImage, validateImageBuffer } from "../lib/images";
 import QRCode from "qrcode";
@@ -164,7 +164,8 @@ router.post("/listings", requireAuth, async (req, res): Promise<void> => {
   }).returning();
 
   const [owner] = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.id)).limit(1);
-  await sendListingSubmittedEmail(owner.email, owner.name, title);
+  sendListingSubmittedEmail(owner.email, owner.name, title).catch(() => {});
+  sendAdminNewListingEmail(owner.name, owner.email, title, listing.id, city, category).catch(() => {});
 
   res.status(201).json(formatListing(listing, owner));
 });

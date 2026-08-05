@@ -130,6 +130,10 @@ export default function CreateListing() {
         return;
       }
     }
+    if (step === 2 && images.length === 0) {
+      toast.error("Please add at least one photo before continuing.");
+      return;
+    }
     if (step < 3) {
       setStep(s => s + 1);
       return;

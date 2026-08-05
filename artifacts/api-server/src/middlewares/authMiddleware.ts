@@ -37,7 +37,11 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 }
 
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
-  if (req.user?.userType !== "admin") {
+  if (!req.user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  if (req.user.userType !== "admin") {
     res.status(403).json({ error: "Admin access required" });
     return;
   }

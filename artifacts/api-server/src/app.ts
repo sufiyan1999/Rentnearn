@@ -28,8 +28,8 @@ app.use(
 );
 
 const allowedOrigins = [
-  'https://yourdomain.com',
-  'https://app.yourdomain.com'
+  'https://rentnearn.com',
+  'https://app.rentnearn.com'
 ];
 
 app.use(cors({
